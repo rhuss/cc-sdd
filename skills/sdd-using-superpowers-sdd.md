@@ -13,6 +13,21 @@ This is not negotiable. This is not optional. You cannot rationalize your way ou
 
 # Getting Started with Superpowers-SDD
 
+## What is SDD?
+
+**SDD = Specification-Driven Development**
+
+A development methodology where specifications are the single source of truth:
+- Specs created before code
+- Code validated against specs
+- Specs evolve with implementation reality
+- Quality gates enforce spec compliance
+
+This plugin combines:
+- **Superpowers** process discipline (TDD, verification, quality gates)
+- **Spec-Driven Development** (specs as source of truth)
+- Result: High-quality software with specs that stay current
+
 ## MANDATORY FIRST RESPONSE PROTOCOL
 
 Before responding to ANY user message, you MUST complete this checklist:
