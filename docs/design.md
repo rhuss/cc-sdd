@@ -1,0 +1,264 @@
+# Superpowers-SDD Plugin Design
+
+**Date**: 2025-11-10
+**Status**: Design Complete, Ready for Implementation
+
+## Overview
+
+A Claude Code plugin that merges superpowers' process discipline with specification-driven development (SDD), using specs as the single source of truth while maintaining workflow flexibility.
+
+## Core Principles
+
+- **Specs as source of truth** - Everything flows from specifications
+- **Process discipline preserved** - All superpowers quality gates and workflow enforcement remain
+- **Evolving specs** - Specs can evolve based on implementation reality with AI guidance
+- **Intent before implementation** - "What" and "why" before "how"
+- **Hybrid tooling** - Spec-kit CLI handles spec operations; superpowers-sdd adds workflow discipline
+- **Flexible entry points** - Phase-specific skills for different starting contexts
+
+## Architecture
+
+```
+User Request
+     ↓
+Phase-Specific Entry Point (/sdd:brainstorm, /sdd:spec, /sdd:implement, /sdd:evolve)
+     ↓
+Superpowers-SDD Skill (workflow + validation + checklists)
+     ↓
+Spec-Kit CLI (for spec CRUD/validation) ← → Spec Files (specs/)
+     ↓
+Implementation (with TDD, code review, verification gates)
+```
+
+## Workflow Phases
+
+### 1. Brainstorm Phase (`sdd:brainstorm`)
+- Starting point: Rough idea
+- Process: Collaborative dialogue to refine concept
+- Output: Formal spec created via `speckit specify`
+- Recommendation: Suggests constitution if none exists
+
+### 2. Spec Phase (`sdd:spec`)
+- Starting point: Clear idea, need formal spec
+- Process: Interactive spec creation with validation
+- Output: Spec file with soundness validation
+- Validation: Auto-validates against constitution if present
+
+### 3. Implementation Phase (`sdd:implement`)
+- Starting point: Spec exists and validated
+- Process: Plan → TDD → Code Review → Verify
+- Key difference: Plans generated FROM spec, not from scratch
+- Verification: Includes spec compliance checking
+
+### 4. Evolution Phase (`sdd:evolve`)
+- Starting point: Code/spec mismatch detected
+- Process: AI analyzes, recommends, user decides
+- Options: Update spec, fix code, or clarify spec
+- Automation: Configurable auto-updates for minor changes
+
+## Skills Structure
+
+### Phase Entry Points
+
+**`sdd:brainstorm`** - Modified `superpowers:brainstorming`
+- Guides collaborative refinement
+- Outputs spec instead of design doc
+- Recommends constitution creation
+
+**`sdd:spec`** - Direct spec creation
+- Bypasses brainstorming for clear requirements
+- Interactive spec authoring
+- Calls spec-kit CLI validation
+
+**`sdd:implement`** - Spec-to-code workflow
+- Generates plan from spec
+- Applies TDD during implementation
+- Validates code-to-spec compliance
+
+**`sdd:evolve`** - Spec/code reconciliation
+- Detects divergence
+- AI-recommended resolution
+- Configurable automation
+
+### Modified Core Skills
+
+**`sdd:writing-plans`** - Plan generation from specs
+- Input: Spec file (not blank slate)
+- Output: Implementation tasks with file paths
+- Validation: Plan completeness against spec
+
+**`sdd:requesting-code-review`** - Code-to-spec review
+- Checks spec compliance
+- Reports: compliance score + mismatches
+- Triggers evolution workflow if needed
+
+**`sdd:verification-before-completion`** - Extended verification
+- Step 1: Run tests (existing)
+- Step 2: Validate spec compliance (new)
+- Step 3: Check for spec drift (new)
+- Blocks completion on failures
+
+### New SDD-Specific Skills
+
+**`sdd:reviewing-spec`** - Spec soundness review
+- Validates structure and clarity
+- Checks implementability
+- Identifies ambiguities and gaps
+
+**`sdd:spec-refactoring`** - Spec consolidation
+- For organically grown specs
+- Identifies inconsistencies
+- Maintains feature coverage
+
+**`sdd:spec-kit`** - CLI wrapper
+- Intelligent delegation to spec-kit
+- TodoWrite integration
+- Error handling with context
+
+**`sdd:constitution`** - Project principles
+- Creates project-wide rules
+- Optional but recommended
+- Referenced during validation
+
+**`sdd:using-superpowers-sdd`** - Entry skill
+- Mandatory workflow establishment
+- Skill discovery and usage
+- Process enforcement
+
+### Preserved Skills (From Superpowers)
+
+These work as-is, referenced by SDD skills:
+- `test-driven-development`
+- `systematic-debugging`
+- `using-git-worktrees`
+- `dispatching-parallel-agents`
+- Other non-conflicting skills
+
+## Spec Evolution & Compliance
+
+### Detection Points
+- During code review
+- During verification
+- Explicit user invocation
+
+### Decision Framework
+1. AI analyzes mismatch (type, severity, impact)
+2. AI recommends with reasoning:
+   - Update spec (better approach discovered)
+   - Fix code (deviation from design)
+   - Clarify spec (ambiguity resolved)
+3. User decides (or auto-update if configured)
+
+### Configuration
+```json
+{
+  "sdd": {
+    "auto_update_spec": {
+      "enabled": true,
+      "threshold": "minor",
+      "notify": true
+    }
+  }
+}
+```
+
+### Change Classification
+- **Minor** (auto-update eligible): Naming, organization, implementation details
+- **Major** (always manual): Architecture, behavior, requirements
+
+### Versioning
+- Git-based spec versioning
+- Spec changelog auto-updated
+- Links between spec versions and commits
+
+## Repository Structure
+
+```
+cc-superpowers-sdd/
+├── README.md                          # In-depth guide with examples
+├── skills/
+│   ├── sdd-brainstorm.md
+│   ├── sdd-spec.md
+│   ├── sdd-implement.md
+│   ├── sdd-evolve.md
+│   ├── sdd-writing-plans.md
+│   ├── sdd-requesting-code-review.md
+│   ├── sdd-verification-before-completion.md
+│   ├── sdd-reviewing-spec.md
+│   ├── sdd-spec-refactoring.md
+│   ├── sdd-spec-kit.md
+│   ├── sdd-constitution.md
+│   └── sdd-using-superpowers-sdd.md
+├── examples/
+│   └── todo-app/                      # Complete workflow example
+│       ├── specs/
+│       ├── docs/
+│       └── src/
+├── plugin.json
+└── docs/
+    ├── workflow-guide.md
+    └── migration-from-superpowers.md
+```
+
+## Design Decisions
+
+### Constitution: Optional but Recommended
+- Not required for spec work
+- Provides project-wide consistency
+- User educated on benefits during first use
+
+### Spec-Kit as Means, Not End
+- Leverage spec-kit CLI where beneficial
+- Replace/bypass if it creates friction
+- Focus on SDD goals, not tool compliance
+
+### User Control on Automation
+- AI makes recommendations with reasoning
+- User configures automation threshold
+- Transparency on all spec changes
+
+### Phase Flexibility
+- Entry points for different contexts
+- No forced linear progression
+- Spec always remains anchor point
+
+## Impedance Resolutions
+
+### Brainstorming → Spec Creation
+- Brainstorming feeds into spec writing
+- Output is spec, not design doc
+- Skill modified accordingly
+
+### Plans from Specs
+- `writing-plans` reads spec as input
+- No longer creates plans from scratch
+- Validates plan against spec
+
+### TDD Integration
+- Spec first, then TDD during implementation
+- Spec guides test structure
+- Tests validate spec compliance
+
+### Dual Review Types
+- Code review: code-to-spec compliance
+- Spec review: soundness and completeness
+- Different skills for each
+
+### Extended Verification
+- Tests must pass (existing)
+- Spec compliance must pass (new)
+- Both required for completion
+
+## Acknowledgements
+
+- **Superpowers**: https://github.com/obra/superpowers by Jesse Vincent
+- **Spec-Kit**: https://github.com/github/spec-kit by GitHub
+
+## Next Steps
+
+1. Create GitHub repository: `rhuss/cc-superpowers-sdd`
+2. Implement all skill files
+3. Create comprehensive README with practical examples
+4. Build example todo-app demonstrating full workflow
+5. Create plugin.json manifest
+6. Add supporting documentation

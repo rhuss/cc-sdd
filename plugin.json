@@ -1,0 +1,202 @@
+{
+  "name": "cc-superpowers-sdd",
+  "version": "1.0.0",
+  "description": "Specification-Driven Development with Process Discipline for Claude Code",
+  "author": "Roland Huss <rhuss@redhat.com>",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/rhuss/cc-superpowers-sdd.git"
+  },
+  "homepage": "https://github.com/rhuss/cc-superpowers-sdd",
+  "bugs": {
+    "url": "https://github.com/rhuss/cc-superpowers-sdd/issues"
+  },
+  "keywords": [
+    "claude-code",
+    "plugin",
+    "specification-driven-development",
+    "sdd",
+    "specs",
+    "test-driven-development",
+    "tdd",
+    "process-discipline",
+    "quality-gates",
+    "superpowers"
+  ],
+  "skills": [
+    {
+      "name": "using-superpowers-sdd",
+      "path": "skills/sdd-using-superpowers-sdd.md",
+      "description": "Entry skill - establishes mandatory workflows for specification-driven development",
+      "category": "core"
+    },
+    {
+      "name": "sdd-brainstorm",
+      "path": "skills/sdd-brainstorm.md",
+      "description": "Refine rough ideas into executable specifications through collaborative dialogue",
+      "category": "workflow"
+    },
+    {
+      "name": "sdd-spec",
+      "path": "skills/sdd-spec.md",
+      "description": "Create formal specifications directly from clear requirements",
+      "category": "workflow"
+    },
+    {
+      "name": "sdd-implement",
+      "path": "skills/sdd-implement.md",
+      "description": "Implement features from validated specifications using TDD with spec compliance checking",
+      "category": "workflow"
+    },
+    {
+      "name": "sdd-evolve",
+      "path": "skills/sdd-evolve.md",
+      "description": "Reconcile spec/code mismatches with AI-guided evolution and user control",
+      "category": "workflow"
+    },
+    {
+      "name": "sdd-writing-plans",
+      "path": "skills/sdd-writing-plans.md",
+      "description": "Generate implementation plans FROM specifications with full requirement coverage",
+      "category": "modified-core"
+    },
+    {
+      "name": "sdd-requesting-code-review",
+      "path": "skills/sdd-requesting-code-review.md",
+      "description": "Review code against spec compliance with scoring and deviation detection",
+      "category": "modified-core"
+    },
+    {
+      "name": "sdd-verification-before-completion",
+      "path": "skills/sdd-verification-before-completion.md",
+      "description": "Extended verification including tests AND spec compliance validation",
+      "category": "modified-core"
+    },
+    {
+      "name": "sdd-reviewing-spec",
+      "path": "skills/sdd-reviewing-spec.md",
+      "description": "Review specifications for soundness, completeness, and implementability",
+      "category": "sdd-specific"
+    },
+    {
+      "name": "sdd-spec-refactoring",
+      "path": "skills/sdd-spec-refactoring.md",
+      "description": "Consolidate and improve evolved specs while maintaining feature coverage",
+      "category": "sdd-specific"
+    },
+    {
+      "name": "sdd-spec-kit",
+      "path": "skills/sdd-spec-kit.md",
+      "description": "Wrapper for spec-kit CLI operations with workflow discipline",
+      "category": "sdd-specific"
+    },
+    {
+      "name": "sdd-constitution",
+      "path": "skills/sdd-constitution.md",
+      "description": "Create and manage project constitution defining project-wide principles",
+      "category": "sdd-specific"
+    }
+  ],
+  "configuration": {
+    "schema": {
+      "type": "object",
+      "properties": {
+        "sdd": {
+          "type": "object",
+          "properties": {
+            "auto_update_spec": {
+              "type": "object",
+              "properties": {
+                "enabled": {
+                  "type": "boolean",
+                  "default": true,
+                  "description": "Enable automatic spec updates for minor changes"
+                },
+                "threshold": {
+                  "type": "string",
+                  "enum": ["none", "minor", "moderate"],
+                  "default": "minor",
+                  "description": "Threshold for auto-updates: none (never), minor (trivial changes), moderate (non-breaking changes)"
+                },
+                "notify": {
+                  "type": "boolean",
+                  "default": true,
+                  "description": "Notify user when auto-updates occur"
+                }
+              }
+            },
+            "spec_kit": {
+              "type": "object",
+              "properties": {
+                "enabled": {
+                  "type": "boolean",
+                  "default": true,
+                  "description": "Use spec-kit CLI if available"
+                },
+                "path": {
+                  "type": "string",
+                  "default": "speckit",
+                  "description": "Path to spec-kit binary"
+                }
+              }
+            },
+            "constitution": {
+              "type": "object",
+              "properties": {
+                "path": {
+                  "type": "string",
+                  "default": "specs/constitution.md",
+                  "description": "Path to project constitution file"
+                },
+                "required": {
+                  "type": "boolean",
+                  "default": false,
+                  "description": "Require constitution before spec work"
+                }
+              }
+            },
+            "specs": {
+              "type": "object",
+              "properties": {
+                "directory": {
+                  "type": "string",
+                  "default": "specs/features",
+                  "description": "Directory for feature specifications"
+                },
+                "format": {
+                  "type": "string",
+                  "default": "markdown",
+                  "description": "Specification file format"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "dependencies": {
+    "optional": [
+      {
+        "name": "spec-kit",
+        "url": "https://github.com/github/spec-kit",
+        "description": "Enhanced spec management tooling (recommended but not required)"
+      }
+    ]
+  },
+  "acknowledgements": [
+    {
+      "project": "superpowers",
+      "url": "https://github.com/obra/superpowers",
+      "author": "Jesse Vincent",
+      "description": "Process discipline and workflow enforcement foundation"
+    },
+    {
+      "project": "spec-kit",
+      "url": "https://github.com/github/spec-kit",
+      "author": "GitHub",
+      "description": "Specification-driven development workflows and tooling"
+    }
+  ]
+}
