@@ -1,0 +1,24 @@
+{
+  "name": "cc-superpowers-sdd",
+  "version": "1.0.0",
+  "description": "Specification-Driven Development with Process Discipline for Claude Code",
+  "author": {
+    "name": "Roland Huss",
+    "email": "rhuss@redhat.com"
+  },
+  "license": "MIT",
+  "repository": "https://github.com/rhuss/cc-superpowers-sdd",
+  "homepage": "https://github.com/rhuss/cc-superpowers-sdd",
+  "keywords": [
+    "claude-code",
+    "plugin",
+    "specification-driven-development",
+    "sdd",
+    "specs",
+    "test-driven-development",
+    "tdd",
+    "process-discipline",
+    "quality-gates",
+    "superpowers"
+  ]
+}
