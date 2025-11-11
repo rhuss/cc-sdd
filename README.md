@@ -1,5 +1,10 @@
 # Superpowers-SDD
 
+![Version](https://img.shields.io/badge/version-1.0.0-blue)
+![License](https://img.shields.io/badge/license-MIT-green)
+![Claude Code](https://img.shields.io/badge/Claude%20Code-Plugin-purple)
+![Status](https://img.shields.io/badge/status-stable-success)
+
 > Specification-Driven Development with Process Discipline for Claude Code
 
 A Claude Code plugin that merges rigorous process discipline with specification-driven development, making specs your single source of truth while maintaining workflow flexibility.
@@ -517,7 +522,7 @@ The example includes all files: specs, plans, code, and tests.
 
 ## File Structure
 
-Your project with cc-superpowers-sdd:
+Your project with the SDD plugin:
 
 ```
 your-project/
