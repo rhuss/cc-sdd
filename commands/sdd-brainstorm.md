@@ -4,5 +4,3 @@ description: Refine rough ideas into executable specifications through collabora
 ---
 
 Use the `sdd-brainstorm` skill to guide the user through collaborative brainstorming, turning their rough idea into a formal, executable specification.
-
-Follow the skill exactly as defined in skills/sdd-brainstorm.md.

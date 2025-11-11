@@ -1,6 +1,6 @@
 ---
 name: sdd-brainstorm
-description: Use when starting from rough ideas - refines concepts into executable specifications through collaborative questioning, alternative exploration, and incremental validation
+description: Use when starting from rough ideas - refines concepts into executable specifications through collaborative questioning, alternative exploration, and incremental validation, use this skill when called from a command
 ---
 
 # Brainstorming Ideas Into Specifications

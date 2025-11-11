@@ -3,14 +3,25 @@ name: sdd-spec-kit
 description: Wrapper for spec-kit CLI operations - intelligent delegation to spec-kit commands with workflow discipline, TodoWrite tracking, and error handling
 ---
 
-# Spec-Kit CLI Integration
+# Spec-Kit Integration
 
 ## Overview
 
-Intelligent wrapper around spec-kit CLI that adds superpowers workflow discipline.
+This plugin bundles spec-kit templates and scripts, providing spec-kit functionality without requiring users to install spec-kit separately.
 
-Spec-kit provides excellent tooling for specification management. This skill:
-- Delegates to spec-kit CLI where beneficial
+**Bundled Resources:**
+- **Templates**: Spec, plan, tasks, checklist, and agent file templates
+- **Scripts**: Shell scripts for feature creation, prerequisites checking, and agent context updates
+- **Commands**: Slash commands for spec-kit workflows (reference implementations)
+
+**Integration Approach:**
+- Use bundled templates and scripts from plugin directory
+- Optionally delegate to spec-kit CLI if user has it installed
+- Provides full SDD workflow support with or without spec-kit CLI
+
+This skill:
+- Uses bundled spec-kit resources
+- Optionally delegates to spec-kit CLI where beneficial
 - Adds TodoWrite tracking
 - Handles errors gracefully
 - Provides context-aware guidance
@@ -25,9 +36,82 @@ Spec-kit provides excellent tooling for specification management. This skill:
 
 **Note:** Most SDD skills call this internally. Direct use is for spec-kit-specific tasks.
 
+## Bundled Resources
+
+The plugin bundles spec-kit templates and scripts so users don't need to install spec-kit separately.
+
+### Accessing Bundled Templates
+
+Templates are located in the plugin's `templates/` directory:
+
+```bash
+# Get plugin directory
+PLUGIN_DIR="${CLAUDE_PLUGINS_DIR}/cc-superpowers-sdd"
+
+# Access templates
+SPEC_TEMPLATE="$PLUGIN_DIR/templates/spec-template.md"
+PLAN_TEMPLATE="$PLUGIN_DIR/templates/plan-template.md"
+TASKS_TEMPLATE="$PLUGIN_DIR/templates/tasks-template.md"
+CHECKLIST_TEMPLATE="$PLUGIN_DIR/templates/checklist-template.md"
+AGENT_FILE_TEMPLATE="$PLUGIN_DIR/templates/agent-file-template.md"
+```
+
+**Available Templates:**
+- `spec-template.md` - Feature specification template
+- `plan-template.md` - Implementation plan template
+- `tasks-template.md` - Task breakdown template
+- `checklist-template.md` - Quality checklist template
+- `agent-file-template.md` - Agent context file template
+
+### Accessing Bundled Scripts
+
+Scripts are located in the plugin's `scripts/bash/` directory:
+
+```bash
+# Get plugin directory
+PLUGIN_DIR="${CLAUDE_PLUGINS_DIR}/cc-superpowers-sdd"
+
+# Access scripts
+CREATE_FEATURE="$PLUGIN_DIR/scripts/bash/create-new-feature.sh"
+CHECK_PREREQS="$PLUGIN_DIR/scripts/bash/check-prerequisites.sh"
+SETUP_PLAN="$PLUGIN_DIR/scripts/bash/setup-plan.sh"
+UPDATE_CONTEXT="$PLUGIN_DIR/scripts/bash/update-agent-context.sh"
+```
+
+**Available Scripts:**
+- `create-new-feature.sh` - Create feature branch and spec structure
+- `check-prerequisites.sh` - Check project prerequisites
+- `setup-plan.sh` - Set up implementation plan structure
+- `update-agent-context.sh` - Update agent context files
+- `common.sh` - Common functions and utilities
+
+### Using Bundled Resources
+
+**Example: Create new feature using bundled script**
+
+```bash
+# Get plugin directory (usually ~/.claude/plugins/cc-superpowers-sdd)
+PLUGIN_DIR="${CLAUDE_PLUGINS_DIR}/cc-superpowers-sdd"
+
+# Run bundled script
+"$PLUGIN_DIR/scripts/bash/create-new-feature.sh" --json "Add user authentication"
+```
+
+**Example: Copy template for manual editing**
+
+```bash
+# Get plugin directory
+PLUGIN_DIR="${CLAUDE_PLUGINS_DIR}/cc-superpowers-sdd"
+
+# Copy template to project
+cp "$PLUGIN_DIR/templates/spec-template.md" ./specs/001-my-feature/spec.md
+```
+
 ## Prerequisites
 
-### Check if Spec-Kit is Available
+### Check if Spec-Kit CLI is Available (Optional)
+
+The plugin bundles all necessary resources, so spec-kit CLI is optional.
 
 ```bash
 which speckit
@@ -35,10 +119,14 @@ which speckit
 speckit --version
 ```
 
-**If not available:**
-- Skill works without spec-kit (degraded mode)
-- Recommend installation if frequent spec work
-- Fall back to manual spec management
+**If spec-kit CLI is available:**
+- Use CLI for validation and advanced features
+- Bundled scripts work alongside CLI
+
+**If spec-kit CLI is not available:**
+- Use bundled templates and scripts
+- Full SDD workflow support without CLI
+- No degraded mode - full functionality
 
 ### Configuration
 
@@ -393,23 +481,26 @@ Overall: ✓ SOUND
 Spec is valid and ready for implementation.
 ```
 
-## Degraded Mode (Without Spec-Kit)
+## Bundled Resources Mode (Default)
 
-**When spec-kit not available:**
+**The plugin bundles all spec-kit resources:**
 
-**Still functional:**
-- Manual spec creation (using templates)
-- Manual validation (SDD checks)
-- Manual plan generation (from spec parsing)
+**Fully functional without spec-kit CLI:**
+- Spec creation using bundled templates
+- Feature creation using bundled scripts
+- Plan generation using bundled templates
+- Task management using bundled templates
+- Validation using bundled scripts
 
-**Not available:**
-- Spec-kit format validation
-- Spec-kit templates
-- Spec-kit-specific features
+**When spec-kit CLI is also installed:**
+- Can use CLI validation for additional checks
+- Can use CLI-specific features
+- Bundled resources still work alongside CLI
 
 **Recommendation:**
-- For occasional spec work: Degraded mode fine
-- For frequent spec work: Install spec-kit
+- Start with bundled resources (no installation needed)
+- Optionally install spec-kit CLI for advanced validation
+- Both approaches fully supported
 
 ## Integration Points
 
@@ -451,22 +542,23 @@ Spec is valid and ready for implementation.
 
 ## Remember
 
-**Spec-kit is a tool, not a requirement.**
+**Bundled resources provide full functionality.**
 
-- SDD works with or without spec-kit
-- Spec-kit enhances workflow when available
-- Manual mode is fully functional
+- Plugin includes all spec-kit templates and scripts
+- No external dependencies required
+- Spec-kit CLI is optional enhancement
 
-**Integration adds discipline:**
+**Integration provides complete workflow:**
 
-- Spec-kit provides tooling
-- SDD adds workflow enforcement
-- Together: powerful spec-driven development
+- Bundled templates for spec creation
+- Bundled scripts for automation
+- SDD adds workflow enforcement and discipline
+- Together: powerful spec-driven development out of the box
 
-**Graceful degradation:**
+**No degraded mode:**
 
-- Always provide fallback
-- Never block on spec-kit unavailability
-- Recommend installation but don't require
+- All features work with bundled resources
+- Spec-kit CLI adds validation features
+- Users choose their preferred approach
 
-**The goal is great specs, not specific tooling.**
+**The goal is great specs with minimal setup.**

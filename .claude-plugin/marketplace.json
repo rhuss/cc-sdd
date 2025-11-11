@@ -1,0 +1,22 @@
+{
+  "name": "sdd-plugin-development",
+  "owner": {
+    "name": "Roland Huss",
+    "email": "rhuss@redhat.com"
+  },
+  "description": "Local development marketplace for cc-superpowers-sdd plugin",
+  "plugins": [
+    {
+      "name": "sdd",
+      "version": "1.0.0",
+      "description": "Specification-Driven Development with Process Discipline for Claude Code",
+      "author": {
+        "name": "Roland Huss",
+        "email": "rhuss@redhat.com"
+      },
+      "source": "./",
+      "homepage": "https://github.com/rhuss/cc-superpowers-sdd",
+      "repository": "https://github.com/rhuss/cc-superpowers-sdd.git"
+    }
+  ]
+}
