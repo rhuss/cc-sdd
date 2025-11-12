@@ -17,6 +17,14 @@ Start by understanding the current project context, then ask questions one at a 
 - Focus on **"what" and "why"**, defer "how" to implementation phase
 - Validate spec soundness before finishing
 
+## Prerequisites
+
+Before starting the brainstorming workflow, ensure spec-kit is initialized:
+
+{Skill: spec-kit}
+
+If spec-kit prompts for restart, pause this workflow and resume after restart.
+
 ## The Process
 
 ### Understanding the idea

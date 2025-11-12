@@ -31,6 +31,14 @@ This skill detects divergence, analyzes the mismatch, recommends resolution, and
 - Spec doesn't exist yet → Use `sdd:spec`
 - Multiple specs need consolidation → Use `sdd:spec-refactoring`
 
+## Prerequisites
+
+Ensure spec-kit is initialized:
+
+{Skill: spec-kit}
+
+If spec-kit prompts for restart, pause this workflow and resume after restart.
+
 ## The Process
 
 ### 1. Detect Mismatches

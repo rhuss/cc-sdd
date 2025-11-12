@@ -25,9 +25,17 @@ This is the core SDD implementation workflow: Spec → Plan → TDD → Verify.
 - Spec/code mismatch exists → Use `sdd:evolve`
 - Debugging existing code → Use `systematic-debugging`
 
-## Prerequisites
+## Technical Prerequisites
 
-**Before starting:**
+Ensure spec-kit is initialized:
+
+{Skill: spec-kit}
+
+If spec-kit prompts for restart, pause this workflow and resume after restart.
+
+## Workflow Prerequisites
+
+**Before starting implementation:**
 - [ ] Spec exists in `specs/features/[feature-name].md`
 - [ ] Spec validated for soundness (`sdd:review-spec`)
 - [ ] Spec validated against constitution (if exists)

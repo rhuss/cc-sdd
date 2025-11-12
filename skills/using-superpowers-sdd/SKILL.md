@@ -1,6 +1,6 @@
 ---
 name: using-superpowers-sdd
-description: Use when starting any SDD conversation - establishes mandatory workflows for specification-driven development, including spec-first discipline, skill discovery, and process enforcement
+description: Establishes SDD methodology - workflow routing, process discipline, spec-first principle, and skill discovery. Use when starting any SDD conversation to determine which workflow skill to invoke.
 ---
 
 <EXTREMELY-IMPORTANT>
@@ -28,127 +28,17 @@ This plugin combines:
 - **Spec-Driven Development** (specs as source of truth)
 - Result: High-quality software with specs that stay current
 
-## AUTOMATIC INITIALIZATION
+## Technical Prerequisites
 
-**IMPORTANT: This section runs automatically on first SDD command/skill usage.**
+**NOTE: The `spec-kit` skill handles all technical setup automatically.**
 
-Before any SDD workflow begins, automatically check and initialize prerequisites:
+Every SDD workflow skill calls `{Skill: spec-kit}` first, which:
+- Checks if spec-kit CLI is installed
+- Initializes the project if needed
+- Prompts restart if new commands installed
+- Validates file structure
 
-### 1. Check if spec-kit is installed
-
-```bash
-which speckit
-```
-
-**If NOT installed:**
-- STOP workflow immediately
-- Display clear error message:
-  ```
-  ERROR: spec-kit is required but not installed
-
-  spec-kit provides the templates, scripts, and tooling for SDD workflows.
-
-  Please install spec-kit:
-  1. Visit: https://github.com/github/spec-kit
-  2. Follow installation instructions
-  3. Ensure 'speckit' is in your PATH
-  4. Restart this workflow
-  ```
-- DO NOT proceed with any SDD workflow
-
-**If installed:**
-- Note the version for user
-- Proceed to step 2
-
-### 2. Check if project is initialized
-
-```bash
-[ -d .specify ] && echo "initialized" || echo "not-initialized"
-```
-
-**If NOT initialized:**
-- Inform user:
-  ```
-  spec-kit is installed but this project is not initialized.
-
-  Running automatic initialization...
-  ```
-- Run initialization:
-  ```bash
-  speckit init
-  ```
-- Check if initialization succeeded
-- **IMPORTANT - Check for .claude/ directory updates:**
-  ```bash
-  # Check if spec-kit installed Claude Code commands
-  [ -d .claude/commands ] && ls .claude/commands/ | grep -q speckit && echo "commands-installed" || echo "no-commands"
-  ```
-- If commands were installed, display restart reminder:
-  ```
-  ✅ Project initialized successfully!
-
-  spec-kit has installed local slash commands in .claude/commands/
-
-  ⚠️  RESTART REQUIRED ⚠️
-
-  Please restart Claude Code to load the new commands:
-  1. Close this conversation
-  2. Restart Claude Code application
-  3. Return to this project
-  4. Continue with your SDD workflow
-
-  After restart, you'll have access to:
-  - /sdd:* commands (from this plugin)
-  - /speckit.* commands (from spec-kit local installation)
-  ```
-- STOP workflow until user restarts
-- When user returns, skip to step 3
-
-**If already initialized:**
-- Silently proceed to step 3
-
-### 3. Verify initialization
-
-```bash
-# Quick sanity check
-[ -f .specify/templates/spec-template.md ] && echo "ok"
-```
-
-**If verification fails:**
-- Display error:
-  ```
-  ERROR: .specify/ exists but appears corrupted
-
-  Please run manually: speckit init --force
-  ```
-- STOP workflow
-
-**If verification succeeds:**
-- Proceed with SDD workflow
-
-### When to Run This Check
-
-**ALWAYS run on first SDD skill/command in a session:**
-- At start of `/sdd:brainstorm`
-- At start of `/sdd:spec`
-- At start of `/sdd:implement`
-- At start of any SDD workflow
-
-**DO NOT run repeatedly:**
-- Once initialized in a session, skip check
-- Use a session flag to track: "sdd_initialized_this_session"
-
-### Error Handling
-
-**If user lacks permissions:**
-```bash
-# If speckit init fails with permission error
-# Suggest running with appropriate permissions
-```
-
-**If spec-kit version is incompatible:**
-- Display version mismatch warning
-- Suggest upgrade if needed
+You don't need to worry about setup. Focus on choosing the right workflow.
 
 ## MANDATORY FIRST RESPONSE PROTOCOL
 
@@ -186,7 +76,6 @@ Before ANY implementation work:
 
 ### Phase Entry Points
 - **sdd:brainstorm** - Rough idea → spec through collaborative dialogue
-- **sdd:spec** - Clear requirements → formal spec creation
 - **sdd:implement** - Spec → code with TDD and compliance checking
 - **sdd:evolve** - Handle spec/code mismatches with AI guidance
 
@@ -195,10 +84,10 @@ Before ANY implementation work:
 - **sdd:review-code** - Review code-to-spec compliance
 - **sdd:verification-before-completion** - Tests + spec compliance validation
 
-### New SDD-Specific Skills
+### SDD-Specific Skills
 - **sdd:review-spec** - Validate spec soundness and completeness
 - **sdd:spec-refactoring** - Consolidate and improve evolved specs
-- **sdd:spec-kit** - Wrapper for spec-kit CLI with workflow discipline
+- **sdd:spec-kit** - Technical integration for spec-kit CLI (called automatically)
 - **sdd:constitution** - Create/manage project-wide principles
 
 ### Compatible Superpowers Skills
@@ -216,13 +105,46 @@ User request arrives
 Is this a new feature/project?
     Yes → Is it a rough idea?
             Yes → sdd:brainstorm
-            No → sdd:spec
+            No → Create spec using spec-kit tools
     No → Does spec exist for this area?
             Yes → Is there spec/code mismatch?
                     Yes → sdd:evolve
                     No → sdd:implement
-            No → sdd:spec (create spec first)
+            No → Create spec first using spec-kit tools
 ```
+
+## Creating Specifications
+
+### Rough Idea → Use Brainstorm
+
+```
+User: "I want to add authentication to my app"
+→ Use sdd:brainstorm
+```
+
+**Brainstorm will:**
+- Explore the idea through questions
+- Propose approaches with trade-offs
+- Refine requirements collaboratively
+- Create formal spec using spec-kit
+
+### Clear Requirements → Direct Spec Creation
+
+```
+User: "Add a POST /api/users endpoint that validates email and returns 422 on invalid format"
+→ Create spec directly using spec-kit tools
+```
+
+**Direct spec creation:**
+- Requirements are already clear
+- No exploratory dialogue needed
+- Use spec-kit CLI or templates directly
+- Follow spec-kit layout conventions
+
+**WHAT vs HOW principle:**
+Specs define WHAT and WHY, not HOW.
+- ✅ WHAT: Requirements, behaviors, contracts, success criteria
+- ❌ HOW: Algorithms, code, technology choices, architecture
 
 ## Common Rationalizations That Mean You're About To Fail
 
@@ -283,7 +205,7 @@ Specs WILL diverge from code. This is expected and healthy.
 
 ## Constitution: Optional but Powerful
 
-If this is your first time using SDD on a project, consider creating a constitution:
+Consider creating a constitution for your project:
 
 **What is it?**
 - Project-wide principles and standards
@@ -308,43 +230,102 @@ Your human partner's specific instructions describe WHAT to do, not HOW.
 
 **Why:** Specific instructions mean clear requirements, which is when specs matter MOST.
 
-## Integration with Spec-Kit
-
-spec-kit is REQUIRED for all SDD workflows. The automatic initialization check ensures:
-- spec-kit CLI is installed
-- Project is initialized (`.specify/` directory exists)
-- Templates and scripts are available locally
-
-SDD skills use spec-kit for:
-- Spec creation and validation
-- Constitution management
-- Spec formatting and structure
-- Template-based artifact generation
-
-If spec-kit is NOT installed, workflows will stop with clear error messages.
-
 ## Summary
 
 **Starting any task:**
-1. Check: Does spec exist? If no → create spec first
-2. If relevant skill exists → Use the skill
-3. Announce you're using it
-4. Follow what it says
+1. Check this skill first for routing
+2. Determine: brainstorm vs. direct spec vs. implement vs. evolve
+3. Invoke the appropriate workflow skill
+4. That skill will call spec-kit for setup automatically
+5. Follow the workflow discipline exactly
 
-**Skill has checklist?** TodoWrite for every item.
+**The methodology is:**
+- Specs first, always
+- Code validates against specs
+- Specs evolve when reality teaches us
+- Quality gates prevent shortcuts
+- Process discipline ensures quality
 
-**Code without spec?** Create spec first. Always.
+**The tools are:**
+- spec-kit (technical integration)
+- Workflow skills (brainstorm, implement, evolve)
+- Verification and validation skills
+- TDD and debugging skills
 
-**Spec/code mismatch?** Use sdd:evolve. Don't force-fit.
+**The goal is:**
+High-quality software with specs that remain the living source of truth.
 
-**Finding a relevant skill = mandatory to read and use it. Not optional.**
+## Workflow Patterns
+
+### Pattern 1: New Feature from Rough Idea
+
+```
+User: "I want to add notifications to my app"
+
+1. Recognize: Rough idea
+2. Route to: sdd:brainstorm
+3. Brainstorm will:
+   - Call spec-kit (auto-setup)
+   - Explore idea collaboratively
+   - Create formal spec
+   - Hand off to sdd:implement
+```
+
+### Pattern 2: New Feature from Clear Requirements
+
+```
+User: "Add GET /api/stats endpoint returning JSON with user_count and post_count"
+
+1. Recognize: Clear requirements
+2. Create spec using spec-kit tools
+3. Route to: sdd:implement
+4. Implement will:
+   - Call spec-kit (auto-setup)
+   - Generate plan from spec
+   - Use TDD
+   - Verify spec compliance
+```
+
+### Pattern 3: Code Exists, Spec Missing
+
+```
+User: "Document what this auth module does"
+
+1. Recognize: Code without spec
+2. Create spec by analyzing code
+3. Route to: sdd:evolve (to reconcile)
+```
+
+### Pattern 4: Code and Spec Diverged
+
+```
+User: "The login endpoint returns different errors than the spec says"
+
+1. Recognize: Spec/code mismatch
+2. Route to: sdd:evolve
+3. Evolve will:
+   - Call spec-kit (auto-setup)
+   - Analyze mismatch
+   - Recommend update spec vs. fix code
+   - User decides or auto-update
+```
 
 ## Remember
 
-- **Specs are source of truth**
-- **Skills enforce discipline**
-- **Evolution is normal**
-- **Quality gates prevent mistakes**
-- **TodoWrite tracks checklists**
+**You are the methodology enforcer.**
 
-**You now have superpowers for specification-driven development. Use them.**
+- Route to correct workflow skill
+- Enforce spec-first principle
+- Catch rationalizations
+- Ensure quality gates run
+
+**You are NOT:**
+- The technical setup manager (that's spec-kit)
+- The implementer (that's workflow skills)
+- The spec creator (that's spec-kit + brainstorm)
+
+**Your job:**
+Ensure the right skill gets used for the right task, and that SDD principles are followed.
+
+**The goal:**
+Specs that stay current. Code that matches intent. Quality through discipline.

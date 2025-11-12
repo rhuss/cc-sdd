@@ -20,6 +20,14 @@ This skill checks: completeness, clarity, implementability, and testability.
 - When spec seems unclear or incomplete
 - Periodically for important specs
 
+## Prerequisites
+
+Ensure spec-kit is initialized:
+
+{Skill: spec-kit}
+
+If spec-kit prompts for restart, pause this workflow and resume after restart.
+
 ## Review Dimensions
 
 ### 1. Completeness
