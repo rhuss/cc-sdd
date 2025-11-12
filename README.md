@@ -100,22 +100,26 @@ git clone https://github.com/rhuss/cc-superpowers-sdd.git
 # Reload Claude Code or restart
 ```
 
-### Initialize Your Project
+### First Use - Automatic Setup
 
-Before using SDD workflows, initialize spec-kit in your project:
+The plugin automatically initializes spec-kit when you first use any SDD command:
 
+1. **First SDD command** - Run any `/sdd:*` command (e.g., `/sdd:brainstorm`, `/sdd:spec`)
+2. **Automatic check** - Plugin verifies spec-kit is installed and initializes your project
+3. **Restart if prompted** - If spec-kit installs new commands, restart Claude Code
+4. **Ready to use** - Continue with your SDD workflow
+
+**What gets initialized:**
+- `.specify/` directory with templates and scripts
+- `.claude/commands/` with spec-kit slash commands
+- Project constitution and memory structure
+
+**Manual initialization (optional):**
+If you prefer to initialize before first use:
 ```bash
-# Navigate to your project
 cd /path/to/your/project
-
-# Initialize spec-kit
 speckit init
 ```
-
-This creates the `.specify/` directory with:
-- Templates for specs, plans, tasks, and checklists
-- Shell scripts for automation
-- Project constitution and memory
 
 ### Configuration
 

@@ -9,6 +9,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- **Automatic spec-kit initialization** - Plugin automatically initializes projects on first SDD command
+  - Checks if spec-kit CLI is installed
+  - Automatically runs `speckit init` if project not initialized
+  - Reminds user to restart if new `.claude/commands/` were installed
+  - No manual setup required for users
+- **Restart detection** - Plugin detects when spec-kit installs local commands and prompts restart
+- **Clear error messages** - If spec-kit not installed, provides installation instructions
+
 ### Changed (BREAKING)
 - **spec-kit is now a required dependency** - Plugin no longer bundles templates and scripts
 - Templates and scripts now live in local project (`.specify/` directory) via `speckit init`
@@ -21,9 +30,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Migration Guide
 1. Ensure spec-kit CLI is installed and in your PATH
-2. Run `speckit init` in each project that uses SDD workflows
-3. Update any custom references from plugin templates to `.specify/templates/`
-4. Update any custom references from plugin scripts to `.specify/scripts/`
+2. ~~Run `speckit init` in each project~~ - Now happens automatically on first SDD command!
+3. Restart Claude Code when prompted (if new commands were installed)
+4. Update any custom references from plugin templates to `.specify/templates/`
+5. Update any custom references from plugin scripts to `.specify/scripts/`
 
 ## [1.0.0] - 2025-11-11
 

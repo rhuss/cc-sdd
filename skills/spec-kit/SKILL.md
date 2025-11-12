@@ -20,9 +20,21 @@ This skill:
 
 ## Prerequisites
 
-### Required: Install spec-kit CLI
+### Automatic Initialization
 
-spec-kit must be installed and accessible in your PATH:
+**NOTE: The `using-superpowers-sdd` skill automatically handles initialization.**
+
+When you run any SDD command/skill for the first time, it will:
+1. Check if spec-kit CLI is installed
+2. Check if project is initialized (`.specify/` exists)
+3. Automatically run `speckit init` if needed
+4. Remind you to restart if new commands were installed
+
+You typically don't need to manually check prerequisites.
+
+### Manual Prerequisite Check (if needed)
+
+If running spec-kit commands directly, verify:
 
 ```bash
 # Check if spec-kit is installed
@@ -36,9 +48,14 @@ speckit --version
 
 Install spec-kit following the instructions at the spec-kit repository. The plugin will not function without it.
 
-### Required: Initialize spec-kit in your project
+### Project Initialization
 
-Before using SDD workflows, you must initialize spec-kit in your project:
+**Automatic (recommended):**
+- Run any `/sdd:*` command
+- Initialization happens automatically
+- Restart when prompted
+
+**Manual (if needed):**
 
 ```bash
 # Initialize spec-kit in current project
@@ -50,9 +67,11 @@ speckit init
 - `.specify/templates/` - Spec, plan, tasks, checklist templates
 - `.specify/scripts/` - Shell scripts for automation
 - `.specify/memory/` - Project constitution and context
-- Configuration files
+- Local `.claude/commands/` - spec-kit slash commands
 
-All SDD skills and commands expect these local project files to exist.
+**After initialization:**
+- Restart Claude Code if `.claude/commands/` were created
+- This loads the new `/speckit.*` commands
 
 ## When to Use
 

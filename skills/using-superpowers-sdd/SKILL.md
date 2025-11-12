@@ -28,6 +28,128 @@ This plugin combines:
 - **Spec-Driven Development** (specs as source of truth)
 - Result: High-quality software with specs that stay current
 
+## AUTOMATIC INITIALIZATION
+
+**IMPORTANT: This section runs automatically on first SDD command/skill usage.**
+
+Before any SDD workflow begins, automatically check and initialize prerequisites:
+
+### 1. Check if spec-kit is installed
+
+```bash
+which speckit
+```
+
+**If NOT installed:**
+- STOP workflow immediately
+- Display clear error message:
+  ```
+  ERROR: spec-kit is required but not installed
+
+  spec-kit provides the templates, scripts, and tooling for SDD workflows.
+
+  Please install spec-kit:
+  1. Visit: https://github.com/github/spec-kit
+  2. Follow installation instructions
+  3. Ensure 'speckit' is in your PATH
+  4. Restart this workflow
+  ```
+- DO NOT proceed with any SDD workflow
+
+**If installed:**
+- Note the version for user
+- Proceed to step 2
+
+### 2. Check if project is initialized
+
+```bash
+[ -d .specify ] && echo "initialized" || echo "not-initialized"
+```
+
+**If NOT initialized:**
+- Inform user:
+  ```
+  spec-kit is installed but this project is not initialized.
+
+  Running automatic initialization...
+  ```
+- Run initialization:
+  ```bash
+  speckit init
+  ```
+- Check if initialization succeeded
+- **IMPORTANT - Check for .claude/ directory updates:**
+  ```bash
+  # Check if spec-kit installed Claude Code commands
+  [ -d .claude/commands ] && ls .claude/commands/ | grep -q speckit && echo "commands-installed" || echo "no-commands"
+  ```
+- If commands were installed, display restart reminder:
+  ```
+  ✅ Project initialized successfully!
+
+  spec-kit has installed local slash commands in .claude/commands/
+
+  ⚠️  RESTART REQUIRED ⚠️
+
+  Please restart Claude Code to load the new commands:
+  1. Close this conversation
+  2. Restart Claude Code application
+  3. Return to this project
+  4. Continue with your SDD workflow
+
+  After restart, you'll have access to:
+  - /sdd:* commands (from this plugin)
+  - /speckit.* commands (from spec-kit local installation)
+  ```
+- STOP workflow until user restarts
+- When user returns, skip to step 3
+
+**If already initialized:**
+- Silently proceed to step 3
+
+### 3. Verify initialization
+
+```bash
+# Quick sanity check
+[ -f .specify/templates/spec-template.md ] && echo "ok"
+```
+
+**If verification fails:**
+- Display error:
+  ```
+  ERROR: .specify/ exists but appears corrupted
+
+  Please run manually: speckit init --force
+  ```
+- STOP workflow
+
+**If verification succeeds:**
+- Proceed with SDD workflow
+
+### When to Run This Check
+
+**ALWAYS run on first SDD skill/command in a session:**
+- At start of `/sdd:brainstorm`
+- At start of `/sdd:spec`
+- At start of `/sdd:implement`
+- At start of any SDD workflow
+
+**DO NOT run repeatedly:**
+- Once initialized in a session, skip check
+- Use a session flag to track: "sdd_initialized_this_session"
+
+### Error Handling
+
+**If user lacks permissions:**
+```bash
+# If speckit init fails with permission error
+# Suggest running with appropriate permissions
+```
+
+**If spec-kit version is incompatible:**
+- Display version mismatch warning
+- Suggest upgrade if needed
+
 ## MANDATORY FIRST RESPONSE PROTOCOL
 
 Before responding to ANY user message, you MUST complete this checklist:
@@ -188,12 +310,18 @@ Your human partner's specific instructions describe WHAT to do, not HOW.
 
 ## Integration with Spec-Kit
 
-If spec-kit CLI is available, SDD skills will use it for:
+spec-kit is REQUIRED for all SDD workflows. The automatic initialization check ensures:
+- spec-kit CLI is installed
+- Project is initialized (`.specify/` directory exists)
+- Templates and scripts are available locally
+
+SDD skills use spec-kit for:
 - Spec creation and validation
 - Constitution management
 - Spec formatting and structure
+- Template-based artifact generation
 
-If spec-kit is NOT available, skills work standalone (with reduced validation).
+If spec-kit is NOT installed, workflows will stop with clear error messages.
 
 ## Summary
 
