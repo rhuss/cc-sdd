@@ -1,5 +1,5 @@
 ---
-name: sdd-verification-before-completion
+name: verification-before-completion
 description: Extended verification including tests AND spec compliance - runs tests, validates spec compliance, checks for drift, blocks completion on failures
 ---
 

@@ -1,5 +1,5 @@
 ---
-name: sdd-writing-plans
+name: writing-plans
 description: Generate implementation plans FROM specifications - reads spec as input, extracts requirements, creates step-by-step tasks with validation against spec
 ---
 

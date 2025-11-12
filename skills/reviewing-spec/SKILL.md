@@ -1,5 +1,5 @@
 ---
-name: sdd-reviewing-spec
+name: reviewing-spec
 description: Review specifications for soundness, completeness, and implementability - validates structure, identifies ambiguities, checks for gaps before implementation
 ---
 

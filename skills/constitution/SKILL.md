@@ -1,5 +1,5 @@
 ---
-name: sdd-constitution
+name: constitution
 description: Create and manage project constitution - defines project-wide principles, patterns, and standards that guide all specs and implementations
 ---
 

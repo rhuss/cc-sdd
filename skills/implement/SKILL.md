@@ -1,5 +1,5 @@
 ---
-name: sdd-implement
+name: implement
 description: Use when spec exists and is validated - generates implementation plan FROM spec, executes with TDD, and verifies spec compliance throughout
 ---
 

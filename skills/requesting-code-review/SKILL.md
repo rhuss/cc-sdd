@@ -1,5 +1,5 @@
 ---
-name: sdd-requesting-code-review
+name: requesting-code-review
 description: Review code against spec compliance - checks implementation matches spec requirements, identifies deviations, reports compliance score, triggers evolution if needed
 ---
 

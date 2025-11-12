@@ -1,5 +1,5 @@
 ---
-name: sdd-evolve
+name: evolve
 description: Use when spec and code diverge - AI analyzes mismatches, recommends update spec vs fix code with reasoning, handles evolution with user control or auto-updates
 ---
 

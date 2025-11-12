@@ -177,24 +177,25 @@ These work as-is, referenced by SDD skills:
 cc-superpowers-sdd/
 ├── README.md                          # In-depth guide with examples
 ├── skills/
-│   ├── sdd-brainstorm.md
-│   ├── sdd-spec.md
-│   ├── sdd-implement.md
-│   ├── sdd-evolve.md
-│   ├── sdd-writing-plans.md
-│   ├── sdd-requesting-code-review.md
-│   ├── sdd-verification-before-completion.md
-│   ├── sdd-reviewing-spec.md
-│   ├── sdd-spec-refactoring.md
-│   ├── sdd-spec-kit.md
-│   ├── sdd-constitution.md
-│   └── sdd-using-superpowers-sdd.md
+│   ├── brainstorm/
+│   ├── spec/
+│   ├── implement/
+│   ├── evolve/
+│   ├── writing-plans/
+│   ├── requesting-code-review/
+│   ├── verification-before-completion/
+│   ├── reviewing-spec/
+│   ├── spec-refactoring/
+│   ├── spec-kit/
+│   ├── constitution/
+│   └── using-superpowers-sdd/
 ├── examples/
 │   └── todo-app/                      # Complete workflow example
 │       ├── specs/
 │       ├── docs/
 │       └── src/
-├── plugin.json
+├── .claude-plugin/
+│   └── plugin.json
 └── docs/
     ├── workflow-guide.md
     └── migration-from-superpowers.md

@@ -7,14 +7,8 @@
     "email": "rhuss@redhat.com"
   },
   "license": "MIT",
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/rhuss/cc-superpowers-sdd.git"
-  },
+  "repository": "https://github.com/rhuss/cc-superpowers-sdd",
   "homepage": "https://github.com/rhuss/cc-superpowers-sdd",
-  "bugs": {
-    "url": "https://github.com/rhuss/cc-superpowers-sdd/issues"
-  },
   "keywords": [
     "claude-code",
     "plugin",
@@ -26,83 +20,5 @@
     "process-discipline",
     "quality-gates",
     "superpowers"
-  ],
-  "configuration": {
-    "schema": {
-      "type": "object",
-      "properties": {
-        "sdd": {
-          "type": "object",
-          "properties": {
-            "auto_update_spec": {
-              "type": "object",
-              "properties": {
-                "enabled": {
-                  "type": "boolean",
-                  "default": true,
-                  "description": "Enable automatic spec updates for minor changes"
-                },
-                "threshold": {
-                  "type": "string",
-                  "enum": ["none", "minor", "moderate"],
-                  "default": "minor",
-                  "description": "Threshold for auto-updates: none (never), minor (trivial changes), moderate (non-breaking changes)"
-                },
-                "notify": {
-                  "type": "boolean",
-                  "default": true,
-                  "description": "Notify user when auto-updates occur"
-                }
-              }
-            },
-            "spec_kit": {
-              "type": "object",
-              "properties": {
-                "enabled": {
-                  "type": "boolean",
-                  "default": true,
-                  "description": "Use spec-kit CLI if available"
-                },
-                "path": {
-                  "type": "string",
-                  "default": "speckit",
-                  "description": "Path to spec-kit binary"
-                }
-              }
-            },
-            "constitution": {
-              "type": "object",
-              "properties": {
-                "path": {
-                  "type": "string",
-                  "default": "specs/constitution.md",
-                  "description": "Path to project constitution file"
-                },
-                "required": {
-                  "type": "boolean",
-                  "default": false,
-                  "description": "Require constitution before spec work"
-                }
-              }
-            },
-            "specs": {
-              "type": "object",
-              "properties": {
-                "directory": {
-                  "type": "string",
-                  "default": "specs/features",
-                  "description": "Directory for feature specifications"
-                },
-                "format": {
-                  "type": "string",
-                  "default": "markdown",
-                  "description": "Specification file format"
-                }
-              }
-            }
-          }
-        }
-      }
-    }
-  }
+  ]
 }

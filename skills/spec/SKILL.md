@@ -1,5 +1,5 @@
 ---
-name: sdd-spec
+name: spec
 description: Use when you have clear requirements and want to create a formal specification directly, bypassing brainstorming - creates validated, executable specs
 ---
 

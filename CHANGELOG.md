@@ -12,30 +12,30 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 #### Core Skills
-- **sdd-using-superpowers-sdd**: Entry skill establishing mandatory SDD workflows
-- **sdd-brainstorm**: Refine rough ideas into executable specifications through collaborative dialogue
-- **sdd-spec**: Create formal specifications directly from clear requirements
-- **sdd-implement**: Implement features from validated specifications using TDD with spec compliance checking
-- **sdd-evolve**: Reconcile spec/code mismatches with AI-guided evolution and user control
+- **using-superpowers-sdd**: Entry skill establishing mandatory SDD workflows
+- **brainstorm**: Refine rough ideas into executable specifications through collaborative dialogue
+- **spec**: Create formal specifications directly from clear requirements
+- **implement**: Implement features from validated specifications using TDD with spec compliance checking
+- **evolve**: Reconcile spec/code mismatches with AI-guided evolution and user control
 
 #### Modified Superpowers Skills
-- **sdd-writing-plans**: Generate implementation plans FROM specifications with full requirement coverage
-- **sdd-requesting-code-review**: Review code against spec compliance with scoring and deviation detection
-- **sdd-verification-before-completion**: Extended verification including tests AND spec compliance validation
+- **writing-plans**: Generate implementation plans FROM specifications with full requirement coverage
+- **requesting-code-review**: Review code against spec compliance with scoring and deviation detection
+- **verification-before-completion**: Extended verification including tests AND spec compliance validation
 
 #### SDD-Specific Skills
-- **sdd-reviewing-spec**: Review specifications for soundness, completeness, and implementability
-- **sdd-spec-refactoring**: Consolidate and improve evolved specs while maintaining feature coverage
-- **sdd-spec-kit**: Wrapper for spec-kit CLI operations with workflow discipline
-- **sdd-constitution**: Create and manage project constitution defining project-wide principles
+- **reviewing-spec**: Review specifications for soundness, completeness, and implementability
+- **spec-refactoring**: Consolidate and improve evolved specs while maintaining feature coverage
+- **spec-kit**: Wrapper for spec-kit CLI operations with workflow discipline
+- **constitution**: Create and manage project constitution defining project-wide principles
 
 #### Slash Commands
-- `/cc-superpowers-sdd:sdd-brainstorm`: Interactive specification refinement
-- `/cc-superpowers-sdd:sdd-spec`: Direct specification creation
-- `/cc-superpowers-sdd:sdd-implement`: Feature implementation from specs
-- `/cc-superpowers-sdd:sdd-evolve`: Spec/code reconciliation
-- `/cc-superpowers-sdd:sdd-review-spec`: Specification review
-- `/cc-superpowers-sdd:sdd-constitution`: Project constitution management
+- `/sdd:brainstorm`: Interactive specification refinement
+- `/sdd:spec`: Direct specification creation
+- `/sdd:implement`: Feature implementation from specs
+- `/sdd:evolve`: Spec/code reconciliation
+- `/sdd:review-spec`: Specification review
+- `/sdd:constitution`: Project constitution management
 
 #### Bundled Resources
 - **Templates**: 5 spec-kit templates (spec, plan, tasks, checklist, agent-file)

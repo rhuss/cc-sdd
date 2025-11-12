@@ -1,5 +1,5 @@
 ---
-name: sdd-spec-kit
+name: spec-kit
 description: Wrapper for spec-kit CLI operations - intelligent delegation to spec-kit commands with workflow discipline, TodoWrite tracking, and error handling
 ---
 

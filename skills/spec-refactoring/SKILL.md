@@ -1,5 +1,5 @@
 ---
-name: sdd-spec-refactoring
+name: spec-refactoring
 description: Consolidate and improve evolved specs - identifies inconsistencies, removes redundancy, improves structure while maintaining feature coverage
 ---
 
