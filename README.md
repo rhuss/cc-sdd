@@ -53,6 +53,29 @@ Superpowers-SDD provides:
 ✅ **Flexible entry points** - Start from idea, spec, or existing code
 ✅ **Automated compliance** - Continuous spec-to-code validation
 
+## Architecture
+
+### Canonical Two-Skill Design
+
+The plugin uses a clear separation of concerns with two core skills:
+
+1. **`spec-kit`** (Technical Integration Layer)
+   - Automatic initialization and setup
+   - Installation validation
+   - Project structure management
+   - CLI command wrappers
+   - Layout and file path enforcement
+   - Called automatically by all workflow skills
+
+2. **`using-superpowers-sdd`** (Methodology Layer)
+   - Workflow routing and skill discovery
+   - Process discipline enforcement
+   - Spec-first principle
+   - Quality gates and verification
+   - No technical setup concerns
+
+**Every workflow skill calls `spec-kit` first for automatic setup, then proceeds with its specific workflow.**
+
 ## Features
 
 - **Phase-specific workflows**: Different entry points for different contexts
@@ -66,20 +89,22 @@ Superpowers-SDD provides:
   - Code reviews check spec compliance
   - Verification includes spec validation
 
-- **New SDD-specific skills**:
+- **SDD-specific skills**:
   - Spec soundness review
   - Spec refactoring and consolidation
   - Constitution management
+  - Technical integration (spec-kit)
 
 - **Intelligent spec evolution**:
   - AI detects spec/code mismatches
   - Recommends update spec vs. fix code
   - Configurable auto-updates for minor changes
 
-- **Spec-kit integration**:
-  - Leverages spec-kit CLI where beneficial
-  - Adds workflow discipline on top
-  - Can bypass when it creates friction
+- **Automatic spec-kit integration**:
+  - Zero-config setup
+  - Automatic initialization
+  - Restart prompts when needed
+  - Enforces proper file/directory layout
 
 ## Installation
 

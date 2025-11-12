@@ -1,385 +1,371 @@
 ---
 name: spec-kit
-description: Wrapper for spec-kit CLI operations - intelligent delegation to spec-kit commands with workflow discipline, TodoWrite tracking, and error handling
+description: Technical integration layer for spec-kit CLI - handles automatic initialization, installation validation, project setup, and ensures proper file/directory layout. Called by all SDD workflow skills.
 ---
 
-# Spec-Kit Integration
+# Spec-Kit Technical Integration
 
-## Overview
+## Purpose
 
-This plugin integrates with spec-kit CLI to provide specification-driven development workflows in Claude Code.
+This skill is the **single source of truth** for all spec-kit technical integration:
+- Automatic initialization and setup
+- Installation validation
+- Project structure management
+- CLI command wrappers
+- Layout and file path enforcement
 
-**spec-kit is a REQUIRED dependency** - it provides the templates, scripts, and tooling that power the SDD workflow.
+**This is a low-level technical skill.** Workflow skills (brainstorm, implement, etc.) call this skill for setup, then proceed with their specific workflows.
 
-This skill:
-- Delegates to spec-kit CLI commands
-- Adds TodoWrite tracking for workflow progress
-- Handles errors gracefully
-- Provides context-aware guidance
-- Integrates spec-kit with SDD workflows
+## Automatic Initialization Protocol
 
-## Prerequisites
+**IMPORTANT: This runs automatically when called by any workflow skill.**
 
-### Automatic Initialization
+Every SDD workflow skill calls this skill first via `{Skill: spec-kit}`. When called, execute this initialization sequence once per session.
 
-**NOTE: The `using-superpowers-sdd` skill automatically handles initialization.**
-
-When you run any SDD command/skill for the first time, it will:
-1. Check if spec-kit CLI is installed
-2. Check if project is initialized (`.specify/` exists)
-3. Automatically run `speckit init` if needed
-4. Remind you to restart if new commands were installed
-
-You typically don't need to manually check prerequisites.
-
-### Manual Prerequisite Check (if needed)
-
-If running spec-kit commands directly, verify:
+### Session Tracking
 
 ```bash
-# Check if spec-kit is installed
-which speckit
+# Check if already initialized this session
+# Use an environment variable or similar mechanism
+# If "sdd_init_done" flag is set, skip to step 4
+```
 
-# Or check version
+### Step 1: Check spec-kit CLI Installation
+
+```bash
+which speckit
+```
+
+**If NOT found:**
+```
+❌ ERROR: spec-kit is required but not installed
+
+spec-kit provides the templates, scripts, and tooling for SDD workflows.
+
+Installation:
+1. Visit: https://github.com/github/spec-kit
+2. Follow installation instructions
+3. Ensure 'speckit' is in your PATH
+4. Verify: run 'which speckit'
+
+After installation, restart this workflow.
+```
+
+**STOP workflow.** Do not proceed without spec-kit.
+
+**If found:**
+```bash
+# Get version for logging
 speckit --version
 ```
 
-**If spec-kit is not installed:**
+Proceed to step 2.
 
-Install spec-kit following the instructions at the spec-kit repository. The plugin will not function without it.
-
-### Project Initialization
-
-**Automatic (recommended):**
-- Run any `/sdd:*` command
-- Initialization happens automatically
-- Restart when prompted
-
-**Manual (if needed):**
+### Step 2: Check Project Initialization
 
 ```bash
-# Initialize spec-kit in current project
-speckit init
+# Check if .specify/ directory exists
+[ -d .specify ] && echo "initialized" || echo "not-initialized"
 ```
 
-**This creates:**
-- `.specify/` directory with templates and scripts
-- `.specify/templates/` - Spec, plan, tasks, checklist templates
-- `.specify/scripts/` - Shell scripts for automation
-- `.specify/memory/` - Project constitution and context
-- Local `.claude/commands/` - spec-kit slash commands
+**If NOT initialized:**
 
-**After initialization:**
-- Restart Claude Code if `.claude/commands/` were created
-- This loads the new `/speckit.*` commands
+Display message:
+```
+spec-kit is installed ✓
 
-## When to Use
+This project needs initialization...
+Running: speckit init
+```
 
-- When spec-kit CLI command would be helpful
-- To validate spec format/structure
-- To initialize spec-kit in project
-- For spec-kit-specific operations
-
-**Note:** Most SDD skills call this internally. Direct use is for spec-kit-specific tasks.
-
-## Available Spec-Kit Commands
-
-### 1. Initialize Spec-Kit
-
+Execute initialization:
 ```bash
 speckit init
 ```
 
-**Creates:**
-- `.specify/` directory structure
-- Templates (spec, plan, tasks, checklist)
-- Scripts (feature creation, setup, context management)
-- Default configuration
+**Check for errors:**
+- Permission denied → suggest running with proper permissions
+- Command failed → display error and suggest manual init
+- Success → proceed to step 3
 
-**Use when:**
-- First time using SDD in a project
-- Setting up new project
+**If already initialized:**
+Skip to step 3.
 
-### 2. Create Specification
+### Step 3: Check for New Commands (Restart Detection)
+
+After `speckit init` runs, check if local commands were installed:
 
 ```bash
-speckit specify
+# Check if spec-kit installed Claude Code commands
+if [ -d .claude/commands ]; then
+  ls .claude/commands/ | grep -q speckit
+  if [ $? -eq 0 ]; then
+    echo "commands-installed"
+  fi
+fi
 ```
 
-**Interactive spec creation.**
+**If commands were installed:**
 
-**Use when:**
-- Creating new spec (alternative to manual)
-- Want spec-kit's guided workflow
+Display restart prompt:
+```
+✅ Project initialized successfully!
 
-**Called by:** `sdd:spec`, `sdd:brainstorm`
+⚠️  RESTART REQUIRED ⚠️
 
-### 3. Create Constitution
+spec-kit has installed local slash commands in:
+  .claude/commands/speckit.*
+
+To load these new commands, please:
+1. Save your work
+2. Close this conversation
+3. Restart Claude Code application
+4. Return to this project
+5. Continue your workflow
+
+After restart, you'll have access to:
+- /sdd:* commands (from this plugin)
+- /speckit.* commands (from local spec-kit installation)
+
+[Workflow paused - resume after restart]
+```
+
+**STOP workflow.** User must restart before continuing.
+
+**If no new commands installed:**
+Proceed to step 4.
+
+### Step 4: Verify Installation
+
+Quick sanity check:
+```bash
+# Verify key files exist
+[ -f .specify/templates/spec-template.md ] && \
+[ -f .specify/scripts/bash/common.sh ] && \
+echo "verified" || echo "corrupt"
+```
+
+**If verification fails:**
+```
+❌ ERROR: .specify/ exists but appears incomplete
+
+This may be due to a failed initialization.
+
+Please run: speckit init --force
+
+Then restart this workflow.
+```
+
+**STOP workflow.**
+
+**If verification succeeds:**
+- Set session flag: "sdd_init_done"
+- Return success to calling skill
+- Calling skill continues with its workflow
+
+## Layout Validation
+
+Use these helpers to validate spec-kit file structure:
+
+### Check Constitution
 
 ```bash
+# Constitution location (per spec-kit convention)
+CONSTITUTION=".specify/memory/constitution.md"
+
+if [ -f "$CONSTITUTION" ]; then
+  echo "constitution-exists"
+else
+  echo "no-constitution"
+fi
+```
+
+### Get Feature Spec Path
+
+```bash
+# Validate feature spec path follows spec-kit layout
+# Expected: specs/NNNN-feature-name/spec.md
+# Or: specs/features/feature-name.md
+
+validate_spec_path() {
+  local spec_path=$1
+
+  # Check if follows spec-kit conventions
+  if [[ $spec_path =~ ^specs/[0-9]+-[a-z-]+/spec\.md$ ]] || \
+     [[ $spec_path =~ ^specs/features/[a-z-]+\.md$ ]]; then
+    echo "valid"
+  else
+    echo "invalid: spec must be in specs/ directory with proper naming"
+  fi
+}
+```
+
+### Get Plan Path
+
+```bash
+# Plan location (per spec-kit convention)
+# Expected: specs/NNNN-feature-name/docs/plan.md
+
+get_plan_path() {
+  local feature_dir=$1  # e.g., "specs/0001-user-auth"
+  echo "$feature_dir/docs/plan.md"
+}
+```
+
+### Ensure Directory Structure
+
+```bash
+# Create spec-kit compliant feature structure
+ensure_feature_structure() {
+  local feature_dir=$1  # e.g., "specs/0001-user-auth"
+
+  mkdir -p "$feature_dir/docs"
+  mkdir -p "$feature_dir/checklists"
+  mkdir -p "$feature_dir/contracts"
+
+  echo "created: $feature_dir structure"
+}
+```
+
+## Spec-Kit CLI Commands
+
+Wrapper helpers for common spec-kit commands:
+
+### Initialize Project
+
+```bash
+# Already covered in automatic initialization
+speckit init
+```
+
+### Create Specification
+
+```bash
+# Interactive spec creation
+speckit specify [feature-description]
+
+# Uses template from .specify/templates/spec-template.md
+```
+
+### Validate Specification
+
+```bash
+# Validate spec format and structure
+speckit validate <spec-file>
+
+# Example:
+speckit validate specs/0001-user-auth/spec.md
+```
+
+### Generate Plan
+
+```bash
+# Generate implementation plan from spec
+speckit plan <spec-file>
+
+# Example:
+speckit plan specs/0001-user-auth/spec.md
+```
+
+### Create Constitution
+
+```bash
+# Interactive constitution creation
 speckit constitution
+
+# Creates .specify/memory/constitution.md
 ```
 
-**Interactive constitution creation.**
+## Error Handling
 
-**Use when:**
-- Creating project constitution
-- Want spec-kit's constitution template
+### spec-kit CLI Errors
 
-**Called by:** `sdd:constitution`
+**Command not found after installation:**
+- Check PATH configuration
+- Suggest shell restart
+- Provide which speckit output
 
-### 4. Validate Specification
+**Init fails:**
+- Check write permissions
+- Check disk space
+- Suggest manual troubleshooting
 
-```bash
-speckit validate specs/features/[feature].md
+**Validation fails:**
+- Display validation errors
+- Suggest fixes based on error type
+- Reference spec template
+
+### File System Errors
+
+**Permission denied:**
+```
+Cannot write to project directory.
+
+Please ensure you have write permissions:
+  chmod +w .
 ```
 
-**Validates spec format and structure.**
-
-**Use when:**
-- Checking spec correctness
-- Before implementation
-- After spec changes
-
-**Called by:** `sdd:review-spec`, `sdd:evolve`
-
-### 5. Generate Plan
-
-```bash
-speckit plan specs/features/[feature].md
+**Path not found:**
 ```
+Expected file not found: <path>
 
-**Generates implementation plan from spec.**
-
-**Use when:**
-- Creating implementation plan
-- Exploring spec structure
-
-**Called by:** `sdd:writing-plans`
-
-## Local Project Structure
-
-After running `speckit init`, your project will have:
-
+This suggests incomplete initialization.
+Run: speckit init --force
 ```
-.specify/
-├── templates/
-│   ├── spec-template.md          # Feature specification template
-│   ├── plan-template.md          # Implementation plan template
-│   ├── tasks-template.md         # Task breakdown template
-│   ├── checklist-template.md     # Quality checklist template
-│   └── agent-file-template.md    # Agent context file template
-├── scripts/
-│   └── bash/
-│       ├── create-new-feature.sh  # Create feature branch and spec
-│       ├── check-prerequisites.sh # Check project prerequisites
-│       ├── setup-plan.sh         # Set up implementation plan
-│       ├── update-agent-context.sh # Update agent context files
-│       └── common.sh             # Common utilities
-└── memory/
-    └── constitution.md           # Project constitution
-```
-
-## Workflow Integration
-
-### Pattern 1: Spec Creation with Spec-Kit
-
-```bash
-# User invokes sdd:spec
-
-# Skill delegates to spec-kit
-speckit specify
-
-# Add SDD validation on top
-run sdd:review-spec
-```
-
-### Pattern 2: Spec Validation
-
-```bash
-# User runs sdd:review-spec
-
-# Skill uses spec-kit validation
-speckit validate [spec-file]
-
-# Add SDD soundness checks
-check implementability
-check testability
-```
-
-### Pattern 3: Plan Generation
-
-```bash
-# User runs sdd:writing-plans
-
-# Skill delegates to spec-kit
-speckit plan [spec-file]
-
-# Enhance with SDD requirements
-add file paths
-add test strategy
-add validation
-```
-
-## The Process
-
-### 1. Check Availability
-
-```bash
-# Check if spec-kit is available
-which speckit
-
-# If not available, ERROR
-```
-
-**If not available:**
-- Stop workflow
-- Instruct user to install spec-kit
-- Provide installation instructions
-
-### 2. Check Project Initialization
-
-```bash
-# Check if project is initialized
-[ -d .specify ]
-
-# If not initialized, prompt to run
-speckit init
-```
-
-### 3. Determine Appropriate Command
-
-**Based on user intent:**
-
-| User Intent | Spec-Kit Command | SDD Enhancement |
-|------------|------------------|-----------------|
-| Create spec | `speckit specify` | + Validation |
-| Create constitution | `speckit constitution` | + Review |
-| Validate spec | `speckit validate` | + Soundness checks |
-| Generate plan | `speckit plan` | + Implementation details |
-| Initialize project | `speckit init` | + SDD setup |
-
-### 4. Execute Command
-
-**With error handling:**
-
-```bash
-# Execute command
-speckit [command] [args]
-
-# Capture output and errors
-# Provide helpful feedback
-```
-
-**Common errors:**
-
-**Spec-kit not found:**
-```
-Error: speckit command not found
-
-spec-kit is required for SDD workflows.
-
-Please install spec-kit and ensure it's in your PATH.
-
-Installation: [link to spec-kit docs]
-```
-
-**Project not initialized:**
-```
-Error: .specify directory not found
-
-This project has not been initialized with spec-kit.
-
-Run: speckit init
-```
-
-**Invalid spec format:**
-```
-Error: Spec validation failed
-
-Spec-kit validation errors:
-- Missing required section: Purpose
-- Invalid format for requirements
-
-Fix these issues and re-run validation.
-```
-
-### 5. Add SDD Workflow Discipline
-
-**After spec-kit command:**
-
-- Run SDD validation (even if spec-kit validation passed)
-- Create TodoWrite tasks if checklist workflow
-- Integrate with git (commit specs)
-- Link to next workflow step
-
-### 6. Provide Next Steps
-
-**Guide user:**
-
-```
-Spec created with spec-kit ✓
-SDD validation complete ✓
-
-Next steps:
-1. Review spec for soundness (sdd:review-spec) [if not auto-done]
-2. Create implementation plan (sdd:implement)
-3. Or refine spec further
-```
-
-## Checklist
-
-Use TodoWrite for spec-kit workflows:
-
-**For spec creation:**
-- [ ] Check spec-kit availability
-- [ ] Check project initialization
-- [ ] Run `speckit specify`
-- [ ] Validate with SDD soundness checks
-- [ ] Commit spec to git
-- [ ] Offer next steps
-
-**For validation:**
-- [ ] Run `speckit validate`
-- [ ] Add SDD-specific checks
-- [ ] Report results
-- [ ] Recommend fixes if issues
-
-**For plan generation:**
-- [ ] Run `speckit plan`
-- [ ] Enhance with file paths
-- [ ] Add test strategy
-- [ ] Validate against spec
-- [ ] Save plan
 
 ## Integration Points
 
-**This skill is called by:**
-- `sdd:spec` (for spec creation)
-- `sdd:brainstorm` (for spec creation)
-- `sdd:constitution` (for constitution creation)
-- `sdd:review-spec` (for validation)
-- `sdd:writing-plans` (for plan generation)
+**Called by these workflow skills:**
+- sdd:brainstorm (at start)
+- sdd:implement (at start)
+- sdd:evolve (at start)
+- sdd:constitution (at start)
+- sdd:review-spec (at start)
+- All workflow skills that need spec-kit
 
-**This skill calls:**
-- Spec-kit CLI commands
-- Git (for commits)
-- TodoWrite (for tracking)
-- Local project scripts and templates
+**Calls:**
+- spec-kit CLI (external command)
+- File system operations
+- No other skills (this is a leaf skill)
+
+## Session Management
+
+**First call in session:**
+- Run full initialization protocol
+- Check installation, project, commands
+- Prompt restart if needed
+- Set session flag
+
+**Subsequent calls in session:**
+- Check session flag
+- Skip initialization if already done
+- Optionally re-verify critical paths
+- Return success immediately
+
+**Session reset:**
+- New conversation = new session
+- Re-run initialization protocol
+- Ensures project state is current
 
 ## Remember
 
-**spec-kit is a required dependency.**
+**This skill is infrastructure, not workflow.**
 
-- Plugin does NOT bundle templates or scripts
-- Templates and scripts live in local project (`.specify/`)
-- Must run `speckit init` in each project
-- Single source of truth: spec-kit repository
+- Don't make decisions about WHAT to build
+- Don't route to other workflow skills
+- Just ensure spec-kit is ready to use
+- Validate paths and structure
+- Handle technical errors
 
-**Integration provides complete workflow:**
+**Workflow skills handle:**
+- What to create (specs, plans, code)
+- When to use which tool
+- Process discipline and quality gates
 
-- spec-kit provides tooling and artifacts
-- SDD adds workflow enforcement and discipline
-- Together: powerful spec-driven development
+**This skill handles:**
+- Is spec-kit installed?
+- Is project initialized?
+- Do files exist in correct locations?
+- Are commands available?
 
-**The goal is great specs with clear separation of concerns.**
+**The goal: Zero-config, automatic, invisible setup.**

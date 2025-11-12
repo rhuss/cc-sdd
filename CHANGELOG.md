@@ -17,6 +17,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - No manual setup required for users
 - **Restart detection** - Plugin detects when spec-kit installs local commands and prompts restart
 - **Clear error messages** - If spec-kit not installed, provides installation instructions
+- **Canonical two-skill architecture** - Clear separation of concerns:
+  - `spec-kit` - Technical integration layer (auto-init, layout validation, CLI wrappers)
+  - `using-superpowers-sdd` - Methodology layer (workflow routing, process discipline)
+  - All workflow skills call `spec-kit` for automatic setup
 
 ### Changed (BREAKING)
 - **spec-kit is now a required dependency** - Plugin no longer bundles templates and scripts

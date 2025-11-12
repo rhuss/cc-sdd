@@ -18,6 +18,14 @@ A constitution provides:
 
 All specs are validated against the constitution for consistency.
 
+## Prerequisites
+
+Ensure spec-kit is initialized:
+
+{Skill: spec-kit}
+
+If spec-kit prompts for restart, pause this workflow and resume after restart.
+
 ## What is a Constitution?
 
 **Purpose:**
