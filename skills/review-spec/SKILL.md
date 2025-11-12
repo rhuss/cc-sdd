@@ -1,5 +1,5 @@
 ---
-name: reviewing-spec
+name: review-spec
 description: Review specifications for soundness, completeness, and implementability - validates structure, identifies ambiguities, checks for gaps before implementation
 ---
 
@@ -172,7 +172,7 @@ cat specs/constitution.md
 
 **Spec:** specs/features/[feature].md
 **Date:** YYYY-MM-DD
-**Reviewer:** Claude (sdd:reviewing-spec)
+**Reviewer:** Claude (sdd:review-spec)
 
 ## Overall Assessment
 

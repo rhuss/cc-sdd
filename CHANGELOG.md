@@ -20,11 +20,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 #### Modified Superpowers Skills
 - **writing-plans**: Generate implementation plans FROM specifications with full requirement coverage
-- **requesting-code-review**: Review code against spec compliance with scoring and deviation detection
+- **review-code**: Review code against spec compliance with scoring and deviation detection
 - **verification-before-completion**: Extended verification including tests AND spec compliance validation
 
 #### SDD-Specific Skills
-- **reviewing-spec**: Review specifications for soundness, completeness, and implementability
+- **review-spec**: Review specifications for soundness, completeness, and implementability
 - **spec-refactoring**: Consolidate and improve evolved specs while maintaining feature coverage
 - **spec-kit**: Wrapper for spec-kit CLI operations with workflow discipline
 - **constitution**: Create and manage project constitution defining project-wide principles

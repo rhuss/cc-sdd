@@ -29,7 +29,7 @@ This is the core SDD implementation workflow: Spec → Plan → TDD → Verify.
 
 **Before starting:**
 - [ ] Spec exists in `specs/features/[feature-name].md`
-- [ ] Spec validated for soundness (`sdd:reviewing-spec`)
+- [ ] Spec validated for soundness (`sdd:review-spec`)
 - [ ] Spec validated against constitution (if exists)
 - [ ] No open questions in spec that block implementation
 
@@ -172,7 +172,7 @@ cd ../feature-[name]
 
 ### 6. Code Review Against Spec
 
-**Use `sdd:requesting-code-review` skill.**
+**Use `sdd:review-code` skill.**
 
 **Review checks:**
 - Code implements all spec requirements
@@ -321,7 +321,7 @@ Spec compliance check:
 All requirements implemented ✓
 
 Requesting code review against spec...
-[Uses sdd:requesting-code-review]
+[Uses sdd:review-code]
 
 Code Review Results:
 ✓ All functional requirements implemented (6/6)
@@ -368,7 +368,7 @@ You: Should I update the spec to include the updated_at field?
 **This skill orchestrates:**
 - `sdd:writing-plans` - Generate plan from spec
 - `test-driven-development` - TDD implementation
-- `sdd:requesting-code-review` - Spec compliance review
+- `sdd:review-code` - Spec compliance review
 - `sdd:verification-before-completion` - Tests + spec validation
 - `sdd:evolve` - If deviations need reconciliation
 

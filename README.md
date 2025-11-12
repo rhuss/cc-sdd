@@ -130,7 +130,7 @@ Create `.claude/settings.json` in your project:
 # and create a spec at specs/features/your-feature.md
 
 # 2. Review the spec
-/sdd:reviewing-spec
+/sdd:review-spec
 
 # 3. Implement
 /sdd:implement
@@ -419,7 +419,7 @@ Generates implementation plans FROM specs (not from scratch).
 
 **Key change**: Reads spec as input, validates plan against spec
 
-#### `sdd:requesting-code-review`
+#### `sdd:review-code`
 Reviews code-to-spec compliance, not just code quality.
 
 **Key change**: Compliance scoring, mismatch detection, evolution triggers
@@ -431,7 +431,7 @@ Extended verification including spec compliance.
 
 ### New SDD-Specific Skills
 
-#### `sdd:reviewing-spec`
+#### `sdd:review-spec`
 Review spec for soundness and implementability.
 
 **Checks**:

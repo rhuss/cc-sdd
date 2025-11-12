@@ -201,7 +201,7 @@ speckit validate specs/features/[feature].md
 - Before implementation
 - After spec changes
 
-**Called by:** `sdd:reviewing-spec`, `sdd:evolve`
+**Called by:** `sdd:review-spec`, `sdd:evolve`
 
 ### 5. Generate Plan
 
@@ -229,18 +229,18 @@ if spec-kit available:
     # Use spec-kit for creation
     speckit specify
     # Add SDD validation on top
-    run sdd:reviewing-spec
+    run sdd:review-spec
 else:
     # Fall back to manual spec creation
     create markdown file
     # Still run SDD validation
-    run sdd:reviewing-spec
+    run sdd:review-spec
 ```
 
 ### Pattern 2: Spec Validation
 
 ```bash
-# User runs sdd:reviewing-spec
+# User runs sdd:review-spec
 
 # Skill uses spec-kit validation
 if spec-kit available:
@@ -369,7 +369,7 @@ Spec created with spec-kit ✓
 SDD validation complete ✓
 
 Next steps:
-1. Review spec for soundness (sdd:reviewing-spec) [if not auto-done]
+1. Review spec for soundness (sdd:review-spec) [if not auto-done]
 2. Create implementation plan (sdd:implement)
 3. Or refine spec further
 ```
@@ -420,7 +420,7 @@ Spec created by spec-kit: specs/features/user-profile-api.md
 
 Adding SDD validation...
 
-Running sdd:reviewing-spec...
+Running sdd:review-spec...
 ✓ Structure complete
 ✓ Requirements clear
 ✓ Success criteria defined
@@ -508,7 +508,7 @@ Spec is valid and ready for implementation.
 - `sdd:spec` (for spec creation)
 - `sdd:brainstorm` (for spec creation)
 - `sdd:constitution` (for constitution creation)
-- `sdd:reviewing-spec` (for validation)
+- `sdd:review-spec` (for validation)
 - `sdd:writing-plans` (for plan generation)
 
 **This skill calls:**

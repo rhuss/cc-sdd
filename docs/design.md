@@ -87,7 +87,7 @@ Implementation (with TDD, code review, verification gates)
 - Output: Implementation tasks with file paths
 - Validation: Plan completeness against spec
 
-**`sdd:requesting-code-review`** - Code-to-spec review
+**`sdd:review-code`** - Code-to-spec review
 - Checks spec compliance
 - Reports: compliance score + mismatches
 - Triggers evolution workflow if needed
@@ -100,7 +100,7 @@ Implementation (with TDD, code review, verification gates)
 
 ### New SDD-Specific Skills
 
-**`sdd:reviewing-spec`** - Spec soundness review
+**`sdd:review-spec`** - Spec soundness review
 - Validates structure and clarity
 - Checks implementability
 - Identifies ambiguities and gaps
@@ -182,9 +182,9 @@ cc-superpowers-sdd/
 │   ├── implement/
 │   ├── evolve/
 │   ├── writing-plans/
-│   ├── requesting-code-review/
+│   ├── review-code/
 │   ├── verification-before-completion/
-│   ├── reviewing-spec/
+│   ├── review-spec/
 │   ├── spec-refactoring/
 │   ├── spec-kit/
 │   ├── constitution/
