@@ -154,7 +154,7 @@ If implementation exists without spec coverage, ADD it during refactor.
 - [ ] Structure logical
 - [ ] No new ambiguities introduced
 
-**Use `sdd:reviewing-spec`** on refactored version.
+**Use `sdd:review-spec`** on refactored version.
 
 ### 7. Create Changelog
 
@@ -220,7 +220,7 @@ Old Section 3.4 → New Section 2.3
 
 ```bash
 # Check spec compliance with current code
-# Use sdd:requesting-code-review
+# Use sdd:review-code
 ```
 
 **Ensure:**

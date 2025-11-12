@@ -1,9 +1,29 @@
 # Feature Specification: [FEATURE NAME]
 
-**Feature Branch**: `[###-feature-name]`  
-**Created**: [DATE]  
-**Status**: Draft  
+**Feature Branch**: `[###-feature-name]`
+**Created**: [DATE]
+**Status**: Draft
 **Input**: User description: "$ARGUMENTS"
+
+---
+
+**IMPORTANT: Specifications define WHAT and WHY, not HOW**
+
+✅ **Include in Spec:**
+- Requirements (what must be built)
+- Contracts (API structures, file formats, error messages)
+- Behaviors (user-observable outcomes)
+- Success criteria (measurable)
+
+❌ **DO NOT Include in Spec:**
+- Implementation code or algorithms
+- Technology choices ("use Redis", "call with POST")
+- Internal architecture details
+- Performance optimizations
+
+💡 **For Technical Details:** If you need to capture design decisions, create `implementation-notes.md` alongside this spec.
+
+---
 
 ## User Scenarios & Testing *(mandatory)*
 

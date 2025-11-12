@@ -23,7 +23,7 @@ This skill detects divergence, analyzes the mismatch, recommends resolution, and
 - Spec ambiguity discovered during implementation
 
 **Auto-triggered by:**
-- `sdd:requesting-code-review` (when deviations found)
+- `sdd:review-code` (when deviations found)
 - `sdd:verification-before-completion` (when compliance fails)
 
 **Don't use this skill when:**

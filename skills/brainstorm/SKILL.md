@@ -57,11 +57,47 @@ Start by understanding the current project context, then ask questions one at a 
    "Based on our discussion, I'm creating the specification..."
 
 2. **Create spec file:**
-   - Location: `specs/features/[feature-name].md`
+   - Location: `specs/features/[feature-name]/spec.md`
    - Use spec-kit CLI if available: `speckit specify`
    - Otherwise: Create markdown directly
 
-3. **Spec structure** (use this template):
+3. **IMPORTANT: Capture implementation insights separately**
+
+   If technical details emerged during brainstorming (technology choices, architecture decisions, trade-off discussions), **create implementation-notes.md** to capture them:
+
+   - Location: `specs/features/[feature-name]/implementation-notes.md`
+   - Purpose: Document the "why" behind design decisions
+   - Content:
+     - Alternative approaches considered
+     - Trade-offs discussed
+     - Technology choices and rationale
+     - Technical constraints discovered
+     - Questions answered during brainstorming
+
+   **Why separate from spec:**
+   - Spec = WHAT and WHY (requirements, contracts)
+   - Implementation notes = Technical context for HOW
+   - Keeps spec stable while preserving valuable context
+   - Helps future implementers understand decisions
+
+   **Example content:**
+   ```markdown
+   # Implementation Notes: User Authentication
+
+   ## Design Decisions
+
+   ### Decision: OAuth vs. Magic Links
+   - Chose OAuth (Google + GitHub)
+   - Rationale: User preference for familiar login flow
+   - Rejected magic links: Email deliverability concerns
+
+   ### Decision: JWT in httpOnly cookies
+   - Prevents XSS attacks
+   - Refresh token rotation for security
+   - Trade-off: Slightly more complex than localStorage
+   ```
+
+4. **Spec structure** (use this template):
 
 ```markdown
 # Feature: [Feature Name]
@@ -119,7 +155,7 @@ Start by understanding the current project context, then ask questions one at a 
 ### After spec creation
 
 **Validate the spec:**
-- Use `sdd:reviewing-spec` to check soundness
+- Use `sdd:review-spec` to check soundness
 - Ensure spec is implementable
 - Confirm no ambiguities remain
 
@@ -148,6 +184,8 @@ Co-Authored-By: Claude <noreply@anthropic.com>"
 - **Explore alternatives** - Always propose 2-3 approaches before settling
 - **Incremental validation** - Present spec in sections, validate each
 - **Be flexible** - Go back and clarify when something doesn't make sense
+- **Separate WHAT from HOW** - Spec focuses on requirements and contracts; implementation notes capture technical decisions
+- **Capture context** - If technical details emerge, put them in implementation-notes.md, not the spec
 - **Spec, not design** - Focus on WHAT, defer HOW to implementation
 
 ## Recommend Constitution (First Time Users)
@@ -235,7 +273,7 @@ User: Yes
 
 You: Spec created! Let me validate it for soundness...
 
-[Runs sdd:reviewing-spec]
+[Runs sdd:review-spec]
 
 Spec is sound and implementable ✓
 

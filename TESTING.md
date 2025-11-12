@@ -62,9 +62,9 @@ What SDD skills are available?
 - sdd:implement
 - sdd:evolve
 - sdd:writing-plans
-- sdd:requesting-code-review
+- sdd:review-code
 - sdd:verification-before-completion
-- sdd:reviewing-spec
+- sdd:review-spec
 - sdd:spec-refactoring
 - sdd:spec-kit
 - sdd:constitution
@@ -215,7 +215,7 @@ Record any unclear questions or workflow issues.
 
 **Steps:**
 1. Create a spec (via brainstorm or direct)
-2. Invoke: `/sdd:reviewing-spec` or ask: "Review the spec for soundness"
+2. Invoke: `/sdd:review-spec` or ask: "Review the spec for soundness"
 3. Review the feedback
 
 **Expected:**
@@ -389,7 +389,7 @@ Record any unclear questions or workflow issues.
 
 **Steps:**
 1. Provide spec and implementation code
-2. Invoke: `/sdd:requesting-code-review`
+2. Invoke: `/sdd:review-code`
 3. Review compliance report
 
 **Expected:**
@@ -562,10 +562,10 @@ Record any unclear questions or workflow issues.
 **Steps:**
 1. Start with rough idea
 2. `/sdd:brainstorm` → create spec
-3. `/sdd:reviewing-spec` → validate spec
+3. `/sdd:review-spec` → validate spec
 4. `/sdd:implement` → generate plan
 5. Describe implementation
-6. `/sdd:requesting-code-review` → check compliance
+6. `/sdd:review-code` → check compliance
 7. `/sdd:verification-before-completion` → verify complete
 
 **Expected:**

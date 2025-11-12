@@ -24,6 +24,54 @@ This skill creates executable specifications that become the source of truth for
 - Spec already exists → Use `sdd:implement` or `sdd:evolve`
 - Making changes to existing spec → Use `sdd:spec-refactoring`
 
+## Critical: Specifications are WHAT and WHY, NOT HOW
+
+**Specs define contracts and requirements, not implementation:**
+
+### ✅ Specs SHOULD include:
+- **Requirements**: What the feature must do
+- **Behaviors**: How the feature should behave (user-observable)
+- **Contracts**: API structures, file formats, data schemas
+- **Error handling rules**: What errors must be handled and how they should appear to users
+- **Success criteria**: Measurable outcomes
+- **Constraints**: Limitations and restrictions
+- **User-visible paths**: File locations, environment variables users interact with
+
+### ❌ Specs should NOT include:
+- **Implementation algorithms**: Specific sorting algorithms, data structure choices
+- **Code**: Function signatures, class hierarchies, pseudocode
+- **Technology choices**: "Use Redis", "Use React hooks", "Use Python asyncio"
+- **Internal architecture**: How components communicate internally
+- **Optimization strategies**: Caching mechanisms, performance tuning
+
+### 📋 Example: What belongs where
+
+**SPEC (WHAT/WHY):**
+```markdown
+## Requirements
+- FR-001: System MUST validate email addresses before storing
+- FR-002: System MUST return validation errors within 200ms
+- FR-003: Invalid emails MUST return 422 status with error details
+
+## Error Handling
+- Invalid format: Return `{"error": "Invalid email format", "field": "email"}`
+- Duplicate email: Return `{"error": "Email already exists"}`
+```
+
+**PLAN (HOW):**
+```markdown
+## Validation Implementation
+- Use regex pattern: `^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$`
+- Cache validation results in Redis (TTL: 5 min)
+- Database query: `SELECT COUNT(*) FROM users WHERE email = ?`
+```
+
+### Why this matters:
+- **Specs remain stable** - Implementation details change, requirements don't
+- **Implementation flexibility** - Can change HOW without changing WHAT
+- **Clearer reviews** - Easy to see if requirements are met vs implementation quality
+- **Better evolution** - When code diverges from spec, know which to update
+
 ## The Process
 
 ### 1. Gather Requirements
@@ -162,7 +210,7 @@ cat specs/constitution.md
 
 ### 5. Validate Spec Soundness
 
-**Use `sdd:reviewing-spec` skill** to check:
+**Use `sdd:review-spec` skill** to check:
 - Completeness (all sections filled)
 - Clarity (no ambiguities)
 - Implementability (can generate plan from this)
@@ -398,18 +446,29 @@ Before marking spec as complete:
 ## Common Pitfalls
 
 **Avoid:**
-- Specs with implementation details ("use Redis")
-- Vague requirements ("fast", "user-friendly")
-- Missing error handling
-- Undefined success criteria
-- Scope creep (include everything)
+- ❌ **Implementation details**: "use Redis", "call REST API with POST", "store in PostgreSQL table"
+  - ✅ **Instead**: "persist data", "communicate with external service", "store user preferences"
+- ❌ **Code/algorithms**: Pseudocode, function signatures, specific data structures
+  - ✅ **Instead**: Behavioral requirements, expected inputs/outputs, error conditions
+- ❌ **Vague requirements**: "fast", "user-friendly", "scalable"
+  - ✅ **Instead**: "< 200ms p95 latency", "complete task in < 3 clicks", "handle 10k concurrent users"
+- ❌ **Missing error handling**: Only happy path described
+  - ✅ **Instead**: All error cases enumerated with expected behaviors
+- ❌ **Undefined success criteria**: No way to verify completion
+  - ✅ **Instead**: Measurable, testable criteria
+- ❌ **Scope creep**: Including every possible feature
+  - ✅ **Instead**: Ruthlessly scoped to MVP (YAGNI)
 
-**Instead:**
-- Focus on behavior and outcomes
-- Be specific and measurable
-- Define all error cases
-- Make success criteria testable
-- Ruthlessly scope (YAGNI)
+**When you catch yourself writing:**
+- "The system will use X library..." → STOP - that's implementation (goes in plan)
+- "Here's the algorithm..." → STOP - that's implementation (goes in plan)
+- "The function signature is..." → STOP - that's code (goes in implementation)
+- "We'll cache this in..." → STOP - that's optimization (goes in plan)
+
+**Ask yourself:**
+- "If I implemented this completely differently, would the spec still apply?" → If no, it's too specific
+- "Does this describe observable behavior or internal implementation?" → Only observable goes in spec
+- "Is this a contract or an approach?" → Only contracts go in spec
 
 ## Remember
 

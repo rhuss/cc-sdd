@@ -1,5 +1,5 @@
 ---
-name: requesting-code-review
+name: review-code
 description: Review code against spec compliance - checks implementation matches spec requirements, identifies deviations, reports compliance score, triggers evolution if needed
 ---
 
@@ -130,7 +130,7 @@ Overall: 16/18 = 89%
 
 **Spec:** specs/features/[feature].md
 **Date:** YYYY-MM-DD
-**Reviewer:** Claude (sdd:requesting-code-review)
+**Reviewer:** Claude (sdd:review-code)
 
 ## Compliance Summary
 
@@ -230,7 +230,7 @@ Use TodoWrite to track:
 
 **Spec:** specs/features/user-profile-api.md
 **Date:** 2025-11-10
-**Reviewer:** Claude (sdd:requesting-code-review)
+**Reviewer:** Claude (sdd:review-code)
 
 ## Compliance Summary
 

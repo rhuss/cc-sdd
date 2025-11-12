@@ -70,11 +70,11 @@ Before ANY implementation work:
 
 ### Modified Core Skills
 - **sdd:writing-plans** - Generate plans FROM specs (not from scratch)
-- **sdd:requesting-code-review** - Review code-to-spec compliance
+- **sdd:review-code** - Review code-to-spec compliance
 - **sdd:verification-before-completion** - Tests + spec compliance validation
 
 ### New SDD-Specific Skills
-- **sdd:reviewing-spec** - Validate spec soundness and completeness
+- **sdd:review-spec** - Validate spec soundness and completeness
 - **sdd:spec-refactoring** - Consolidate and improve evolved specs
 - **sdd:spec-kit** - Wrapper for spec-kit CLI with workflow discipline
 - **sdd:constitution** - Create/manage project-wide principles
@@ -115,7 +115,7 @@ If you catch yourself thinking ANY of these thoughts, STOP. You are rationalizin
 **Skill-avoidance rationalizations:**
 - "This is just a quick fix" → WRONG. Quick fixes need spec validation.
 - "I can check the spec manually" → WRONG. Use sdd:verification-before-completion.
-- "The spec is good enough" → WRONG. Use sdd:reviewing-spec before implementing.
+- "The spec is good enough" → WRONG. Use sdd:review-spec before implementing.
 - "I remember this workflow" → WRONG. Skills evolve. Run the current version.
 
 **Why:** Specs prevent drift. Skills enforce discipline. Both save time by preventing mistakes.

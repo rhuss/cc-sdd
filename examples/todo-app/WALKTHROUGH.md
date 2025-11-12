@@ -59,7 +59,7 @@ I need a REST API for todo CRUD operations:
 
 ### Step 3: Review Spec for Soundness
 
-**Command:** (Automatic via `/sdd:spec`, or manual `/sdd:reviewing-spec`)
+**Command:** (Automatic via `/sdd:spec`, or manual `/sdd:review-spec`)
 
 **Checks:**
 - ✓ All sections complete
@@ -148,7 +148,7 @@ router.get('/todos', async (req, res) => {
 
 ### Step 6: Code Review Against Spec
 
-**Command:** `/sdd:requesting-code-review`
+**Command:** `/sdd:review-code`
 
 **Review Process:**
 1. Load spec: `specs/features/todo-crud.md`
