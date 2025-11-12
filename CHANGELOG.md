@@ -7,6 +7,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 > **Note**: The plugin name is `sdd` (for slash commands like `/sdd:brainstorm`), while the GitHub repository is `cc-superpowers-sdd`.
 
+## [Unreleased]
+
+### Changed (BREAKING)
+- **spec-kit is now a required dependency** - Plugin no longer bundles templates and scripts
+- Templates and scripts now live in local project (`.specify/` directory) via `speckit init`
+- Single source of truth: spec-kit repository maintains all templates and scripts
+- Cleaner separation of concerns: plugin focuses on Claude Code integration, spec-kit provides tooling
+
+### Removed
+- **Bundled templates** - Removed `templates/` directory (use `speckit init` instead)
+- **Bundled scripts** - Removed `scripts/` directory (use `speckit init` instead)
+
+### Migration Guide
+1. Ensure spec-kit CLI is installed and in your PATH
+2. Run `speckit init` in each project that uses SDD workflows
+3. Update any custom references from plugin templates to `.specify/templates/`
+4. Update any custom references from plugin scripts to `.specify/scripts/`
+
 ## [1.0.0] - 2025-11-11
 
 ### Added

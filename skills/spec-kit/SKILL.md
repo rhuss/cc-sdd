@@ -7,25 +7,52 @@ description: Wrapper for spec-kit CLI operations - intelligent delegation to spe
 
 ## Overview
 
-This plugin bundles spec-kit templates and scripts, providing spec-kit functionality without requiring users to install spec-kit separately.
+This plugin integrates with spec-kit CLI to provide specification-driven development workflows in Claude Code.
 
-**Bundled Resources:**
-- **Templates**: Spec, plan, tasks, checklist, and agent file templates
-- **Scripts**: Shell scripts for feature creation, prerequisites checking, and agent context updates
-- **Commands**: Slash commands for spec-kit workflows (reference implementations)
-
-**Integration Approach:**
-- Use bundled templates and scripts from plugin directory
-- Optionally delegate to spec-kit CLI if user has it installed
-- Provides full SDD workflow support with or without spec-kit CLI
+**spec-kit is a REQUIRED dependency** - it provides the templates, scripts, and tooling that power the SDD workflow.
 
 This skill:
-- Uses bundled spec-kit resources
-- Optionally delegates to spec-kit CLI where beneficial
-- Adds TodoWrite tracking
+- Delegates to spec-kit CLI commands
+- Adds TodoWrite tracking for workflow progress
 - Handles errors gracefully
 - Provides context-aware guidance
-- Integrates with SDD workflows
+- Integrates spec-kit with SDD workflows
+
+## Prerequisites
+
+### Required: Install spec-kit CLI
+
+spec-kit must be installed and accessible in your PATH:
+
+```bash
+# Check if spec-kit is installed
+which speckit
+
+# Or check version
+speckit --version
+```
+
+**If spec-kit is not installed:**
+
+Install spec-kit following the instructions at the spec-kit repository. The plugin will not function without it.
+
+### Required: Initialize spec-kit in your project
+
+Before using SDD workflows, you must initialize spec-kit in your project:
+
+```bash
+# Initialize spec-kit in current project
+speckit init
+```
+
+**This creates:**
+- `.specify/` directory with templates and scripts
+- `.specify/templates/` - Spec, plan, tasks, checklist templates
+- `.specify/scripts/` - Shell scripts for automation
+- `.specify/memory/` - Project constitution and context
+- Configuration files
+
+All SDD skills and commands expect these local project files to exist.
 
 ## When to Use
 
@@ -36,113 +63,6 @@ This skill:
 
 **Note:** Most SDD skills call this internally. Direct use is for spec-kit-specific tasks.
 
-## Bundled Resources
-
-The plugin bundles spec-kit templates and scripts so users don't need to install spec-kit separately.
-
-### Accessing Bundled Templates
-
-Templates are located in the plugin's `templates/` directory:
-
-```bash
-# Get plugin directory
-PLUGIN_DIR="${CLAUDE_PLUGINS_DIR}/cc-superpowers-sdd"
-
-# Access templates
-SPEC_TEMPLATE="$PLUGIN_DIR/templates/spec-template.md"
-PLAN_TEMPLATE="$PLUGIN_DIR/templates/plan-template.md"
-TASKS_TEMPLATE="$PLUGIN_DIR/templates/tasks-template.md"
-CHECKLIST_TEMPLATE="$PLUGIN_DIR/templates/checklist-template.md"
-AGENT_FILE_TEMPLATE="$PLUGIN_DIR/templates/agent-file-template.md"
-```
-
-**Available Templates:**
-- `spec-template.md` - Feature specification template
-- `plan-template.md` - Implementation plan template
-- `tasks-template.md` - Task breakdown template
-- `checklist-template.md` - Quality checklist template
-- `agent-file-template.md` - Agent context file template
-
-### Accessing Bundled Scripts
-
-Scripts are located in the plugin's `scripts/bash/` directory:
-
-```bash
-# Get plugin directory
-PLUGIN_DIR="${CLAUDE_PLUGINS_DIR}/cc-superpowers-sdd"
-
-# Access scripts
-CREATE_FEATURE="$PLUGIN_DIR/scripts/bash/create-new-feature.sh"
-CHECK_PREREQS="$PLUGIN_DIR/scripts/bash/check-prerequisites.sh"
-SETUP_PLAN="$PLUGIN_DIR/scripts/bash/setup-plan.sh"
-UPDATE_CONTEXT="$PLUGIN_DIR/scripts/bash/update-agent-context.sh"
-```
-
-**Available Scripts:**
-- `create-new-feature.sh` - Create feature branch and spec structure
-- `check-prerequisites.sh` - Check project prerequisites
-- `setup-plan.sh` - Set up implementation plan structure
-- `update-agent-context.sh` - Update agent context files
-- `common.sh` - Common functions and utilities
-
-### Using Bundled Resources
-
-**Example: Create new feature using bundled script**
-
-```bash
-# Get plugin directory (usually ~/.claude/plugins/cc-superpowers-sdd)
-PLUGIN_DIR="${CLAUDE_PLUGINS_DIR}/cc-superpowers-sdd"
-
-# Run bundled script
-"$PLUGIN_DIR/scripts/bash/create-new-feature.sh" --json "Add user authentication"
-```
-
-**Example: Copy template for manual editing**
-
-```bash
-# Get plugin directory
-PLUGIN_DIR="${CLAUDE_PLUGINS_DIR}/cc-superpowers-sdd"
-
-# Copy template to project
-cp "$PLUGIN_DIR/templates/spec-template.md" ./specs/001-my-feature/spec.md
-```
-
-## Prerequisites
-
-### Check if Spec-Kit CLI is Available (Optional)
-
-The plugin bundles all necessary resources, so spec-kit CLI is optional.
-
-```bash
-which speckit
-# or
-speckit --version
-```
-
-**If spec-kit CLI is available:**
-- Use CLI for validation and advanced features
-- Bundled scripts work alongside CLI
-
-**If spec-kit CLI is not available:**
-- Use bundled templates and scripts
-- Full SDD workflow support without CLI
-- No degraded mode - full functionality
-
-### Configuration
-
-Check `.claude/settings.json`:
-
-```json
-{
-  "sdd": {
-    "spec_kit": {
-      "enabled": true,
-      "path": "speckit"  // or full path
-    }
-  }
-}
-```
-
 ## Available Spec-Kit Commands
 
 ### 1. Initialize Spec-Kit
@@ -152,12 +72,13 @@ speckit init
 ```
 
 **Creates:**
-- `.speckit/` directory
+- `.specify/` directory structure
+- Templates (spec, plan, tasks, checklist)
+- Scripts (feature creation, setup, context management)
 - Default configuration
-- Template structure
 
 **Use when:**
-- First time using spec-kit in project
+- First time using SDD in a project
 - Setting up new project
 
 ### 2. Create Specification
@@ -217,6 +138,29 @@ speckit plan specs/features/[feature].md
 
 **Called by:** `sdd:writing-plans`
 
+## Local Project Structure
+
+After running `speckit init`, your project will have:
+
+```
+.specify/
+├── templates/
+│   ├── spec-template.md          # Feature specification template
+│   ├── plan-template.md          # Implementation plan template
+│   ├── tasks-template.md         # Task breakdown template
+│   ├── checklist-template.md     # Quality checklist template
+│   └── agent-file-template.md    # Agent context file template
+├── scripts/
+│   └── bash/
+│       ├── create-new-feature.sh  # Create feature branch and spec
+│       ├── check-prerequisites.sh # Check project prerequisites
+│       ├── setup-plan.sh         # Set up implementation plan
+│       ├── update-agent-context.sh # Update agent context files
+│       └── common.sh             # Common utilities
+└── memory/
+    └── constitution.md           # Project constitution
+```
+
 ## Workflow Integration
 
 ### Pattern 1: Spec Creation with Spec-Kit
@@ -224,17 +168,11 @@ speckit plan specs/features/[feature].md
 ```bash
 # User invokes sdd:spec
 
-# Skill checks if spec-kit available
-if spec-kit available:
-    # Use spec-kit for creation
-    speckit specify
-    # Add SDD validation on top
-    run sdd:review-spec
-else:
-    # Fall back to manual spec creation
-    create markdown file
-    # Still run SDD validation
-    run sdd:review-spec
+# Skill delegates to spec-kit
+speckit specify
+
+# Add SDD validation on top
+run sdd:review-spec
 ```
 
 ### Pattern 2: Spec Validation
@@ -243,15 +181,11 @@ else:
 # User runs sdd:review-spec
 
 # Skill uses spec-kit validation
-if spec-kit available:
-    speckit validate [spec-file]
-    # Add SDD soundness checks
-    check implementability
-    check testability
-else:
-    # Manual validation only
-    check structure manually
-    check completeness manually
+speckit validate [spec-file]
+
+# Add SDD soundness checks
+check implementability
+check testability
 ```
 
 ### Pattern 3: Plan Generation
@@ -259,17 +193,13 @@ else:
 ```bash
 # User runs sdd:writing-plans
 
-# Skill may use spec-kit
-if spec-kit available AND spec-kit plan works well:
-    speckit plan [spec-file]
-    # Enhance with SDD requirements
-    add file paths
-    add test strategy
-    add validation
-else:
-    # Generate plan manually
-    parse spec
-    create plan from scratch
+# Skill delegates to spec-kit
+speckit plan [spec-file]
+
+# Enhance with SDD requirements
+add file paths
+add test strategy
+add validation
 ```
 
 ## The Process
@@ -280,16 +210,25 @@ else:
 # Check if spec-kit is available
 which speckit
 
-# Check configuration
-cat .claude/settings.json | grep spec_kit
+# If not available, ERROR
 ```
 
 **If not available:**
-- Note in output
-- Offer degraded mode
-- Recommend installation if frequent use
+- Stop workflow
+- Instruct user to install spec-kit
+- Provide installation instructions
 
-### 2. Determine Appropriate Command
+### 2. Check Project Initialization
+
+```bash
+# Check if project is initialized
+[ -d .specify ]
+
+# If not initialized, prompt to run
+speckit init
+```
+
+### 3. Determine Appropriate Command
 
 **Based on user intent:**
 
@@ -301,7 +240,7 @@ cat .claude/settings.json | grep spec_kit
 | Generate plan | `speckit plan` | + Implementation details |
 | Initialize project | `speckit init` | + SDD setup |
 
-### 3. Execute Command
+### 4. Execute Command
 
 **With error handling:**
 
@@ -319,13 +258,20 @@ speckit [command] [args]
 ```
 Error: speckit command not found
 
-This skill integrates with spec-kit CLI for enhanced spec management.
+spec-kit is required for SDD workflows.
 
-Options:
-1. Install spec-kit: https://github.com/github/spec-kit
-2. Continue without spec-kit (degraded mode)
+Please install spec-kit and ensure it's in your PATH.
 
-Continuing in degraded mode...
+Installation: [link to spec-kit docs]
+```
+
+**Project not initialized:**
+```
+Error: .specify directory not found
+
+This project has not been initialized with spec-kit.
+
+Run: speckit init
 ```
 
 **Invalid spec format:**
@@ -339,19 +285,7 @@ Spec-kit validation errors:
 Fix these issues and re-run validation.
 ```
 
-**Configuration error:**
-```
-Error: Spec-kit configuration invalid
-
-Check .speckit/config.yaml for errors.
-
-Common issues:
-- Invalid YAML syntax
-- Missing required fields
-- Incorrect paths
-```
-
-### 4. Add SDD Workflow Discipline
+### 5. Add SDD Workflow Discipline
 
 **After spec-kit command:**
 
@@ -360,7 +294,7 @@ Common issues:
 - Integrate with git (commit specs)
 - Link to next workflow step
 
-### 5. Provide Next Steps
+### 6. Provide Next Steps
 
 **Guide user:**
 
@@ -380,7 +314,8 @@ Use TodoWrite for spec-kit workflows:
 
 **For spec creation:**
 - [ ] Check spec-kit availability
-- [ ] Run `speckit specify` (if available)
+- [ ] Check project initialization
+- [ ] Run `speckit specify`
 - [ ] Validate with SDD soundness checks
 - [ ] Commit spec to git
 - [ ] Offer next steps
@@ -398,110 +333,6 @@ Use TodoWrite for spec-kit workflows:
 - [ ] Validate against spec
 - [ ] Save plan
 
-## Examples
-
-### Example 1: Spec Creation with Spec-Kit
-
-```
-You: Creating spec with spec-kit integration...
-
-Checking spec-kit availability...
-✓ Spec-kit found at /usr/local/bin/speckit
-
-Running: speckit specify
-
-[Spec-kit interactive prompts]
-
-Feature name: User Profile API
-Purpose: Allow users to update their profile information
-...
-
-Spec created by spec-kit: specs/features/user-profile-api.md
-
-Adding SDD validation...
-
-Running sdd:review-spec...
-✓ Structure complete
-✓ Requirements clear
-✓ Success criteria defined
-
-Spec created and validated ✓
-
-Committed to git ✓
-
-Ready for implementation planning?
-```
-
-### Example 2: Spec Creation WITHOUT Spec-Kit
-
-```
-You: Creating spec...
-
-Checking spec-kit availability...
-✗ Spec-kit not found
-
-Note: Spec-kit is not installed. Proceeding with manual spec creation.
-
-(Install spec-kit for enhanced workflows: https://github.com/github/spec-kit)
-
-Creating spec at specs/features/user-profile-api.md...
-
-[Manual spec creation using template]
-
-Spec created ✓
-
-Running SDD validation...
-✓ Structure complete
-✓ Requirements clear
-
-Ready for implementation planning?
-```
-
-### Example 3: Spec Validation
-
-```
-You: Validating spec with spec-kit...
-
-Running: speckit validate specs/features/user-profile-api.md
-
-Spec-kit validation: ✓ PASS
-
-Adding SDD soundness checks...
-
-Checking implementability...
-✓ Can generate implementation plan
-✓ All dependencies identified
-
-Checking testability...
-✓ Success criteria measurable
-✓ Requirements verifiable
-
-Overall: ✓ SOUND
-
-Spec is valid and ready for implementation.
-```
-
-## Bundled Resources Mode (Default)
-
-**The plugin bundles all spec-kit resources:**
-
-**Fully functional without spec-kit CLI:**
-- Spec creation using bundled templates
-- Feature creation using bundled scripts
-- Plan generation using bundled templates
-- Task management using bundled templates
-- Validation using bundled scripts
-
-**When spec-kit CLI is also installed:**
-- Can use CLI validation for additional checks
-- Can use CLI-specific features
-- Bundled resources still work alongside CLI
-
-**Recommendation:**
-- Start with bundled resources (no installation needed)
-- Optionally install spec-kit CLI for advanced validation
-- Both approaches fully supported
-
 ## Integration Points
 
 **This skill is called by:**
@@ -515,50 +346,21 @@ Spec is valid and ready for implementation.
 - Spec-kit CLI commands
 - Git (for commits)
 - TodoWrite (for tracking)
-- File operations (for manual fallback)
-
-## Configuration Options
-
-```json
-{
-  "sdd": {
-    "spec_kit": {
-      "enabled": true,
-      "path": "speckit",
-      "prefer_manual": false,
-      "validate_always": true,
-      "fallback_on_error": true
-    }
-  }
-}
-```
-
-**Options:**
-- `enabled`: Use spec-kit if available
-- `path`: Path to spec-kit binary
-- `prefer_manual`: Skip spec-kit even if available
-- `validate_always`: Always run spec-kit validation
-- `fallback_on_error`: Use manual mode if spec-kit errors
+- Local project scripts and templates
 
 ## Remember
 
-**Bundled resources provide full functionality.**
+**spec-kit is a required dependency.**
 
-- Plugin includes all spec-kit templates and scripts
-- No external dependencies required
-- Spec-kit CLI is optional enhancement
+- Plugin does NOT bundle templates or scripts
+- Templates and scripts live in local project (`.specify/`)
+- Must run `speckit init` in each project
+- Single source of truth: spec-kit repository
 
 **Integration provides complete workflow:**
 
-- Bundled templates for spec creation
-- Bundled scripts for automation
+- spec-kit provides tooling and artifacts
 - SDD adds workflow enforcement and discipline
-- Together: powerful spec-driven development out of the box
+- Together: powerful spec-driven development
 
-**No degraded mode:**
-
-- All features work with bundled resources
-- Spec-kit CLI adds validation features
-- Users choose their preferred approach
-
-**The goal is great specs with minimal setup.**
+**The goal is great specs with clear separation of concerns.**

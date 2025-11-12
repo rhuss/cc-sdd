@@ -176,38 +176,25 @@ Specification directory settings:
 
 **Type**: Object with resource categories
 
-**Purpose**: Documents templates, scripts, and other files bundled with the plugin for offline use
+**Purpose**: Documents files bundled with the plugin
+
+**Note**: Templates and scripts are NOT bundled. They are provided by spec-kit CLI via `speckit init` in each project.
 
 **Structure**:
 ```json
 {
   "bundled_resources": {
-    "templates": {
-      "path": "templates",
-      "description": "Spec-kit templates bundled with the plugin",
-      "files": [
-        "spec-template.md",
-        "plan-template.md",
-        "tasks-template.md",
-        "checklist-template.md",
-        "agent-file-template.md"
-      ]
-    },
-    "scripts": {
-      "path": "scripts/bash",
-      "description": "Spec-kit shell scripts bundled with the plugin",
-      "files": [
-        "common.sh",
-        "create-new-feature.sh",
-        "check-prerequisites.sh",
-        "setup-plan.sh",
-        "update-agent-context.sh"
-      ]
-    },
     "commands": {
       "path": "commands",
-      "description": "Spec-kit slash commands (reference implementations)",
+      "description": "Slash commands for SDD workflows",
       "files": [
+        "brainstorm.md",
+        "spec.md",
+        "implement.md",
+        "evolve.md",
+        "review-spec.md",
+        "review-code.md",
+        "constitution.md",
         "speckit.specify.md",
         "speckit.plan.md",
         "speckit.tasks.md",
@@ -223,16 +210,17 @@ Specification directory settings:
 ```
 
 **Resource Categories**:
-- `templates`: Reusable document templates
-- `scripts`: Shell scripts for automation
-- `commands`: Reference command implementations
+- `commands`: Slash command implementations
 
 **Each category has**:
 - `path`: Directory path relative to plugin root
 - `description`: What these resources provide
 - `files`: Array of filenames in the directory
 
-**Purpose**: This allows skills to reference bundled resources and provides documentation of what's included.
+**External Resources** (not bundled):
+- Templates: Provided by `speckit init` in `.specify/templates/`
+- Scripts: Provided by `speckit init` in `.specify/scripts/`
+- Source of truth: spec-kit repository
 
 ## Skill Categories
 

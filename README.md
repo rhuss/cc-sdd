@@ -86,7 +86,9 @@ Superpowers-SDD provides:
 ### Prerequisites
 
 1. **Claude Code** - Install from [claude.com/claude-code](https://claude.com/claude-code)
-2. **Spec-Kit** (optional but recommended) - Install from [github.com/github/spec-kit](https://github.com/github/spec-kit)
+2. **Spec-Kit** (required) - Install from [github.com/github/spec-kit](https://github.com/github/spec-kit)
+   - spec-kit provides the templates, scripts, and tooling that power SDD workflows
+   - Must be installed and accessible in your PATH
 
 ### Install Superpowers-SDD Plugin
 
@@ -97,6 +99,23 @@ git clone https://github.com/rhuss/cc-superpowers-sdd.git
 
 # Reload Claude Code or restart
 ```
+
+### Initialize Your Project
+
+Before using SDD workflows, initialize spec-kit in your project:
+
+```bash
+# Navigate to your project
+cd /path/to/your/project
+
+# Initialize spec-kit
+speckit init
+```
+
+This creates the `.specify/` directory with:
+- Templates for specs, plans, tasks, and checklists
+- Shell scripts for automation
+- Project constitution and memory
 
 ### Configuration
 
