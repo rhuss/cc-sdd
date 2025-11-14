@@ -1,5 +1,9 @@
 # Local Claude Code settings (user-specific)
-.claude/
+.claude/state/
+.claude/history/
+.claude/*.json
+.claude/settings.local.json
+# BUT: Keep .claude/commands/ for plugin maintenance commands
 
 # Editor swap files
 *.swp
@@ -54,3 +58,8 @@ build/
 *.tmp
 *.bak
 *.log
+
+# Sync-related temporary files
+skills/**/SKILL.md.proposed
+/tmp/upstream-changes-*.patch
+/tmp/upstream-commits-*.txt

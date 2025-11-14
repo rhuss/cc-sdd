@@ -178,7 +178,7 @@ Specification directory settings:
 
 **Purpose**: Documents files bundled with the plugin
 
-**Note**: Templates and scripts are NOT bundled. They are provided by spec-kit CLI via `speckit init` in each project.
+**Note**: Templates, scripts, and spec-kit commands are NOT bundled. They are provided by spec-kit CLI via `speckit init` in each project.
 
 **Structure**:
 ```json
@@ -186,7 +186,7 @@ Specification directory settings:
   "bundled_resources": {
     "commands": {
       "path": "commands",
-      "description": "Slash commands for SDD workflows",
+      "description": "Slash commands for SDD workflows (spec-kit commands installed via speckit init)",
       "files": [
         "brainstorm.md",
         "spec.md",
@@ -194,15 +194,7 @@ Specification directory settings:
         "evolve.md",
         "review-spec.md",
         "review-code.md",
-        "constitution.md",
-        "speckit.specify.md",
-        "speckit.plan.md",
-        "speckit.tasks.md",
-        "speckit.implement.md",
-        "speckit.constitution.md",
-        "speckit.clarify.md",
-        "speckit.checklist.md",
-        "speckit.analyze.md"
+        "constitution.md"
       ]
     }
   }
@@ -220,6 +212,7 @@ Specification directory settings:
 **External Resources** (not bundled):
 - Templates: Provided by `speckit init` in `.specify/templates/`
 - Scripts: Provided by `speckit init` in `.specify/scripts/`
+- Spec-kit commands: Provided by `speckit init` in `.claude/commands/speckit.*`
 - Source of truth: spec-kit repository
 
 ## Skill Categories

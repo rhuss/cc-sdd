@@ -23,21 +23,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - All workflow skills call `spec-kit` for automatic setup
 
 ### Changed (BREAKING)
-- **spec-kit is now a required dependency** - Plugin no longer bundles templates and scripts
-- Templates and scripts now live in local project (`.specify/` directory) via `speckit init`
-- Single source of truth: spec-kit repository maintains all templates and scripts
+- **spec-kit is now a required dependency** - Plugin no longer bundles templates, scripts, or spec-kit commands
+- Templates, scripts, and commands now live in local project (`.specify/` and `.claude/commands/`) via `speckit init`
+- Single source of truth: spec-kit repository maintains all templates, scripts, and commands
 - Cleaner separation of concerns: plugin focuses on Claude Code integration, spec-kit provides tooling
 
 ### Removed
 - **Bundled templates** - Removed `templates/` directory (use `speckit init` instead)
 - **Bundled scripts** - Removed `scripts/` directory (use `speckit init` instead)
+- **Bundled spec-kit commands** - Removed `commands/speckit.*` files (installed to `.claude/commands/` via `speckit init`)
 
 ### Migration Guide
 1. Ensure spec-kit CLI is installed and in your PATH
 2. ~~Run `speckit init` in each project~~ - Now happens automatically on first SDD command!
-3. Restart Claude Code when prompted (if new commands were installed)
+3. Restart Claude Code when prompted (if new commands were installed to `.claude/commands/`)
 4. Update any custom references from plugin templates to `.specify/templates/`
 5. Update any custom references from plugin scripts to `.specify/scripts/`
+6. `/speckit.*` commands now come from `speckit init`, not the plugin
 
 ## [1.0.0] - 2025-11-11
 
