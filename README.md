@@ -64,7 +64,7 @@ Run any `/sdd:*` command and the plugin will automatically initialize:
 flowchart TD
     Start([User Request]) --> HasIdea{Have rough<br/>idea?}
     HasIdea -->|Yes| Brainstorm[/sdd:brainstorm<br/>Refine idea to Spec]
-    HasIdea -->|No, clear reqs| Spec[/sdd:spec<br/>Create spec directly]
+    HasIdea -->|"No, clear reqs"| Spec[/sdd:spec<br/>Create spec directly]
 
     Brainstorm --> Review[/sdd:review-spec<br/>Validate spec]
     Spec --> Review
