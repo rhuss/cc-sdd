@@ -63,18 +63,18 @@ Run any `/sdd:*` command and the plugin will automatically initialize:
 ```mermaid
 flowchart TD
     Start([User Request]) --> HasIdea{Have rough<br/>idea?}
-    HasIdea -->|Yes| Brainstorm[/sdd:brainstorm<br/>Refine idea to Spec]
-    HasIdea -->|No, clear reqs| Spec[/sdd:spec<br/>Create spec directly]
+    HasIdea -->|Yes| Brainstorm["/sdd:brainstorm<br/>Refine idea to Spec"]
+    HasIdea -->|"No, clear reqs"| Spec["/sdd:spec<br/>Create spec directly"]
 
-    Brainstorm --> Review[/sdd:review-spec<br/>Validate spec]
+    Brainstorm --> Review["/sdd:review-spec<br/>Validate spec"]
     Spec --> Review
 
-    Review --> Implement[/sdd:implement<br/>TDD + Compliance]
+    Review --> Implement["/sdd:implement<br/>TDD + Compliance"]
 
-    Implement --> Verify[Verification<br/>Tests + Spec Check]
+    Implement --> Verify["Verification<br/>Tests + Spec Check"]
 
     Verify -->|Pass| Done([Complete])
-    Verify -->|Drift| Evolve[/sdd:evolve<br/>Reconcile]
+    Verify -->|Drift| Evolve["/sdd:evolve<br/>Reconcile"]
 
     Evolve -->|Update Spec| Review
     Evolve -->|Fix Code| Implement
