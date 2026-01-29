@@ -1,5 +1,5 @@
 ---
-description: AI-assisted sync with upstream superpowers - updates modified skills while preserving SDD enhancements (plugin maintenance only)
+description: "[Plugin Dev] Sync modified skills with upstream superpowers while preserving SDD enhancements"
 ---
 
 # Upstream Superpowers Sync Workflow
@@ -14,19 +14,19 @@ Before proceeding, verify we're in the plugin development directory:
 
 ```bash
 # Check for plugin marker
-if [ ! -f ".superpowers-sync" ] || [ ! -f ".claude-plugin/plugin.json" ]; then
-  echo "❌ ERROR: This command only works in cc-superpowers-sdd plugin directory"
+if [ ! -f "sdd/.superpowers-sync" ] || [ ! -f "sdd/.claude-plugin/plugin.json" ]; then
+  echo "ERROR: This command only works in cc-superpowers-sdd plugin directory"
   echo "Current directory: $(pwd)"
   exit 1
 fi
 
 # Verify we're in the right repo
-if ! grep -q "cc-superpowers-sdd" .claude-plugin/plugin.json 2>/dev/null; then
-  echo "❌ ERROR: This doesn't appear to be the cc-superpowers-sdd repository"
+if ! grep -q "cc-superpowers-sdd" sdd/.claude-plugin/plugin.json 2>/dev/null; then
+  echo "ERROR: This doesn't appear to be the cc-superpowers-sdd repository"
   exit 1
 fi
 
-echo "✅ Plugin directory confirmed"
+echo "Plugin directory confirmed"
 ```
 
 **If checks fail, STOP and inform user this command is only for plugin maintenance.**
@@ -36,7 +36,7 @@ echo "✅ Plugin directory confirmed"
 ### 1. Load Current Sync State
 
 ```bash
-cat .superpowers-sync
+cat sdd/.superpowers-sync
 ```
 
 Extract:
@@ -67,7 +67,7 @@ echo "Upstream HEAD: $CURRENT_COMMIT ($CURRENT_DATE)"
 For each modified skill, get the diff:
 
 ```bash
-LAST_SYNC=$(jq -r '.last_sync_commit' /path/to/.superpowers-sync)
+LAST_SYNC=$(jq -r '.last_sync_commit' sdd/.superpowers-sync)
 
 # For each modified skill
 for skill in writing-plans code-review verification-before-completion brainstorming; do
@@ -94,12 +94,12 @@ For each modified skill, we'll use AI agents to merge upstream changes with SDD 
 
 ### Per-Skill Merge Process
 
-For each skill in `.superpowers-sync` → `modified_skills`:
+For each skill in `sdd/.superpowers-sync` → `modified_skills`:
 
 1. **Read three sources**:
    - Upstream current version: `$TEMP_DIR/superpowers-upstream/skills/[skill]/SKILL.md`
-   - Local current version: `skills/[skill]/SKILL.md`
-   - Modification metadata: from `.superpowers-sync`
+   - Local current version: `sdd/skills/[skill]/SKILL.md`
+   - Modification metadata: from `sdd/.superpowers-sync`
 
 2. **Get upstream changes** (if not INITIAL sync):
    ```bash
@@ -127,9 +127,9 @@ For each skill in `.superpowers-sync` → `modified_skills`:
    - Local repo: cc-superpowers-sdd (this plugin)
 
    **Your task:**
-   1. Read the current local version: skills/[skill]/SKILL.md
+   1. Read the current local version: sdd/skills/[skill]/SKILL.md
    2. Read the upstream current version: $TEMP_DIR/superpowers-upstream/skills/[skill]/SKILL.md
-   3. Read the modification metadata from .superpowers-sync
+   3. Read the modification metadata from sdd/.superpowers-sync
    4. If not INITIAL sync, read upstream changes: /tmp/upstream-changes-[skill].patch
    5. Analyze:
       - What improved in upstream (better examples, new patterns, fixes)
@@ -168,8 +168,8 @@ For each skill in `.superpowers-sync` → `modified_skills`:
    - If "NEEDS REVIEW", examine conflicts carefully
 
 5. **Apply or defer**:
-   - If "READY TO APPLY": Write merged content to `skills/[skill]/SKILL.md`
-   - If "NEEDS REVIEW": Save to `skills/[skill]/SKILL.md.proposed` and mark for manual review
+   - If "READY TO APPLY": Write merged content to `sdd/skills/[skill]/SKILL.md`
+   - If "NEEDS REVIEW": Save to `sdd/skills/[skill]/SKILL.md.proposed` and mark for manual review
 
 ## Run Merge for All Modified Skills
 
@@ -244,9 +244,9 @@ Create `docs/sync-reports/sync-YYYY-MM-DD.md`:
 # Update tracking file
 jq --arg commit "$CURRENT_COMMIT" --arg date "$(date +%Y-%m-%d)" \
   '.last_sync_commit = $commit | .last_sync_date = $date | .note = "Synced via /update-superpowers"' \
-  .superpowers-sync > .superpowers-sync.tmp
+  sdd/.superpowers-sync > sdd/.superpowers-sync.tmp
 
-mv .superpowers-sync.tmp .superpowers-sync
+mv sdd/.superpowers-sync.tmp sdd/.superpowers-sync
 ```
 
 ### 3. Update CHANGELOG
@@ -281,10 +281,10 @@ After merge, verify each skill:
 
 ```bash
 # Read through each modified skill
-cat skills/writing-plans/SKILL.md
-cat skills/review-code/SKILL.md
-cat skills/verification-before-completion/SKILL.md
-cat skills/brainstorm/SKILL.md
+cat sdd/skills/writing-plans/SKILL.md
+cat sdd/skills/review-code/SKILL.md
+cat sdd/skills/verification-before-completion/SKILL.md
+cat sdd/skills/brainstorm/SKILL.md
 
 # Check for:
 # - SDD sections still present (spec-first, compliance checking, etc.)
@@ -322,7 +322,7 @@ Present to user:
 
 [If any skills need manual review]:
 ⚠️  Manual review needed:
-- skills/[skill]/SKILL.md.proposed - [reason]
+- sdd/skills/[skill]/SKILL.md.proposed - [reason]
 
 Please review and resolve before committing.
 ```
@@ -335,14 +335,14 @@ Please review and resolve before committing.
 
 # Claude executes:
 # 1. Verifies we're in plugin directory ✅
-# 2. Reads .superpowers-sync
+# 2. Reads sdd/.superpowers-sync
 # 3. Clones upstream superpowers
 # 4. Checks for changes since last sync
 # 5. Launches merge agents for each modified skill
 # 6. Reviews agent outputs
 # 7. Applies merged versions
 # 8. Generates sync report
-# 9. Updates .superpowers-sync
+# 9. Updates sdd/.superpowers-sync
 # 10. Suggests CHANGELOG entry
 # 11. Shows summary and next steps
 ```

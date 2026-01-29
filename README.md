@@ -101,6 +101,7 @@ flowchart TD
 | `/sdd:review-spec` | Review specifications for soundness, completeness, and implementability |
 | `/sdd:review-code` | Review code against spec compliance (checks implementation vs spec) |
 | `/sdd:constitution` | Create and manage project-wide principles that guide all specs |
+| `/sdd:tutorial` | Interactive guide to SDD methodology and team collaboration workflows |
 
 ### Spec-Kit Commands
 
@@ -132,6 +133,7 @@ After initialization, these spec-kit commands are available:
 | `sdd:spec-refactoring` | Consolidate and improve evolved specs, remove redundancy |
 | `sdd:constitution` | Create/manage project-wide principles and standards |
 | `sdd:spec-kit` | **Technical layer** - Automatic initialization, installation validation, project setup |
+| `sdd:tutorial` | Interactive onboarding for SDD methodology and team collaboration workflows |
 
 ### Modified Superpowers Skills
 

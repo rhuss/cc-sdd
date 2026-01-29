@@ -2,7 +2,9 @@
 .claude/state/
 .claude/history/
 .claude/*.json
+!.claude/settings.json
 .claude/settings.local.json
+sdd/.claude/settings.local.json
 # BUT: Keep .claude/commands/ for plugin maintenance commands
 
 # Editor swap files

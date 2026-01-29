@@ -163,5 +163,5 @@ After understanding this example:
 ## Resources
 
 - Full superpowers-sdd documentation: `../../README.md`
-- Skill reference: `../../skills/`
+- Skill reference: `../../sdd/skills/`
 - Design documentation: `../../docs/design.md`

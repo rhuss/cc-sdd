@@ -19,19 +19,21 @@ This plugin modifies 4 superpowers skills to add spec-awareness. We need a strat
 
 ```
 cc-superpowers-sdd/
-├── .superpowers-sync              # Tracking file (committed to git)
-├── .claude/commands/
-│   └── update-superpowers.md      # Slash command for AI-assisted sync
-├── scripts/
-│   └── check-upstream-changes.sh  # Helper to check for changes
+├── sdd/                           # Nested plugin directory
+│   ├── .superpowers-sync          # Tracking file (committed to git)
+│   ├── .claude/commands/
+│   │   └── update-superpowers.md  # Slash command for AI-assisted sync
+│   ├── scripts/
+│   │   └── check-upstream-changes.sh  # Helper to check for changes
+│   └── skills/
+│       ├── writing-plans/         # Modified from superpowers
+│       ├── review-code/           # Modified from superpowers
+│       ├── verification-before-completion/  # Modified from superpowers
+│       └── brainstorm/            # Modified from superpowers
 ├── docs/
 │   ├── sync-reports/              # Generated sync reports
 │   └── upstream-sync-strategy.md  # This file
-└── skills/
-    ├── writing-plans/             # Modified from superpowers
-    ├── review-code/               # Modified from superpowers
-    ├── verification-before-completion/  # Modified from superpowers
-    └── brainstorm/                # Modified from superpowers
+└── Makefile                       # Build and install targets
 ```
 
 ### Modified Skills Mapping
@@ -50,11 +52,14 @@ cc-superpowers-sdd/
 **Quarterly** (or before major release), check for upstream changes:
 
 ```bash
-# Option A: Run helper script
-./scripts/check-upstream-changes.sh
+# Option A: Run via Makefile
+make check-upstream
 
-# Option B: Manual check
-cat .superpowers-sync | jq -r '.last_sync_commit'
+# Option B: Run helper script from sdd/
+cd sdd && ./scripts/check-upstream-changes.sh
+
+# Option C: Manual check
+cat sdd/.superpowers-sync | jq -r '.last_sync_commit'
 # Visit: https://github.com/obra/superpowers/commits/main
 # Compare against last_sync_commit
 ```
@@ -115,13 +120,13 @@ To sync, run: /update-superpowers
 
 ```bash
 # Review changes
-git diff skills/
+git diff sdd/skills/
 
 # Read through merged skills
-cat skills/writing-plans/SKILL.md
-cat skills/review-code/SKILL.md
-cat skills/verification-before-completion/SKILL.md
-cat skills/brainstorm/SKILL.md
+cat sdd/skills/writing-plans/SKILL.md
+cat sdd/skills/review-code/SKILL.md
+cat sdd/skills/verification-before-completion/SKILL.md
+cat sdd/skills/brainstorm/SKILL.md
 
 # Check sync report
 cat docs/sync-reports/sync-2025-12-01.md
@@ -241,7 +246,7 @@ Begin merge analysis.
 ## Sync Schedule
 
 **Recommended**:
-- **Quarterly check**: Run `./scripts/check-upstream-changes.sh`
+- **Quarterly check**: Run `make check-upstream`
 - **Sync on major changes**: If upstream has significant improvements
 - **Before major releases**: Ensure we have latest upstream improvements
 
@@ -257,16 +262,16 @@ After syncing, verify:
 1. **SDD sections present**:
    ```bash
    # Check for spec-first language
-   grep -n "spec" skills/writing-plans/SKILL.md
-   grep -n "compliance" skills/review-code/SKILL.md
-   grep -n "drift" skills/verification-before-completion/SKILL.md
+   grep -n "spec" sdd/skills/writing-plans/SKILL.md
+   grep -n "compliance" sdd/skills/review-code/SKILL.md
+   grep -n "drift" sdd/skills/verification-before-completion/SKILL.md
    ```
 
 2. **No merge artifacts**:
    ```bash
-   grep -r "<<<<<<" skills/
-   grep -r ">>>>>>" skills/
-   grep -r "======" skills/
+   grep -r "<<<<<<" sdd/skills/
+   grep -r ">>>>>>" sdd/skills/
+   grep -r "======" sdd/skills/
    ```
 
 3. **Consistency**:
@@ -417,6 +422,6 @@ Potential enhancements:
 
 - Upstream: https://github.com/obra/superpowers
 - Plugin repo: https://github.com/rhuss/cc-superpowers-sdd
-- Sync command: `.claude/commands/update-superpowers.md`
-- Check script: `scripts/check-upstream-changes.sh`
-- Tracking file: `.superpowers-sync`
+- Sync command: `sdd/.claude/commands/update-superpowers.md`
+- Check script: `sdd/scripts/check-upstream-changes.sh`
+- Tracking file: `sdd/.superpowers-sync`

@@ -1,6 +1,7 @@
 #!/bin/bash
 # Helper script: Check for upstream superpowers changes since last sync
-# Usage: ./scripts/check-upstream-changes.sh
+# Usage: From project root: make check-upstream
+#        Or from sdd/: ./scripts/check-upstream-changes.sh
 
 set -e
 
@@ -12,8 +13,9 @@ NC='\033[0m' # No Color
 
 # Check we're in the right directory
 if [ ! -f ".superpowers-sync" ]; then
-  echo -e "${RED}❌ ERROR: .superpowers-sync not found${NC}"
-  echo "This script must be run from cc-superpowers-sdd root directory"
+  echo -e "${RED}ERROR: .superpowers-sync not found${NC}"
+  echo "This script must be run from the sdd/ directory"
+  echo "Use 'make check-upstream' from the project root"
   exit 1
 fi
 
