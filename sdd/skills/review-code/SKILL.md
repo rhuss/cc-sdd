@@ -325,11 +325,25 @@ After spec evolution, compliance will be 100%.
 - Critical gap
 - Must fix code
 
+## Anti-Rationalization: What You Must NOT Do
+
+**DO NOT skip checking ANY requirement.** Each spec requirement must be verified against code. Not "spot checking." Not "seems fine." Every. Single. One.
+
+**DO NOT assume compliance.** "It looks right" is not compliance. "I think it matches" is not compliance. Show the code location. Compare the behavior. Document the status.
+
+**DO NOT hide deviations.** A deviation is not a failure; it's information. Hiding deviations breaks the feedback loop. Report every deviation, even minor ones.
+
+**DO NOT proceed with deviations unresolved.** 89% compliance is NOT ready for verification. 99% compliance is NOT ready for verification. Only 100% compliance proceeds to verification.
+
+**DO NOT rationalize scope creep.** "But this feature is useful!" is not justification for unspecified code. Either add it to the spec (via evolution) or remove it. Undocumented features are invisible bugs.
+
+**DO NOT conflate code quality with spec compliance.** Code can be beautiful AND non-compliant. Code can be ugly AND compliant. Check both, report both, but never confuse them.
+
 ## Remember
 
 **Spec compliance is primary concern.**
 
-This is not just code quality review - it's **spec validation**.
+This is not just code quality review; it's **spec validation**.
 
 - Does code match spec? (Most important)
 - Is code quality good? (Secondary)
@@ -348,3 +362,5 @@ This is not just code quality review - it's **spec validation**.
 - Use `sdd:evolve` to reconcile
 
 **The code and spec must tell the same story.**
+
+**Evidence before assertions. Always.**
