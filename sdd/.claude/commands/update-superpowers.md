@@ -1,5 +1,5 @@
 ---
-description: AI-assisted sync with upstream superpowers - updates modified skills while preserving SDD enhancements (plugin maintenance only)
+description: "[Plugin Dev] Sync modified skills with upstream superpowers while preserving SDD enhancements"
 ---
 
 # Upstream Superpowers Sync Workflow

@@ -7,6 +7,10 @@ description: Extended verification including tests AND spec compliance - runs te
 
 ## Overview
 
+Claiming work is complete without verification is dishonesty, not efficiency.
+
+**Core principle:** Evidence before claims, always.
+
 Verify implementation is complete by running tests AND validating spec compliance.
 
 **Key Additions from Standard Verification:**
@@ -14,6 +18,33 @@ Verify implementation is complete by running tests AND validating spec complianc
 - **Step 2: Validate spec compliance** (new)
 - **Step 3: Check for spec drift** (new)
 - Blocks completion if EITHER tests OR spec compliance fails
+
+## The Iron Law
+
+```
+NO COMPLETION CLAIMS WITHOUT FRESH VERIFICATION EVIDENCE
+```
+
+If you haven't run the verification command in this message, you cannot claim it passes.
+
+## The Gate Function
+
+```
+BEFORE claiming any status or expressing satisfaction:
+
+1. IDENTIFY: What command proves this claim?
+2. RUN: Execute the FULL command (fresh, complete)
+3. READ: Full output, check exit code, count failures
+4. VERIFY: Does output confirm the claim?
+   - If NO: State actual status with evidence
+   - If YES: State claim WITH evidence
+5. CHECK SPEC: Does implementation match spec?
+   - If NO: State actual compliance with evidence
+   - If YES: State compliance score WITH evidence
+6. ONLY THEN: Make the claim
+
+Skip any step = lying, not verifying
+```
 
 ## When to Use
 
@@ -38,7 +69,7 @@ npm test  # or pytest, go test, etc.
 - Coverage adequate?
 
 **If tests fail:**
-- ❌ **STOP - Fix tests before proceeding**
+- STOP: Fix tests before proceeding
 - Do not skip this step
 - Do not claim completion
 
@@ -53,9 +84,9 @@ cat specs/features/[feature-name].md
 
 ```markdown
 Functional Requirement 1: [From spec]
-  ✓ / ✗ Implemented
-  ✓ / ✗ Tested
-  ✓ / ✗ Matches spec behavior
+  IMPLEMENTED / MISSING
+  TESTED / UNTESTED
+  MATCHES SPEC / DEVIATION
 
 Functional Requirement 2: [From spec]
   ...
@@ -74,7 +105,7 @@ Spec Compliance: X/X requirements = XX%
 ```
 
 **If compliance < 100%:**
-- ❌ **STOP - Use `sdd:evolve` to reconcile**
+- STOP: Use `sdd:evolve` to reconcile
 - Document all deviations
 - Do not proceed until resolved
 
@@ -103,7 +134,7 @@ Spec Compliance: X/X requirements = XX%
 ```markdown
 Success Criteria (from spec):
 - [ ] Criterion 1: [Description]
-      Status: ✓ Met / ✗ Not met
+      Status: Met / Not met
       Evidence: [How verified]
 
 - [ ] Criterion 2: [Description]
@@ -113,7 +144,7 @@ Success Criteria (from spec):
 **All criteria must be met.**
 
 If any criterion not met:
-- ❌ **STOP - Criterion not met**
+- STOP: Criterion not met
 - Implement missing piece
 - Re-verify
 
@@ -129,7 +160,7 @@ If any criterion not met:
 
 ## Test Results
 
-**Status:** ✅ PASS / ❌ FAIL
+**Status:** PASS / FAIL
 
 ```
 [Test output]
@@ -143,7 +174,7 @@ If any criterion not met:
 
 ## Spec Compliance
 
-**Status:** ✅ COMPLIANT / ❌ NON-COMPLIANT
+**Status:** COMPLIANT / NON-COMPLIANT
 
 **Compliance Score:** XX%
 
@@ -158,25 +189,25 @@ If any criterion not met:
 
 ## Spec Drift Check
 
-**Status:** ✅ NO DRIFT / ⚠️ DRIFT DETECTED
+**Status:** NO DRIFT / DRIFT DETECTED
 
 [Details if drift found]
 
 ## Success Criteria
 
-**Status:** ✅ ALL MET / ❌ INCOMPLETE
+**Status:** ALL MET / INCOMPLETE
 
-- [✓] Criterion 1
-- [✓] Criterion 2
+- [x] Criterion 1
+- [x] Criterion 2
 ...
 
 ## Overall Status
 
-✅ **VERIFIED - Ready for completion**
+**VERIFIED - Ready for completion**
 
 OR
 
-❌ **NOT VERIFIED - Issues must be resolved**
+**NOT VERIFIED - Issues must be resolved**
 
 **Blocking Issues:**
 - [Issue 1]
@@ -195,13 +226,46 @@ OR
 - [x] All success criteria met
 
 **If ALL true:**
-- ✅ **VERIFIED - Proceed to completion**
+- VERIFIED: Proceed to completion
 - Safe to commit/merge/deploy
 
 **If ANY false:**
-- ❌ **NOT VERIFIED - Block completion**
+- NOT VERIFIED: Block completion
 - Fix issues before proceeding
 - Re-run verification after fixes
+
+## Common Failures
+
+| Claim | Requires | Not Sufficient |
+|-------|----------|----------------|
+| Tests pass | Test command output: 0 failures | Previous run, "should pass" |
+| Spec compliant | Line-by-line requirement check | "Looks complete" |
+| Linter clean | Linter output: 0 errors | Partial check |
+| Build succeeds | Build command: exit 0 | Linter passing |
+| Bug fixed | Test original symptom: passes | Code changed |
+| Requirements met | Line-by-line checklist | Tests passing |
+
+## Red Flags - STOP
+
+- Using "should", "probably", "seems to"
+- Expressing satisfaction before verification ("Great!", "Perfect!", "Done!")
+- About to commit/push/PR without verification
+- Relying on partial verification
+- Thinking "just this once"
+- Tired and wanting work over
+- **ANY wording implying success without having run verification**
+
+## Rationalization Prevention
+
+| Excuse | Reality |
+|--------|---------|
+| "Should work now" | RUN the verification |
+| "I'm confident" | Confidence is not evidence |
+| "Just this once" | No exceptions |
+| "Tests pass" | Did you check spec compliance? |
+| "Spec compliant" | Did you run the tests? |
+| "I'm tired" | Exhaustion is not an excuse |
+| "Partial check is enough" | Partial proves nothing |
 
 ## Verification Checklist
 
@@ -227,55 +291,55 @@ Step 1: Running tests...
 
 $ npm test
 
-✅ All tests passing (24/24)
-✅ Coverage: 95%
+All tests passing (24/24)
+Coverage: 95%
 
 Step 2: Validating spec compliance...
 
 Reading spec: specs/features/user-profile-api.md
 
 Checking requirements:
-✓ Functional Requirement 1: PUT endpoint - Implemented & tested
-✓ Functional Requirement 2: Validation - Implemented & tested
-✓ Functional Requirement 3: Auth - Implemented & tested
-✓ Functional Requirement 4: Authorization - Implemented & tested
-✓ Functional Requirement 5: Response format - Implemented & tested
-✓ Functional Requirement 6: Partial updates - Implemented & tested
+COMPLIANT: Functional Requirement 1: PUT endpoint - Implemented & tested
+COMPLIANT: Functional Requirement 2: Validation - Implemented & tested
+COMPLIANT: Functional Requirement 3: Auth - Implemented & tested
+COMPLIANT: Functional Requirement 4: Authorization - Implemented & tested
+COMPLIANT: Functional Requirement 5: Response format - Implemented & tested
+COMPLIANT: Functional Requirement 6: Partial updates - Implemented & tested
 
-✓ Error Case 1: Missing JWT - Handled & tested
-✓ Error Case 2: User not found - Handled & tested
-✓ Error Case 3: Validation failure - Handled & tested
-✓ Error Case 4: Authorization failure - Handled & tested
+COMPLIANT: Error Case 1: Missing JWT - Handled & tested
+COMPLIANT: Error Case 2: User not found - Handled & tested
+COMPLIANT: Error Case 3: Validation failure - Handled & tested
+COMPLIANT: Error Case 4: Authorization failure - Handled & tested
 
-✓ Edge Case 1: Empty update - Handled & tested
-✓ Edge Case 2: Invalid avatar URL - Handled & tested
-✓ Edge Case 3: Special characters in name - Handled & tested
+COMPLIANT: Edge Case 1: Empty update - Handled & tested
+COMPLIANT: Edge Case 2: Invalid avatar URL - Handled & tested
+COMPLIANT: Edge Case 3: Special characters in name - Handled & tested
 
-Spec Compliance: 13/13 = 100% ✅
+Spec Compliance: 13/13 = 100%
 
 Step 3: Checking for spec drift...
 
 Comparing spec to implementation...
-No drift detected ✅
+No drift detected
 
 Step 4: Verifying success criteria...
 
 From spec:
-✓ Authenticated users can update their profile
-✓ Validation errors return 422 with clear messages
-✓ Users cannot update other users' profiles
-✓ All edge cases handled gracefully
+MET: Authenticated users can update their profile
+MET: Validation errors return 422 with clear messages
+MET: Users cannot update other users' profiles
+MET: All edge cases handled gracefully
 
-All criteria met ✅
+All criteria met
 
 === VERIFICATION REPORT ===
 
-✅ Tests: PASS (24/24)
-✅ Spec Compliance: 100%
-✅ Spec Drift: None
-✅ Success Criteria: All met
+Tests: PASS (24/24)
+Spec Compliance: 100%
+Spec Drift: None
+Success Criteria: All met
 
-**OVERALL: ✅ VERIFIED**
+**OVERALL: VERIFIED**
 
 Implementation is complete and verified. Ready for commit/merge.
 ```
@@ -289,7 +353,7 @@ Step 1: Running tests...
 
 $ npm test
 
-❌ Tests FAILED (22/24 passing, 2 failing)
+Tests FAILED (22/24 passing, 2 failing)
 
 Failures:
 1. "Should handle database connection errors"
@@ -307,28 +371,28 @@ Reading spec: specs/features/user-profile-api.md
 Checking requirements:
 [checks requirements...]
 
-❌ Non-Functional Requirement 1: Database retry logic
+DEVIATION: Non-Functional Requirement 1: Database retry logic
    Status: Not implemented
    Spec says: "3 retry attempts with exponential backoff"
    Code does: Single attempt, no retry
 
-Spec Compliance: 12/13 = 92% ❌
+Spec Compliance: 12/13 = 92%
 
 Step 3: Checking success criteria...
 
 From spec:
-✓ Authenticated users can update their profile
-✓ Validation errors return 422
-✗ Handles database failures gracefully (missing retry logic)
-✓ Users cannot update other users' profiles
+MET: Authenticated users can update their profile
+MET: Validation errors return 422
+NOT MET: Handles database failures gracefully (missing retry logic)
+MET: Users cannot update other users' profiles
 
 === VERIFICATION REPORT ===
 
-❌ Tests: FAIL (2 failures)
-❌ Spec Compliance: 92% (missing retry logic)
-❌ Success Criteria: 3/4 met
+Tests: FAIL (2 failures)
+Spec Compliance: 92% (missing retry logic)
+Success Criteria: 3/4 met
 
-**OVERALL: ❌ NOT VERIFIED**
+**OVERALL: NOT VERIFIED**
 
 **Blocking Issues:**
 1. Database retry logic not implemented (from spec)
@@ -348,9 +412,9 @@ From spec:
 ### Scenario: Tests Pass but Spec Compliance Fails
 
 ```
-✅ Tests: 24/24 passing
-❌ Spec Compliance: 85%
-❌ BLOCKED
+Tests: 24/24 passing
+Spec Compliance: 85%
+BLOCKED
 
 Issue: Tests don't cover all spec requirements
 
@@ -360,9 +424,9 @@ Action: Add tests for uncovered requirements, re-verify
 ### Scenario: Spec Compliant but Tests Fail
 
 ```
-❌ Tests: 20/24 passing
-✅ Spec Compliance: 100%
-❌ BLOCKED
+Tests: 20/24 passing
+Spec Compliance: 100%
+BLOCKED
 
 Issue: Implementation exists but has bugs
 
@@ -372,10 +436,10 @@ Action: Fix bugs, ensure tests pass, re-verify
 ### Scenario: Both Pass but Drift Detected
 
 ```
-✅ Tests: 24/24 passing
-✅ Spec Compliance: 100%
-⚠️  Spec Drift: Spec updated after implementation
-❌ BLOCKED
+Tests: 24/24 passing
+Spec Compliance: 100%
+Spec Drift: Spec updated after implementation
+BLOCKED
 
 Issue: Spec changed, code doesn't reflect changes
 
@@ -387,9 +451,9 @@ Action: Update code or revert spec, re-verify
 **This skill enforces quality gates:**
 
 1. **All tests must pass** (from superpowers)
-2. **100% spec compliance required** (new)
-3. **No spec drift allowed** (new)
-4. **All success criteria must be met** (new)
+2. **100% spec compliance required** (SDD)
+3. **No spec drift allowed** (SDD)
+4. **All success criteria must be met** (SDD)
 
 **No exceptions. No shortcuts.**
 
@@ -414,6 +478,12 @@ These gates exist to prevent:
 - Drift detected? Synchronization problem
 - Criteria not met? Work incomplete
 
+**No shortcuts for verification.**
+
+Run the command. Read the output. Check the spec. THEN claim the result.
+
 **Fix issues, don't rationalize past them.**
 
 **Evidence before assertions. Always.**
+
+This is non-negotiable.
