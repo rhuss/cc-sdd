@@ -28,16 +28,16 @@ ls ~/.claude/plugins/cc-superpowers-sdd/
 **Expected output:**
 ```
 LICENSE
+Makefile
 README.md
 docs/
 examples/
-plugin.json
-skills/
+sdd/
 ```
 
 **Step 3: Check plugin.json is valid**
 ```bash
-cat ~/.claude/plugins/cc-superpowers-sdd/plugin.json | python3 -m json.tool
+cat ~/.claude/plugins/cc-superpowers-sdd/sdd/.claude-plugin/plugin.json | python3 -m json.tool
 ```
 
 **Expected:** Valid JSON output with no errors
