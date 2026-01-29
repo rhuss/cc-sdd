@@ -89,6 +89,7 @@ Before ANY implementation work:
 - **sdd:spec-refactoring** - Consolidate and improve evolved specs
 - **sdd:spec-kit** - Technical integration for spec-kit CLI (called automatically)
 - **sdd:constitution** - Create/manage project-wide principles
+- **sdd:tutorial** - Interactive onboarding for SDD methodology and team workflows
 
 ### Compatible Superpowers Skills
 These work as-is with spec context:

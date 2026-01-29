@@ -176,26 +176,32 @@ These work as-is, referenced by SDD skills:
 ```
 cc-superpowers-sdd/
 ├── README.md                          # In-depth guide with examples
-├── skills/
-│   ├── brainstorm/
-│   ├── spec/
-│   ├── implement/
-│   ├── evolve/
-│   ├── writing-plans/
-│   ├── review-code/
-│   ├── verification-before-completion/
-│   ├── review-spec/
-│   ├── spec-refactoring/
-│   ├── spec-kit/
-│   ├── constitution/
-│   └── using-superpowers-sdd/
+├── Makefile                           # Build and install targets
+├── sdd/                               # Nested plugin directory
+│   ├── .claude-plugin/
+│   │   └── plugin.json
+│   ├── skills/
+│   │   ├── brainstorm/
+│   │   ├── spec/
+│   │   ├── implement/
+│   │   ├── evolve/
+│   │   ├── writing-plans/
+│   │   ├── review-code/
+│   │   ├── verification-before-completion/
+│   │   ├── review-spec/
+│   │   ├── spec-refactoring/
+│   │   ├── spec-kit/
+│   │   ├── constitution/
+│   │   └── using-superpowers-sdd/
+│   ├── commands/                      # Slash command implementations
+│   └── scripts/                       # Maintenance scripts
+├── .claude-plugin/
+│   └── marketplace.json               # Local marketplace definition
 ├── examples/
 │   └── todo-app/                      # Complete workflow example
 │       ├── specs/
 │       ├── docs/
 │       └── src/
-├── .claude-plugin/
-│   └── plugin.json
 └── docs/
     ├── workflow-guide.md
     └── migration-from-superpowers.md
