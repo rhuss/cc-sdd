@@ -1,42 +1,42 @@
-.PHONY: validate-plugin install-local-marketplace uninstall-marketplace uninstall-plugin install-plugin reinstall-plugin check-upstream help
+.PHONY: validate install uninstall reinstall check-upstream help
 
-validate-plugin:
+MARKETPLACE := sdd-plugin-development
+PLUGIN := sdd@$(MARKETPLACE)
+
+validate:
 	claude plugin validate ./
 	claude plugin validate ./sdd/
 
-install-local-marketplace:
-	@output=$$(claude plugin marketplace add ./ 2>&1) || { \
-		if echo "$$output" | grep -q "Marketplace '.*' is already installed"; then \
-			echo "Marketplace already installed, updating..."; \
-			claude plugin marketplace update sdd-plugin-development; \
-		else \
-			echo "$$output" >&2; \
-			exit 1; \
-		fi; \
-	}
+install:
+	@# Add or update marketplace
+	@if claude plugin marketplace add ./ 2>&1 | grep -q "already installed"; then \
+		echo "Updating marketplace..."; \
+		claude plugin marketplace update $(MARKETPLACE); \
+	else \
+		echo "Marketplace added."; \
+	fi
+	@# Install or reinstall plugin
+	@if claude plugin list 2>/dev/null | grep -q "$(PLUGIN)"; then \
+		echo "Plugin already installed, reinstalling..."; \
+		claude plugin rm $(PLUGIN) 2>/dev/null || true; \
+	fi
+	claude plugin install $(PLUGIN)
 
-uninstall-marketplace: uninstall-plugin
-	@echo "Removing marketplace..."
-	@claude plugin marketplace rm sdd-plugin-development 2>/dev/null || echo "Marketplace not installed"
-
-uninstall-plugin:
+uninstall:
 	@echo "Removing plugin..."
-	@claude plugin rm sdd@sdd-plugin-development 2>/dev/null || echo "Plugin not installed"
+	@claude plugin rm $(PLUGIN) 2>/dev/null || echo "Plugin not installed"
+	@echo "Removing marketplace..."
+	@claude plugin marketplace rm $(MARKETPLACE) 2>/dev/null || echo "Marketplace not installed"
 
-install-plugin: install-local-marketplace
-	claude plugin install sdd@sdd-plugin-development
-
-reinstall-plugin: uninstall-plugin uninstall-marketplace install-local-marketplace install-plugin
+reinstall: uninstall install
 
 check-upstream:
 	cd sdd && ./scripts/check-upstream-changes.sh
 
 help:
 	@echo "Available targets:"
-	@echo "  validate-plugin           - Validate plugin manifests"
-	@echo "  install-local-marketplace - Add marketplace to Claude Code"
-	@echo "  uninstall-marketplace     - Remove marketplace from Claude Code"
-	@echo "  install-plugin            - Install plugin from local marketplace"
-	@echo "  uninstall-plugin          - Remove plugin from Claude Code"
-	@echo "  reinstall-plugin          - Full reinstall cycle"
-	@echo "  check-upstream            - Check for upstream changes"
+	@echo "  validate       - Validate plugin manifests"
+	@echo "  install        - Install plugin (adds marketplace, installs/updates plugin)"
+	@echo "  uninstall      - Remove plugin and marketplace"
+	@echo "  reinstall      - Full uninstall and reinstall"
+	@echo "  check-upstream - Check for upstream superpowers changes"

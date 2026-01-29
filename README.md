@@ -33,15 +33,27 @@ graph LR
 
 ### Installation
 
-```bash
-# Prerequisites
-# 1. Install Claude Code from claude.com/claude-code
-# 2. Install spec-kit from github.com/github/spec-kit
+**Prerequisites:**
+1. Install [Claude Code](https://claude.com/claude-code)
+2. Install [spec-kit](https://github.com/github/spec-kit)
 
-# Install plugin
-cd ~/.claude/plugins
+**Install the plugin:**
+
+```bash
 git clone https://github.com/rhuss/cc-superpowers-sdd.git
+cd cc-superpowers-sdd
+make install
 ```
+
+### Makefile Targets
+
+| Target | Description |
+|--------|-------------|
+| `make install` | Install plugin (adds marketplace, installs/updates plugin automatically) |
+| `make uninstall` | Remove plugin and marketplace |
+| `make reinstall` | Full uninstall and reinstall |
+| `make validate` | Validate plugin manifests |
+| `make check-upstream` | Check for upstream superpowers changes |
 
 ### First Use
 
