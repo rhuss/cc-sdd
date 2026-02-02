@@ -259,7 +259,7 @@ Create `.claude/settings.json` in your project:
     },
     "spec_kit": {
       "enabled": true,
-      "path": "speckit"
+      "path": "specify"
     }
   }
 }

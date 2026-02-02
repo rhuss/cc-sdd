@@ -38,6 +38,38 @@ Ensure spec-kit is initialized:
 
 If spec-kit prompts for restart, pause this workflow and resume after restart.
 
+## CRITICAL: spec-kit CLI is REQUIRED
+
+This skill MUST use spec-kit CLI commands. Claude MUST NOT:
+- Generate specs internally (use `specify specify` instead)
+- Create spec markdown directly (spec-kit handles this)
+- Generate plans internally (use `specify plan` instead)
+- Generate tasks internally (use `specify tasks` instead)
+
+**FAILURE PROTOCOL:**
+- If any spec-kit command fails → STOP and report the error
+- If output is unexpected → STOP and report the issue
+- If files are missing → STOP and suggest the correct specify command
+- **NEVER "manually proceed"** with the workflow
+- **NEVER "work around"** spec-kit by doing things directly
+- **NEVER say "let me manually..."** and continue
+
+The correct response to any issue is: STOP, diagnose, and either FIX with specify or ASK the user.
+
+**Examples of FORBIDDEN behavior:**
+```
+❌ "The directory structure is different, let me manually create the spec..."
+❌ "specify specify failed, I'll write the spec.md directly..."
+❌ "The template is missing, let me manually set up the structure..."
+```
+
+**Examples of CORRECT behavior:**
+```
+✓ "specify specify failed with error X. Please check spec-kit installation."
+✓ "The spec directory doesn't exist. Run: specify specify 'feature description'"
+✓ "plan.md was not created. Run: specify plan specs/feature/spec.md"
+```
+
 ## Critical: Specifications are WHAT and WHY, NOT HOW
 
 **Specs define contracts and requirements, not implementation.**
@@ -123,22 +155,29 @@ cat .specify/memory/constitution.md
 - Integration points
 - Shared components
 
-### 3. Create Specification
+### 3. Create Specification (MUST use spec-kit CLI)
 
-**Use spec-kit tools:**
+**Use spec-kit CLI (REQUIRED):**
 
 ```bash
 # Interactive spec creation using spec-kit template
-speckit specify "[feature description]"
-
-# Or use spec-kit scripts directly
-.specify/scripts/bash/create-new-feature.sh --json "[feature description]"
+specify specify "[feature description]"
 ```
+
+**Do NOT create spec markdown directly. Always use `specify specify`.**
 
 **This will:**
 - Create feature directory (e.g., `specs/0001-feature-name/`)
 - Initialize spec.md from template
 - Set up directory structure (docs/, checklists/, contracts/)
+
+**After creation, run clarification check (RECOMMENDED):**
+
+```bash
+specify clarify specs/[feature-name]/spec.md
+```
+
+This identifies underspecified areas. Present results to user and update spec if needed.
 
 **Fill in the spec following template structure:**
 - Purpose - WHY this feature exists
@@ -175,9 +214,13 @@ cat .specify/memory/constitution.md
 
 ### 5. Review Spec Soundness
 
-**Before finishing, validate:**
+**Before finishing, validate using spec-kit:**
 
-Use `sdd:review-spec` skill to check:
+```bash
+specify validate specs/[feature-name]/spec.md
+```
+
+Then use `sdd:review-spec` skill to check:
 - Completeness (all sections filled)
 - Clarity (no ambiguous language)
 - Implementability (can generate plan from this)
@@ -188,32 +231,88 @@ Use `sdd:review-spec` skill to check:
 - Document any known gaps
 - Mark unclear areas for clarification
 
-### 6. Commit Spec
+### 6. Generate Implementation Artifacts
 
-**Create git commit:**
+After spec is validated, generate the implementation plan and tasks:
+
+**Generate plan (REQUIRED):**
+
+```bash
+specify plan specs/[feature-name]/spec.md
+```
+
+This creates `specs/[feature-name]/plan.md` from the spec.
+
+**Generate tasks (REQUIRED):**
+
+```bash
+specify tasks specs/[feature-name]/spec.md
+```
+
+This creates `specs/[feature-name]/tasks.md` with dependency ordering.
+
+**VERIFICATION CHECKPOINT (MANDATORY):**
+
+```bash
+SPEC_DIR="specs/[feature-name]"
+
+if [ ! -f "$SPEC_DIR/plan.md" ]; then
+  echo "❌ FAILURE: plan.md not created"
+  echo "Run: specify plan $SPEC_DIR/spec.md"
+  exit 1
+fi
+
+if [ ! -f "$SPEC_DIR/tasks.md" ]; then
+  echo "❌ FAILURE: tasks.md not created"
+  echo "Run: specify tasks $SPEC_DIR/spec.md"
+  exit 1
+fi
+
+echo "✓ All artifacts generated"
+```
+
+**If verification fails: STOP. Do not continue. Do not "manually proceed".**
+Report the failure and suggest the correct specify command to fix it.
+
+**Run final consistency check:**
+
+```bash
+specify analyze specs/[feature-name]/
+```
+
+This validates cross-artifact consistency between spec, plan, and tasks.
+
+**The complete spec package now includes:**
+- `spec.md` - What to build (requirements)
+- `plan.md` - How to build it (implementation approach)
+- `tasks.md` - Work breakdown (actionable items)
+
+### 7. Commit Spec Package
+
+**Create git commit for the complete spec package:**
 
 ```bash
 git add specs/[feature-dir]/
-git commit -m "Add spec for [feature-name]"
+git commit -m "Add spec package for [feature-name]
+
+Includes:
+- spec.md (requirements)
+- plan.md (implementation plan)
+- tasks.md (task breakdown)"
 ```
 
-**Spec is now source of truth** for this feature.
+**Spec package is now source of truth** for this feature.
 
 ## Next Steps
 
-After spec creation:
+After spec package creation:
 
-1. **Review spec soundness** (if not already done):
-   ```
-   Use sdd:review-spec
-   ```
-
-2. **Implement the feature**:
+1. **Implement the feature** (plan and tasks are ready):
    ```
    Use sdd:implement
    ```
 
-3. **Or refine spec further** if issues found
+2. **Or refine spec further** if issues found during review
 
 ## Remember
 

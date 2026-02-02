@@ -33,30 +33,41 @@ Every SDD workflow skill calls this skill first via `{Skill: spec-kit}`. When ca
 ### Step 1: Check spec-kit CLI Installation
 
 ```bash
-which speckit
+which specify
 ```
 
 **If NOT found:**
-```
-❌ ERROR: spec-kit is required but not installed
 
-spec-kit provides the templates, scripts, and tooling for SDD workflows.
+The `specify` CLI is not installed. Run initialization to bootstrap it:
 
-Installation:
-1. Visit: https://github.com/github/spec-kit
-2. Follow installation instructions
-3. Ensure 'speckit' is in your PATH
-4. Verify: run 'which speckit'
-
-After installation, restart this workflow.
+```bash
+specify init
 ```
 
-**STOP workflow.** Do not proceed without spec-kit.
+This will:
+- Download and install the spec-kit CLI components
+- Create the `.specify/` directory structure
+- Install templates and scripts
+
+If `specify init` fails (command not found), provide installation instructions:
+```
+❌ ERROR: 'specify' command not found
+
+The specify CLI needs to be installed first.
+
+Installation options (preferred first):
+1. uv: uv pip install specify-cli
+2. pip: pip install specify-cli
+3. npm: npm install -g @anthropic/specify
+4. Manual: Visit https://github.com/anthropics/specify
+
+After installation, run: specify init
+```
 
 **If found:**
 ```bash
 # Get version for logging
-speckit --version
+specify --version
 ```
 
 Proceed to step 2.
@@ -72,15 +83,15 @@ Proceed to step 2.
 
 Display message:
 ```
-spec-kit is installed ✓
+specify CLI is installed ✓
 
 This project needs initialization...
-Running: speckit init
+Running: specify init
 ```
 
 Execute initialization:
 ```bash
-speckit init
+specify init
 ```
 
 **Check for errors:**
@@ -93,12 +104,12 @@ Skip to step 3.
 
 ### Step 3: Check for New Commands (Restart Detection)
 
-After `speckit init` runs, check if local commands were installed:
+After `specify init` runs, check if local commands were installed:
 
 ```bash
 # Check if spec-kit installed Claude Code commands
 if [ -d .claude/commands ]; then
-  ls .claude/commands/ | grep -q speckit
+  ls .claude/commands/ | grep -q specify
   if [ $? -eq 0 ]; then
     echo "commands-installed"
   fi
@@ -151,7 +162,7 @@ echo "verified" || echo "corrupt"
 
 This may be due to a failed initialization.
 
-Please run: speckit init --force
+Please run: specify init --force
 
 Then restart this workflow.
 ```
@@ -227,6 +238,115 @@ ensure_feature_structure() {
 }
 ```
 
+## Spec Discovery
+
+When a workflow skill requires a spec file and none is specified, use this discovery protocol.
+
+### List Available Specs
+
+```bash
+# Find all spec.md files in specs/ directory
+fd -t f "spec.md" specs/ 2>/dev/null || find specs/ -name "spec.md" -type f 2>/dev/null
+
+# Also check for direct .md files in specs/features/
+ls specs/features/*.md 2>/dev/null
+```
+
+### Present Options to User
+
+**If multiple specs found:**
+Use AskUserQuestion to let user select which spec to use.
+
+**If single spec found:**
+Confirm with user before proceeding: "Found specs/0001-auth/spec.md. Use this spec?"
+
+**If no specs found:**
+Inform user and suggest creating one:
+```
+No specs found in specs/ directory.
+
+To create a spec:
+- Use `sdd:brainstorm` to refine ideas into a spec
+- Use `sdd:spec` to create a spec from clear requirements
+- Run `specify specify` directly
+```
+
+### Path Resolution Priority
+
+When resolving a spec path:
+
+1. **Exact path if provided** (e.g., `specs/0001-auth/spec.md`)
+2. **Match by feature name in numbered directory** (e.g., `auth` → `specs/0001-auth/spec.md`)
+3. **Match by feature name in features directory** (e.g., `auth` → `specs/features/auth.md`)
+
+```bash
+# Resolve feature name to spec path
+resolve_spec_path() {
+  local feature_name=$1
+
+  # Check numbered directory pattern first
+  local numbered=$(fd -t f "spec.md" specs/ 2>/dev/null | grep -i "$feature_name" | head -1)
+  if [ -n "$numbered" ]; then
+    echo "$numbered"
+    return
+  fi
+
+  # Check features directory
+  local features="specs/features/${feature_name}.md"
+  if [ -f "$features" ]; then
+    echo "$features"
+    return
+  fi
+
+  # Not found
+  echo ""
+}
+```
+
+### Standard Discovery Instructions for Skills
+
+Skills that require a spec should include this at workflow start:
+
+```markdown
+## Spec Selection
+
+If no spec is specified, discover available specs:
+
+\`\`\`bash
+# List all specs in the project
+fd -t f "spec.md" specs/ 2>/dev/null | head -20
+\`\`\`
+
+**If specs found:** Present list and ask user to select one.
+**If no specs found:** Inform user and suggest using `sdd:brainstorm` or `sdd:spec` first.
+```
+
+## Local Command Detection
+
+When a project has been initialized with spec-kit, local slash commands may be available:
+
+```bash
+# Check for local spec-kit commands
+if ls .claude/commands/speckit.* 2>/dev/null | grep -q specify; then
+  echo "Local spec-kit commands available:"
+  ls .claude/commands/speckit.* | xargs -n1 basename | sed 's/\.md$//'
+fi
+```
+
+**Available local commands (when installed):**
+- `/speckit.plan` - Generate implementation plan from spec
+- `/speckit.tasks` - Generate task list from spec
+- `/speckit.validate` - Validate spec format
+- `/speckit.clarify` - Find underspecified areas
+- `/speckit.analyze` - Cross-artifact consistency check
+
+**Preference order:**
+1. Use local `/speckit.*` commands when available (more integrated)
+2. Fall back to `specify` CLI commands via bash
+3. NEVER generate internally
+
+When local commands are detected, inform the user they can invoke these directly for more control over the workflow.
+
 ## Spec-Kit CLI Commands
 
 Wrapper helpers for common spec-kit commands:
@@ -235,43 +355,87 @@ Wrapper helpers for common spec-kit commands:
 
 ```bash
 # Already covered in automatic initialization
-speckit init
+specify init
 ```
 
 ### Create Specification
 
 ```bash
 # Interactive spec creation
-speckit specify [feature-description]
+specify specify [feature-description]
 
 # Uses template from .specify/templates/spec-template.md
+# Creates: specs/[NNNN]-[feature-name]/spec.md
 ```
 
 ### Validate Specification
 
 ```bash
 # Validate spec format and structure
-speckit validate <spec-file>
+specify validate <spec-file>
 
 # Example:
-speckit validate specs/0001-user-auth/spec.md
+specify validate specs/0001-user-auth/spec.md
 ```
 
 ### Generate Plan
 
 ```bash
 # Generate implementation plan from spec
-speckit plan <spec-file>
+specify plan <spec-file>
 
 # Example:
-speckit plan specs/0001-user-auth/spec.md
+specify plan specs/0001-user-auth/spec.md
+
+# Creates: specs/0001-user-auth/plan.md
+```
+
+### Generate Tasks
+
+```bash
+# Generate task list with dependency ordering from spec
+specify tasks <spec-file>
+
+# Example:
+specify tasks specs/0001-user-auth/spec.md
+
+# Creates: specs/0001-user-auth/tasks.md
+```
+
+### Clarify Specification
+
+```bash
+# Identify underspecified areas in a spec
+specify clarify <spec-file>
+
+# Example:
+specify clarify specs/0001-user-auth/spec.md
+
+# Output: List of areas that need more detail
+# Use this after creating a spec to find gaps
+```
+
+### Analyze Artifacts
+
+```bash
+# Cross-artifact consistency check
+specify analyze <feature-dir>
+
+# Example:
+specify analyze specs/0001-user-auth/
+
+# Checks consistency between:
+# - spec.md (requirements)
+# - plan.md (implementation approach)
+# - tasks.md (task list)
+# Reports any mismatches or gaps
 ```
 
 ### Create Constitution
 
 ```bash
 # Interactive constitution creation
-speckit constitution
+specify constitution
 
 # Creates .specify/memory/constitution.md
 ```
@@ -283,7 +447,7 @@ speckit constitution
 **Command not found after installation:**
 - Check PATH configuration
 - Suggest shell restart
-- Provide which speckit output
+- Provide which specify output
 
 **Init fails:**
 - Check write permissions
@@ -310,7 +474,7 @@ Please ensure you have write permissions:
 Expected file not found: <path>
 
 This suggests incomplete initialization.
-Run: speckit init --force
+Run: specify init --force
 ```
 
 ## Integration Points
@@ -346,6 +510,19 @@ Run: speckit init --force
 - New conversation = new session
 - Re-run initialization protocol
 - Ensures project state is current
+
+## Command Summary
+
+| Command | Purpose | Creates |
+|---------|---------|---------|
+| `specify init` | Initialize project | `.specify/` directory |
+| `specify specify` | Create specification | `specs/[NNNN]-[name]/spec.md` |
+| `specify validate` | Validate spec format | (validation only) |
+| `specify plan` | Generate implementation plan | `specs/[name]/plan.md` |
+| `specify tasks` | Generate task list | `specs/[name]/tasks.md` |
+| `specify clarify` | Find underspecified areas | (analysis only) |
+| `specify analyze` | Cross-artifact consistency | (analysis only) |
+| `specify constitution` | Create project constitution | `.specify/memory/constitution.md` |
 
 ## Remember
 

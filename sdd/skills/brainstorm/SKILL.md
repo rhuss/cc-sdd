@@ -25,6 +25,15 @@ Before starting the brainstorming workflow, ensure spec-kit is initialized:
 
 If spec-kit prompts for restart, pause this workflow and resume after restart.
 
+## CRITICAL: spec-kit CLI is REQUIRED
+
+This skill MUST use spec-kit CLI commands. Claude MUST NOT:
+- Generate specs internally (use `specify specify` instead)
+- Create spec markdown directly (spec-kit handles this)
+
+If any spec-kit command fails, STOP and report the error.
+Do not fall back to internal generation.
+
 ## The Process
 
 ### Understanding the idea
@@ -64,12 +73,27 @@ If spec-kit prompts for restart, pause this workflow and resume after restart.
 1. **Announce spec creation:**
    "Based on our discussion, I'm creating the specification..."
 
-2. **Create spec file:**
-   - Location: `specs/features/[feature-name]/spec.md`
-   - Use spec-kit CLI if available: `speckit specify`
-   - Otherwise: Create markdown directly
+2. **Create spec file using spec-kit CLI (REQUIRED):**
 
-3. **IMPORTANT: Capture implementation insights separately**
+   ```bash
+   specify specify "[feature description based on discussion]"
+   ```
+
+   This creates the spec at `specs/[NNNN]-[feature-name]/spec.md` using the spec-kit template.
+
+   **Do NOT create spec markdown directly. Always use `specify specify`.**
+
+3. **Run clarification check (RECOMMENDED):**
+
+   After creating the spec, identify any underspecified areas:
+
+   ```bash
+   specify clarify specs/[feature-name]/spec.md
+   ```
+
+   Present clarification results to user for review. If gaps are identified, update the spec before proceeding.
+
+4. **IMPORTANT: Capture implementation insights separately**
 
    If technical details emerged during brainstorming (technology choices, architecture decisions, trade-off discussions), **create implementation-notes.md** to capture them:
 
@@ -105,7 +129,7 @@ If spec-kit prompts for restart, pause this workflow and resume after restart.
    - Trade-off: Slightly more complex than localStorage
    ```
 
-4. **Spec structure** (use this template):
+5. **Spec structure** (spec-kit template provides this, but reference for review):
 
 ```markdown
 # Feature: [Feature Name]
@@ -150,12 +174,12 @@ If spec-kit prompts for restart, pause this workflow and resume after restart.
 - [Decisions deferred to implementation]
 ```
 
-4. **Validate against constitution** (if exists):
+6. **Validate against constitution** (if exists):
    - Read `specs/constitution.md`
    - Check spec aligns with project principles
    - Note any violations and address them
 
-5. **Present spec in sections:**
+7. **Present spec in sections:**
    - Show 200-300 words at a time
    - Ask: "Does this look right so far?"
    - Be ready to revise based on feedback
@@ -163,9 +187,16 @@ If spec-kit prompts for restart, pause this workflow and resume after restart.
 ### After spec creation
 
 **Validate the spec:**
-- Use `sdd:review-spec` to check soundness
+- Use `sdd:review-spec` to check soundness (which will run `specify validate`)
 - Ensure spec is implementable
 - Confirm no ambiguities remain
+
+**Run consistency check (RECOMMENDED):**
+```bash
+specify analyze specs/[feature-name]/
+```
+
+This checks for cross-artifact consistency if multiple artifacts exist.
 
 **Offer next steps:**
 - "Spec created and validated. Ready to implement?"
@@ -174,7 +205,7 @@ If spec-kit prompts for restart, pause this workflow and resume after restart.
 
 **Commit the spec:**
 ```bash
-git add specs/features/[feature-name].md
+git add specs/[NNNN]-[feature-name]/
 git commit -m "Add spec for [feature name]
 
 [Brief description of what the feature does]

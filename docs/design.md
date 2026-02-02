@@ -35,7 +35,7 @@ Implementation (with TDD, code review, verification gates)
 ### 1. Brainstorm Phase (`sdd:brainstorm`)
 - Starting point: Rough idea
 - Process: Collaborative dialogue to refine concept
-- Output: Formal spec created via `speckit specify`
+- Output: Formal spec created via `specify specify`
 - Recommendation: Suggests constitution if none exists
 
 ### 2. Spec Phase (`sdd:spec`)

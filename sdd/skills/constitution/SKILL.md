@@ -97,7 +97,7 @@ Make implicit standards explicit.
 
 **With spec-kit:**
 ```bash
-speckit constitution
+specify constitution
 ```
 
 **Manual creation:**

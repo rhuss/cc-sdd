@@ -479,7 +479,7 @@ Record any unclear questions or workflow issues.
 
 **Objective:** Test integration when spec-kit is installed
 
-**Prerequisites:** spec-kit installed (`which speckit` succeeds)
+**Prerequisites:** spec-kit installed (`which specify` succeeds)
 
 **Steps:**
 1. Create spec using `/sdd:spec`

@@ -12,7 +12,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 - **Automatic spec-kit initialization** - Plugin automatically initializes projects on first SDD command
   - Checks if spec-kit CLI is installed
-  - Automatically runs `speckit init` if project not initialized
+  - Automatically runs `specify init` if project not initialized
   - Reminds user to restart if new `.claude/commands/` were installed
   - No manual setup required for users
 - **Restart detection** - Plugin detects when spec-kit installs local commands and prompts restart
@@ -24,22 +24,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed (BREAKING)
 - **spec-kit is now a required dependency** - Plugin no longer bundles templates, scripts, or spec-kit commands
-- Templates, scripts, and commands now live in local project (`.specify/` and `.claude/commands/`) via `speckit init`
+- Templates, scripts, and commands now live in local project (`.specify/` and `.claude/commands/`) via `specify init`
 - Single source of truth: spec-kit repository maintains all templates, scripts, and commands
 - Cleaner separation of concerns: plugin focuses on Claude Code integration, spec-kit provides tooling
 
 ### Removed
-- **Bundled templates** - Removed `templates/` directory (use `speckit init` instead)
-- **Bundled scripts** - Removed `scripts/` directory (use `speckit init` instead)
-- **Bundled spec-kit commands** - Removed `commands/speckit.*` files (installed to `.claude/commands/` via `speckit init`)
+- **Bundled templates** - Removed `templates/` directory (use `specify init` instead)
+- **Bundled scripts** - Removed `scripts/` directory (use `specify init` instead)
+- **Bundled spec-kit commands** - Removed `commands/speckit.*` files (installed to `.claude/commands/` via `specify init`)
 
 ### Migration Guide
 1. Ensure spec-kit CLI is installed and in your PATH
-2. ~~Run `speckit init` in each project~~ - Now happens automatically on first SDD command!
+2. ~~Run `specify init` in each project~~ - Now happens automatically on first SDD command!
 3. Restart Claude Code when prompted (if new commands were installed to `.claude/commands/`)
 4. Update any custom references from plugin templates to `.specify/templates/`
 5. Update any custom references from plugin scripts to `.specify/scripts/`
-6. `/speckit.*` commands now come from `speckit init`, not the plugin
+6. `/speckit.*` commands now come from `specify init`, not the plugin
 
 ## [1.0.0] - 2025-11-11
 

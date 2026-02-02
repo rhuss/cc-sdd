@@ -22,6 +22,34 @@ Review code implementation against specification to ensure compliance.
 - When validating existing code against spec
 - As part of verification workflow
 
+## Spec Selection
+
+If no spec is specified, discover available specs:
+
+```bash
+# List all specs in the project
+fd -t f "spec.md" specs/ 2>/dev/null | head -20
+```
+
+**If specs found:** Present list and ask user to select one using AskUserQuestion.
+
+Example:
+```
+Found 2 specs in this project:
+1. specs/0001-user-auth/spec.md
+2. specs/0002-api-gateway/spec.md
+
+Which spec should I review code against?
+```
+
+**If no specs found:** Inform user:
+```
+No specs found in specs/ directory.
+
+Code review against spec requires a spec to compare against.
+Use `sdd:brainstorm` or `sdd:spec` to create one first.
+```
+
 ## The Process
 
 ### 1. Load Spec and Code
