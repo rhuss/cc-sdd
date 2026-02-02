@@ -59,37 +59,18 @@ To create a spec first:
 Cannot review without a spec to review.
 ```
 
-## spec-kit CLI Integration
+## spec-kit Integration
 
-This skill uses spec-kit CLI for validation:
+This skill can use `/speckit.*` slash commands when available:
 
-```bash
-# Validate spec format and structure
-specify validate specs/[feature-name]/spec.md
+- `/speckit.clarify` - Find underspecified areas in the spec
+- `/speckit.analyze` - Cross-artifact consistency check (if plan/tasks exist)
 
-# Cross-artifact consistency check (if plan/tasks exist)
-specify analyze specs/[feature-name]/
-```
+**If `/speckit.*` commands are available:**
+Use them to assist with review, but always perform manual review as well.
 
-**VERIFICATION:**
-
-After running `specify validate`, confirm it executed successfully:
-
-```bash
-# The validate command should output results
-# If no output or command not found, something is wrong
-specify validate specs/[feature-name]/spec.md 2>&1 | head -5
-if [ $? -ne 0 ]; then
-  echo "❌ specify validate failed or not available"
-  echo "Cannot proceed without spec-kit validation"
-  echo "Check spec-kit installation: which specify"
-fi
-```
-
-**If validation fails: STOP. Do not proceed with manual review until spec-kit validation works.**
-
-Always run `specify validate` before manual review.
-Run `specify analyze` if multiple artifacts exist (spec, plan, tasks).
+**If `/speckit.*` commands are not available:**
+Proceed with manual review only. This is acceptable.
 
 ## Review Dimensions
 
@@ -118,17 +99,9 @@ Run `specify analyze` if multiple artifacts exist (spec, plan, tasks).
 
 ## The Process
 
-### 1. Load and Validate Spec
+### 1. Load and Read Spec
 
-**First, run spec-kit validation:**
-
-```bash
-specify validate specs/[feature-name]/spec.md
-```
-
-If validation fails, report errors before proceeding.
-
-**Then read the spec:**
+**Read the spec:**
 
 ```bash
 cat specs/[feature-name]/spec.md
@@ -244,15 +217,11 @@ cat .specify/memory/constitution.md
 
 **Note any violations with reasoning.**
 
-### 8. Run Cross-Artifact Consistency Check
+### 8. Run Cross-Artifact Consistency Check (Optional)
 
-**If plan or tasks exist, run spec-kit analyze:**
+**If plan or tasks exist and `/speckit.analyze` is available:**
 
-```bash
-specify analyze specs/[feature-name]/
-```
-
-This checks consistency between:
+Invoke `/speckit.analyze` to check consistency between:
 - spec.md (requirements)
 - plan.md (implementation approach)
 - tasks.md (task list)
@@ -377,7 +346,6 @@ This checks consistency between:
 
 Use TodoWrite to track:
 
-- [ ] Run `specify validate` on spec
 - [ ] Load and read spec thoroughly
 - [ ] Check structure (all sections present)
 - [ ] Review completeness (no TBD, all covered)
@@ -385,7 +353,7 @@ Use TodoWrite to track:
 - [ ] Validate implementability (can plan from this)
 - [ ] Assess testability (can verify requirements)
 - [ ] Check constitution alignment (if exists)
-- [ ] Run `specify analyze` for cross-artifact consistency (if applicable)
+- [ ] Run `/speckit.analyze` for cross-artifact consistency (if available)
 - [ ] Generate review report
 - [ ] Make recommendation (ready/needs work/major issues)
 

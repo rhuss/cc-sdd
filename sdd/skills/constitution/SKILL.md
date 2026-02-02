@@ -93,14 +93,12 @@ cat specs/features/*.md
 **Extract commonalities:**
 Make implicit standards explicit.
 
-### 3. Use Spec-Kit or Manual Creation
+### 3. Use /speckit.constitution or Manual Creation
 
-**With spec-kit:**
-```bash
-specify constitution
-```
+**With /speckit.constitution (if available):**
+Invoke `/speckit.constitution` to create the constitution interactively.
 
-**Manual creation:**
+**Manual creation (if command not available):**
 Create `specs/constitution.md` with template below.
 
 ### 4. Create Constitution Content

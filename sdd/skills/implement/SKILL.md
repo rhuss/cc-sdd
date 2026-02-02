@@ -128,7 +128,7 @@ echo "✓ spec.md exists"
 if [ ! -f "$SPEC_DIR/plan.md" ]; then
   echo "❌ MISSING: plan.md"
   echo "The spec package is incomplete."
-  echo "Run: specify plan $SPEC_DIR/spec.md"
+  echo "Use /speckit.plan or sdd:spec to generate it."
   exit 1
 fi
 echo "✓ plan.md exists"
@@ -137,7 +137,7 @@ echo "✓ plan.md exists"
 if [ ! -f "$SPEC_DIR/tasks.md" ]; then
   echo "❌ MISSING: tasks.md"
   echo "The spec package is incomplete."
-  echo "Run: specify tasks $SPEC_DIR/spec.md"
+  echo "Use /speckit.tasks or sdd:spec to generate it."
   exit 1
 fi
 echo "✓ tasks.md exists"
@@ -149,37 +149,24 @@ echo "✓ Spec package complete"
 
 The spec package must be created via `sdd:spec` or manually with spec-kit CLI.
 
-## CRITICAL: spec-kit CLI is REQUIRED - NO MANUAL WORKAROUNDS
+## CRITICAL: Spec Package Required
 
-This skill MUST use spec-kit CLI commands. Claude MUST NOT:
-- Generate plans internally (they come from `sdd:spec`)
-- Generate tasks internally (they come from `sdd:spec`)
+This skill requires a complete spec package. Claude MUST NOT:
+- Generate plans internally (they come from `sdd:spec` or `/speckit.plan`)
+- Generate tasks internally (they come from `sdd:spec` or `/speckit.tasks`)
 - Create any spec artifacts by hand
 - "Manually proceed" when something is unexpected
 
 **FAILURE PROTOCOL:**
-- If any spec-kit command fails → STOP and report the error
 - If spec package is incomplete → STOP and tell user to run `sdd:spec`
 - If paths don't match expectations → STOP and diagnose the issue
-- If checklists/artifacts are missing → STOP and suggest the correct specify command
-- **NEVER say "let me manually proceed"** and continue
-- **NEVER "work around"** missing artifacts by doing things directly
-- **NEVER skip verification steps** because "we can see the files"
-
-The correct response to any issue is: STOP, diagnose, and either FIX with specify or ASK the user.
-
-**Examples of FORBIDDEN behavior:**
-```
-❌ "The branch naming doesn't match, let me manually proceed..."
-❌ "I can see the feature directory, let me manually set up the paths..."
-❌ "The checklist is missing, I'll create the tasks myself..."
-```
+- If artifacts are missing → STOP and suggest using `/speckit.*` commands or `sdd:spec`
 
 **Examples of CORRECT behavior:**
 ```
-✓ "The spec package is incomplete. Run: specify plan specs/feature/spec.md"
+✓ "The spec package is incomplete. Use /speckit.plan and /speckit.tasks to generate artifacts."
 ✓ "The branch naming doesn't match expectations. Please check the spec directory structure."
-✓ "Missing tasks.md. The spec package must be regenerated with sdd:spec."
+✓ "Missing tasks.md. Use sdd:spec to create a complete spec package."
 ```
 
 ## Workflow Prerequisites
@@ -408,9 +395,9 @@ Missing files:
 - tasks.md
 
 The spec package must be created via sdd:spec first.
-Run: sdd:spec to generate the complete package, or manually run:
-  specify plan specs/user-profile-api/spec.md
-  specify tasks specs/user-profile-api/spec.md
+Run: sdd:spec to generate the complete package, or use:
+  /speckit.plan
+  /speckit.tasks
 ```
 
 ## Handling Deviations

@@ -38,36 +38,31 @@ Ensure spec-kit is initialized:
 
 If spec-kit prompts for restart, pause this workflow and resume after restart.
 
-## CRITICAL: spec-kit CLI is REQUIRED
+## CRITICAL: Use /speckit.* Slash Commands
 
-This skill MUST use spec-kit CLI commands. Claude MUST NOT:
-- Generate specs internally (use `specify specify` instead)
+This skill should use `/speckit.*` slash commands when available. Claude MUST NOT:
+- Generate specs internally (use `/speckit.specify` instead)
 - Create spec markdown directly (spec-kit handles this)
-- Generate plans internally (use `specify plan` instead)
-- Generate tasks internally (use `specify tasks` instead)
+- Generate plans internally (use `/speckit.plan` instead)
+- Generate tasks internally (use `/speckit.tasks` instead)
+
+**If `/speckit.*` commands are not available:**
+Fall back to creating files manually using templates in `.specify/templates/`.
 
 **FAILURE PROTOCOL:**
-- If any spec-kit command fails → STOP and report the error
+- If a `/speckit.*` command fails → report the error and suggest alternatives
 - If output is unexpected → STOP and report the issue
-- If files are missing → STOP and suggest the correct specify command
-- **NEVER "manually proceed"** with the workflow
-- **NEVER "work around"** spec-kit by doing things directly
-- **NEVER say "let me manually..."** and continue
-
-The correct response to any issue is: STOP, diagnose, and either FIX with specify or ASK the user.
-
-**Examples of FORBIDDEN behavior:**
-```
-❌ "The directory structure is different, let me manually create the spec..."
-❌ "specify specify failed, I'll write the spec.md directly..."
-❌ "The template is missing, let me manually set up the structure..."
-```
+- If commands are not available → use manual creation with templates
 
 **Examples of CORRECT behavior:**
 ```
-✓ "specify specify failed with error X. Please check spec-kit installation."
-✓ "The spec directory doesn't exist. Run: specify specify 'feature description'"
-✓ "plan.md was not created. Run: specify plan specs/feature/spec.md"
+When /speckit.* available:
+✓ "Invoking /speckit.specify to create the spec..."
+✓ "Invoking /speckit.plan to generate the implementation plan..."
+
+When /speckit.* not available:
+✓ "Commands not available. Creating spec manually using .specify/templates/spec-template.md"
+✓ "The spec directory doesn't exist. Please run: specify init"
 ```
 
 ## Critical: Specifications are WHAT and WHY, NOT HOW
@@ -155,29 +150,23 @@ cat .specify/memory/constitution.md
 - Integration points
 - Shared components
 
-### 3. Create Specification (MUST use spec-kit CLI)
+### 3. Create Specification
 
-**Use spec-kit CLI (REQUIRED):**
+**Use /speckit.specify (if available):**
 
-```bash
-# Interactive spec creation using spec-kit template
-specify specify "[feature description]"
-```
-
-**Do NOT create spec markdown directly. Always use `specify specify`.**
+Invoke `/speckit.specify` to create the specification interactively.
 
 **This will:**
 - Create feature directory (e.g., `specs/0001-feature-name/`)
 - Initialize spec.md from template
 - Set up directory structure (docs/, checklists/, contracts/)
 
+**If /speckit.specify is not available:**
+Create the spec manually using `.specify/templates/spec-template.md`.
+
 **After creation, run clarification check (RECOMMENDED):**
 
-```bash
-specify clarify specs/[feature-name]/spec.md
-```
-
-This identifies underspecified areas. Present results to user and update spec if needed.
+Invoke `/speckit.clarify` to identify underspecified areas. Present results to user and update spec if needed.
 
 **Fill in the spec following template structure:**
 - Purpose - WHY this feature exists
@@ -214,13 +203,7 @@ cat .specify/memory/constitution.md
 
 ### 5. Review Spec Soundness
 
-**Before finishing, validate using spec-kit:**
-
-```bash
-specify validate specs/[feature-name]/spec.md
-```
-
-Then use `sdd:review-spec` skill to check:
+**Before finishing, use `sdd:review-spec` skill to check:**
 - Completeness (all sections filled)
 - Clarity (no ambiguous language)
 - Implementability (can generate plan from this)
@@ -235,52 +218,38 @@ Then use `sdd:review-spec` skill to check:
 
 After spec is validated, generate the implementation plan and tasks:
 
-**Generate plan (REQUIRED):**
+**Generate plan:**
 
-```bash
-specify plan specs/[feature-name]/spec.md
-```
+Invoke `/speckit.plan` to generate the implementation plan from the spec.
 
 This creates `specs/[feature-name]/plan.md` from the spec.
 
-**Generate tasks (REQUIRED):**
+**Generate tasks:**
 
-```bash
-specify tasks specs/[feature-name]/spec.md
-```
+Invoke `/speckit.tasks` to generate the task list with dependency ordering.
 
-This creates `specs/[feature-name]/tasks.md` with dependency ordering.
+This creates `specs/[feature-name]/tasks.md`.
 
-**VERIFICATION CHECKPOINT (MANDATORY):**
+**If /speckit.* commands are not available:**
+Generate plan and tasks manually based on the spec requirements.
+
+**VERIFICATION CHECKPOINT:**
 
 ```bash
 SPEC_DIR="specs/[feature-name]"
 
 if [ ! -f "$SPEC_DIR/plan.md" ]; then
-  echo "❌ FAILURE: plan.md not created"
-  echo "Run: specify plan $SPEC_DIR/spec.md"
-  exit 1
+  echo "⚠️  plan.md not yet created"
 fi
 
 if [ ! -f "$SPEC_DIR/tasks.md" ]; then
-  echo "❌ FAILURE: tasks.md not created"
-  echo "Run: specify tasks $SPEC_DIR/spec.md"
-  exit 1
+  echo "⚠️  tasks.md not yet created"
 fi
-
-echo "✓ All artifacts generated"
 ```
 
-**If verification fails: STOP. Do not continue. Do not "manually proceed".**
-Report the failure and suggest the correct specify command to fix it.
+**Run final consistency check (optional):**
 
-**Run final consistency check:**
-
-```bash
-specify analyze specs/[feature-name]/
-```
-
-This validates cross-artifact consistency between spec, plan, and tasks.
+If `/speckit.analyze` is available, invoke it to validate cross-artifact consistency between spec, plan, and tasks.
 
 **The complete spec package now includes:**
 - `spec.md` - What to build (requirements)
