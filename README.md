@@ -108,12 +108,23 @@ flowchart TD
 |---------|---------|
 | `/sdd:brainstorm` | Refine rough ideas into executable specifications through dialogue |
 | `/sdd:spec` | Create formal specifications directly from clear requirements |
-| `/sdd:implement` | Implement features from validated specs using TDD with compliance checking |
+| `/sdd:plan` | Generate implementation plan and tasks from a validated spec |
+| `/sdd:implement` | Implement features from validated specs with full quality gates |
 | `/sdd:evolve` | Reconcile spec/code mismatches with AI-guided evolution |
 | `/sdd:review-spec` | Review specifications for soundness, completeness, and implementability |
 | `/sdd:review-code` | Review code against spec compliance (checks implementation vs spec) |
 | `/sdd:constitution` | Create and manage project-wide principles that guide all specs |
+| `/sdd:help` | Quick reference for all SDD commands |
 | `/sdd:tutorial` | Interactive guide to SDD methodology and team collaboration workflows |
+
+**Why use `/sdd:*` commands instead of `/speckit.*`?**
+
+The `/sdd:*` commands wrap `/speckit.*` with superpowers discipline:
+
+| `/sdd:*` command | Wraps | Adds |
+|------------------|-------|------|
+| `/sdd:plan` | `/speckit.plan` + `/speckit.tasks` | Spec review before planning, consistency check after |
+| `/sdd:implement` | `/speckit.implement` | Pre: init, spec discovery, branch setup. Post: code review, verification |
 
 ### Spec-Kit Commands
 
@@ -139,13 +150,14 @@ After initialization, these spec-kit commands are available:
 | `sdd:using-superpowers-sdd` | **Entry point** - Establishes SDD methodology, workflow routing, and skill discovery |
 | `sdd:brainstorm` | Refine rough ideas into executable specs through collaborative questioning |
 | `sdd:spec` | Create formal specifications directly from clear requirements using spec-kit |
-| `sdd:implement` | Spec-guided implementation with TDD and compliance checking |
+| `sdd:plan` | Generate plan.md and tasks.md with spec review and consistency checking |
+| `sdd:implement` | Wraps /speckit.implement with pre/post quality gates |
 | `sdd:evolve` | Reconcile spec/code mismatches with AI recommendations |
 | `sdd:review-spec` | Validate spec soundness, completeness, and implementability |
-| `sdd:spec-refactoring` | Consolidate and improve evolved specs, remove redundancy |
+| `sdd:review-code` | Review code against spec compliance |
 | `sdd:constitution` | Create/manage project-wide principles and standards |
 | `sdd:spec-kit` | **Technical layer** - Automatic initialization, installation validation, project setup |
-| `sdd:tutorial` | Interactive onboarding for SDD methodology and team collaboration workflows |
+| `sdd:verification-before-completion` | Run tests and validate spec compliance before completing |
 
 ### Modified Superpowers Skills
 
