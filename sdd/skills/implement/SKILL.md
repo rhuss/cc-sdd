@@ -1,27 +1,69 @@
 ---
 name: implement
-description: Use when spec exists and is validated - generates implementation plan FROM spec, executes with TDD, and verifies spec compliance throughout
+description: Execute implementation from existing spec package (spec.md, plan.md, tasks.md) using TDD with spec compliance checking
 ---
 
 # Spec-Driven Implementation
 
 ## Overview
 
-Implement features from validated specifications using Test-Driven Development, with continuous spec compliance checking throughout.
+Execute implementation from a complete spec package using Test-Driven Development, with continuous spec compliance checking throughout.
 
-This is the core SDD implementation workflow: Spec → Plan → TDD → Verify.
+This skill expects a complete spec package to already exist:
+- `spec.md` - Requirements (WHAT)
+- `plan.md` - Implementation approach (HOW)
+- `tasks.md` - Task breakdown
+
+## MANDATORY: Use /speckit.implement
+
+**This skill MUST invoke `/speckit.implement` to execute implementation.**
+
+### Prerequisite: Verify speckit.implement command exists
+
+Before invoking, verify the local command is available:
+
+```bash
+# Check if speckit.implement command exists
+if [ -f .claude/commands/speckit.implement.md ]; then
+  echo "✓ speckit.implement command available"
+else
+  echo "❌ speckit.implement command NOT found"
+  echo ""
+  echo "The /speckit.implement command must be installed."
+  echo "Run: specify init"
+  echo "Then restart Claude Code to load the new commands."
+fi
+```
+
+**If command is missing: STOP. Do not proceed.** Run `specify init` and restart.
+
+### Invoke the command
+
+After verifying the spec package exists AND the command is available, invoke:
+
+```
+/speckit.implement
+```
+
+**Do NOT manually implement steps from this document.**
+**Do NOT read plan.md and tasks.md and "follow" them yourself.**
+**Do NOT proceed with TDD cycles without invoking /speckit.implement.**
+
+The `/speckit.implement` command handles the actual implementation workflow.
+This skill (`sdd:implement`) is the entry point that ensures prerequisites are met.
 
 **Critical Rule:** Implementation MUST match spec. Any deviation triggers spec evolution workflow.
 
 ## When to Use
 
 **Use this skill when:**
-- Spec exists and is validated
+- Complete spec package exists (spec.md, plan.md, tasks.md)
+- Spec is validated and reviewed
 - Ready to write code
-- Starting implementation of new feature
 
 **Don't use this skill when:**
 - No spec exists → Use `sdd:spec` or `sdd:brainstorm` first
+- Spec exists but no plan/tasks → Run `sdd:spec` to generate them
 - Spec/code mismatch exists → Use `sdd:evolve`
 - Debugging existing code → Use `systematic-debugging`
 
@@ -32,6 +74,113 @@ Ensure spec-kit is initialized:
 {Skill: spec-kit}
 
 If spec-kit prompts for restart, pause this workflow and resume after restart.
+
+## Spec Selection
+
+If no spec is specified, discover available specs:
+
+```bash
+# List all specs in the project
+fd -t f "spec.md" specs/ 2>/dev/null | head -20
+```
+
+**If specs found:** Present list and ask user to select one using AskUserQuestion.
+
+Example:
+```
+Found 3 specs in this project:
+1. specs/0001-user-auth/spec.md
+2. specs/0002-api-gateway/spec.md
+3. specs/0003-notification-service/spec.md
+
+Which spec would you like to implement?
+```
+
+**If no specs found:** Inform user and suggest creating one first:
+```
+No specs found in specs/ directory.
+
+To create a spec first:
+- Use `sdd:brainstorm` to refine ideas into a spec
+- Use `sdd:spec` to create a spec from clear requirements
+
+Cannot proceed with implementation without a spec.
+```
+
+## Spec Package Verification
+
+Before implementation can begin, verify the complete spec package exists:
+
+```bash
+SPEC_DIR="specs/[feature-name]"
+
+echo "Verifying spec package..."
+
+# Check spec.md
+if [ ! -f "$SPEC_DIR/spec.md" ]; then
+  echo "❌ MISSING: spec.md"
+  echo "Use sdd:spec to create the spec package first."
+  exit 1
+fi
+echo "✓ spec.md exists"
+
+# Check plan.md
+if [ ! -f "$SPEC_DIR/plan.md" ]; then
+  echo "❌ MISSING: plan.md"
+  echo "The spec package is incomplete."
+  echo "Run: specify plan $SPEC_DIR/spec.md"
+  exit 1
+fi
+echo "✓ plan.md exists"
+
+# Check tasks.md
+if [ ! -f "$SPEC_DIR/tasks.md" ]; then
+  echo "❌ MISSING: tasks.md"
+  echo "The spec package is incomplete."
+  echo "Run: specify tasks $SPEC_DIR/spec.md"
+  exit 1
+fi
+echo "✓ tasks.md exists"
+
+echo "✓ Spec package complete"
+```
+
+**If any file is missing: STOP. Do not proceed. Do not generate internally.**
+
+The spec package must be created via `sdd:spec` or manually with spec-kit CLI.
+
+## CRITICAL: spec-kit CLI is REQUIRED - NO MANUAL WORKAROUNDS
+
+This skill MUST use spec-kit CLI commands. Claude MUST NOT:
+- Generate plans internally (they come from `sdd:spec`)
+- Generate tasks internally (they come from `sdd:spec`)
+- Create any spec artifacts by hand
+- "Manually proceed" when something is unexpected
+
+**FAILURE PROTOCOL:**
+- If any spec-kit command fails → STOP and report the error
+- If spec package is incomplete → STOP and tell user to run `sdd:spec`
+- If paths don't match expectations → STOP and diagnose the issue
+- If checklists/artifacts are missing → STOP and suggest the correct specify command
+- **NEVER say "let me manually proceed"** and continue
+- **NEVER "work around"** missing artifacts by doing things directly
+- **NEVER skip verification steps** because "we can see the files"
+
+The correct response to any issue is: STOP, diagnose, and either FIX with specify or ASK the user.
+
+**Examples of FORBIDDEN behavior:**
+```
+❌ "The branch naming doesn't match, let me manually proceed..."
+❌ "I can see the feature directory, let me manually set up the paths..."
+❌ "The checklist is missing, I'll create the tasks myself..."
+```
+
+**Examples of CORRECT behavior:**
+```
+✓ "The spec package is incomplete. Run: specify plan specs/feature/spec.md"
+✓ "The branch naming doesn't match expectations. Please check the spec directory structure."
+✓ "Missing tasks.md. The spec package must be regenerated with sdd:spec."
+```
 
 ## Workflow Prerequisites
 
@@ -45,88 +194,73 @@ If spec-kit prompts for restart, pause this workflow and resume after restart.
 
 ## The Process
 
-### 1. Read and Understand Spec
+### 1. Verify Spec Package (this skill's responsibility)
 
-**Load the spec:**
+Run the Spec Package Verification from above. Ensure all three files exist:
+- `spec.md`
+- `plan.md`
+- `tasks.md`
+
+**If any file is missing: STOP and tell the user to run `sdd:spec` first.**
+
+### 2. Invoke /speckit.implement (MANDATORY)
+
+**After verification passes, invoke the /speckit.implement command:**
+
+```
+/speckit.implement
+```
+
+**This is the ONLY way to proceed.** The /speckit.implement command handles:
+- Reading and understanding the spec
+- Loading implementation artifacts
+- Setting up workspace
+- TDD implementation cycles
+- Spec compliance checking
+
+**Do NOT manually perform these steps. Invoke the command.**
+
+### 3. (Handled by speckit.implement) Set Up Isolated Workspace
+
+**Check for existing feature branch:**
+
 ```bash
-cat specs/features/[feature-name].md
+FEATURE_NAME="[feature-name]"
+BRANCH_NAME="feature/$FEATURE_NAME"
+
+# Check if branch exists
+if git show-ref --verify --quiet "refs/heads/$BRANCH_NAME"; then
+  echo "✓ Feature branch exists: $BRANCH_NAME"
+else
+  echo "⚠️  No feature branch found: $BRANCH_NAME"
+fi
 ```
 
-**Extract key information:**
-- Functional requirements (what to build)
-- Success criteria (how to verify)
-- Error handling (what can go wrong)
-- Dependencies (what's needed)
-- Constraints (limitations)
+**If no feature branch exists: ASK the user.**
 
-**Validate understanding:**
-- Summarize spec back to user
-- Confirm no ambiguities remain
-- Identify any implementation questions
+Use AskUserQuestion with options:
+1. **Create feature branch** - `git checkout -b feature/[feature-name]`
+2. **Create git worktree** - `git worktree add ../feature-[name] -b feature/[name]`
+3. **Use current branch** - Continue on current branch (user's choice)
 
-### 2. Generate Implementation Plan FROM Spec
+**Do NOT automatically create branches or proceed without asking.**
 
-**Use `sdd:writing-plans` skill** to create plan.
-
-**The plan MUST:**
-- Derive directly from spec requirements
-- Include all functional requirements
-- Cover all error cases
-- Address all edge cases
-- Reference spec sections explicitly
-
-**Plan structure:**
-```markdown
-# Implementation Plan: [Feature Name]
-
-**Source Spec:** specs/features/[feature-name].md
-**Date:** YYYY-MM-DD
-
-## Requirements Coverage
-
-### Functional Requirement 1: [From spec]
-**Implementation approach:**
-- [ ] Task 1
-- [ ] Task 2
-...
-
-[Repeat for all functional requirements]
-
-## Error Handling Implementation
-
-[For each error case in spec]
-- **Error:** [From spec]
-- **Implementation:** [How to handle]
-
-## Test Strategy
-
-[How we'll verify each requirement]
-
-## Files to Create/Modify
-
-[List with file paths]
-
-## Verification Steps
-
-- [ ] All tests pass
-- [ ] Spec compliance check passes
-- [ ] Code review against spec
-```
-
-**Save plan:** `docs/plans/[date]-[feature]-implementation.md`
-
-### 3. Set Up Isolated Workspace
-
-**Use `using-git-worktrees`** (optional but recommended):
+**After branch setup (if using worktree):**
 
 ```bash
 git worktree add ../feature-[name] -b feature/[name]
 cd ../feature-[name]
 ```
 
-**Or work in current branch:**
-- Ensure clean working directory
-- Create feature branch if needed
+**Or for simple feature branch:**
+
+```bash
+git checkout -b feature/[feature-name]
+```
+
+**Before proceeding, ensure:**
+- Clean working directory (no uncommitted changes)
+- On the correct branch for implementation
 
 ### 4. Implement with Test-Driven Development
 
@@ -208,10 +342,13 @@ cd ../feature-[name]
 
 ## Checklist
 
-Use TodoWrite to track:
+**This skill (sdd:implement) handles:**
+- [ ] Verify spec package exists (spec.md, plan.md, tasks.md)
+- [ ] Invoke `/speckit.implement`
 
+**The /speckit.implement command handles everything else:**
 - [ ] Read and understand spec
-- [ ] Generate implementation plan from spec
+- [ ] Load plan and tasks
 - [ ] Set up workspace (worktree or branch)
 - [ ] For each requirement: TDD cycle (test, fail, implement, pass, refactor)
 - [ ] Check spec compliance continuously
@@ -228,132 +365,52 @@ User: Let's implement the user profile API from the spec
 
 You: I'm using sdd:implement to build this feature from the spec.
 
-Reading spec: specs/features/user-profile-api.md
+Verifying spec package...
 
-The spec defines:
-- PUT /api/users/:id/profile endpoint
-- Fields: name (2-50 chars), bio (max 500), avatar_url
-- Auth: JWT required
-- Errors: 401, 403, 404, 422
-- Success criteria: authenticated users can update profiles
+$ SPEC_DIR="specs/user-profile-api"
+$ [ -f "$SPEC_DIR/spec.md" ] && echo "✓ spec.md exists"
+✓ spec.md exists
+$ [ -f "$SPEC_DIR/plan.md" ] && echo "✓ plan.md exists"
+✓ plan.md exists
+$ [ -f "$SPEC_DIR/tasks.md" ] && echo "✓ tasks.md exists"
+✓ tasks.md exists
 
-Generating implementation plan from spec...
-[Uses sdd:writing-plans]
+✓ Spec package complete
 
-Plan created: docs/plans/2025-11-10-user-profile-api-implementation.md
+Now invoking /speckit.implement to execute the implementation...
 
-Plan includes:
-1. Create route handler (src/api/users/profile.ts)
-2. Add validation middleware (src/middleware/validate-profile.ts)
-3. Update service layer (src/services/user.ts)
-4. Add tests (tests/api/users/profile.test.ts)
+/speckit.implement
 
-Ready to implement with TDD. Starting...
-
-[Uses test-driven-development]
-
-Test 1: Should reject unauthenticated requests (Spec: Error Handling)
-
-Writing test...
-```typescript
-test('PUT /api/users/:id/profile returns 401 without JWT', async () => {
-  const response = await request(app)
-    .put('/api/users/123/profile')
-    .send({ name: 'Test' });
-
-  expect(response.status).toBe(401);
-  expect(response.body.error).toBe('Authentication required');
-});
+[/speckit.implement takes over and handles all implementation steps]
 ```
 
-Running test... ❌ FAIL (expected - no auth implemented yet)
+**What happens if spec package is incomplete:**
 
-Implementing auth middleware...
-[Adds JWT validation]
-
-Running test... ✅ PASS
-
-Spec compliance check:
-✓ Matches spec requirement: "User must be authenticated with valid JWT"
-✓ Error message matches spec: "Authentication required"
-
----
-
-Test 2: Should validate name length (Spec: Functional Requirements #2)
-
-Writing test...
-```typescript
-test('PUT /api/users/:id/profile validates name length', async () => {
-  const token = generateTestJWT({ sub: '123' });
-
-  // Too short
-  let response = await request(app)
-    .put('/api/users/123/profile')
-    .set('Authorization', `Bearer ${token}`)
-    .send({ name: 'A' });
-
-  expect(response.status).toBe(422);
-
-  // Too long
-  response = await request(app)
-    .put('/api/users/123/profile')
-    .set('Authorization', `Bearer ${token}`)
-    .send({ name: 'A'.repeat(51) });
-
-  expect(response.status).toBe(422);
-
-  // Valid
-  response = await request(app)
-    .put('/api/users/123/profile')
-    .set('Authorization', `Bearer ${token}`)
-    .send({ name: 'Valid Name' });
-
-  expect(response.status).toBe(200);
-});
 ```
+User: Let's implement the user profile API from the spec
 
-Running test... ❌ FAIL
+You: I'm using sdd:implement to build this feature from the spec.
 
-Implementing validation...
-[Adds name length validation]
+Verifying spec package...
 
-Running test... ✅ PASS
+$ SPEC_DIR="specs/user-profile-api"
+$ [ -f "$SPEC_DIR/spec.md" ] && echo "✓ spec.md exists"
+✓ spec.md exists
+$ [ -f "$SPEC_DIR/plan.md" ] && echo "✓ plan.md exists"
+[no output]
+$ [ -f "$SPEC_DIR/tasks.md" ] && echo "✓ tasks.md exists"
+[no output]
 
-Spec compliance check:
-✓ Matches spec: "name: string, 2-50 characters"
+❌ Spec package is incomplete.
 
----
+Missing files:
+- plan.md
+- tasks.md
 
-[Continues through all requirements...]
-
-All requirements implemented ✓
-
-Requesting code review against spec...
-[Uses sdd:review-code]
-
-Code Review Results:
-✓ All functional requirements implemented (6/6)
-✓ All error cases handled (4/4)
-✓ All edge cases covered (3/3)
-✓ Tests validate spec requirements
-
-Spec Compliance: 100%
-
-Deviations detected: 1
-- Added `updated_at` field to response (not in spec)
-  Reason: Standard practice for update endpoints
-  Recommendation: Update spec (minor addition)
-
-Running verification...
-[Uses sdd:verification-before-completion]
-
-✅ All tests passing (24/24)
-✅ Spec compliance validated
-⚠️  Minor deviation: updated_at field
-
-Recommendation: Use sdd:evolve to update spec with updated_at field
-
-You: Should I update the spec to include the updated_at field?
+The spec package must be created via sdd:spec first.
+Run: sdd:spec to generate the complete package, or manually run:
+  specify plan specs/user-profile-api/spec.md
+  specify tasks specs/user-profile-api/spec.md
 ```
 
 ## Handling Deviations
@@ -371,10 +428,21 @@ You: Should I update the spec to include the updated_at field?
 - Force-fit code to incorrect spec
 - Skip spec compliance checks
 
-## Integration with Superpowers Skills
+## Integration with spec-kit CLI and Skills
 
-**This skill orchestrates:**
-- `sdd:writing-plans` - Generate plan from spec
+**This skill (sdd:implement) is an entry point that:**
+1. Verifies the spec package exists
+2. Invokes `/speckit.implement` to do the actual work
+
+**This skill INVOKES:**
+- `/speckit.implement` - The actual implementation workflow (MANDATORY)
+
+**This skill does NOT:**
+- Generate `plan.md` or `tasks.md` (created by `sdd:spec`)
+- Manually read artifacts and follow steps
+- Perform TDD cycles directly
+
+**The /speckit.implement command orchestrates:**
 - `test-driven-development` - TDD implementation
 - `sdd:review-code` - Spec compliance review
 - `sdd:verification-before-completion` - Tests + spec validation

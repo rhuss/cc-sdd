@@ -28,6 +28,69 @@ Ensure spec-kit is initialized:
 
 If spec-kit prompts for restart, pause this workflow and resume after restart.
 
+## Spec Selection
+
+If no spec is specified, discover available specs:
+
+```bash
+# List all specs in the project
+fd -t f "spec.md" specs/ 2>/dev/null | head -20
+```
+
+**If specs found:** Present list and ask user to select one using AskUserQuestion.
+
+Example:
+```
+Found 2 specs in this project:
+1. specs/0001-user-auth/spec.md
+2. specs/0002-api-gateway/spec.md
+
+Which spec would you like to review?
+```
+
+**If no specs found:** Inform user:
+```
+No specs found in specs/ directory.
+
+To create a spec first:
+- Use `sdd:brainstorm` to refine ideas into a spec
+- Use `sdd:spec` to create a spec from clear requirements
+
+Cannot review without a spec to review.
+```
+
+## spec-kit CLI Integration
+
+This skill uses spec-kit CLI for validation:
+
+```bash
+# Validate spec format and structure
+specify validate specs/[feature-name]/spec.md
+
+# Cross-artifact consistency check (if plan/tasks exist)
+specify analyze specs/[feature-name]/
+```
+
+**VERIFICATION:**
+
+After running `specify validate`, confirm it executed successfully:
+
+```bash
+# The validate command should output results
+# If no output or command not found, something is wrong
+specify validate specs/[feature-name]/spec.md 2>&1 | head -5
+if [ $? -ne 0 ]; then
+  echo "❌ specify validate failed or not available"
+  echo "Cannot proceed without spec-kit validation"
+  echo "Check spec-kit installation: which specify"
+fi
+```
+
+**If validation fails: STOP. Do not proceed with manual review until spec-kit validation works.**
+
+Always run `specify validate` before manual review.
+Run `specify analyze` if multiple artifacts exist (spec, plan, tasks).
+
 ## Review Dimensions
 
 ### 1. Completeness
@@ -55,10 +118,20 @@ If spec-kit prompts for restart, pause this workflow and resume after restart.
 
 ## The Process
 
-### 1. Load and Read Spec
+### 1. Load and Validate Spec
+
+**First, run spec-kit validation:**
 
 ```bash
-cat specs/features/[feature-name].md
+specify validate specs/[feature-name]/spec.md
+```
+
+If validation fails, report errors before proceeding.
+
+**Then read the spec:**
+
+```bash
+cat specs/[feature-name]/spec.md
 ```
 
 Read thoroughly, take notes on issues.
@@ -160,7 +233,7 @@ Read thoroughly, take notes on issues.
 **If constitution exists:**
 
 ```bash
-cat specs/constitution.md
+cat .specify/memory/constitution.md
 ```
 
 **Validate:**
@@ -171,7 +244,22 @@ cat specs/constitution.md
 
 **Note any violations with reasoning.**
 
-### 8. Generate Review Report
+### 8. Run Cross-Artifact Consistency Check
+
+**If plan or tasks exist, run spec-kit analyze:**
+
+```bash
+specify analyze specs/[feature-name]/
+```
+
+This checks consistency between:
+- spec.md (requirements)
+- plan.md (implementation approach)
+- tasks.md (task list)
+
+**Report any mismatches or gaps found.**
+
+### 9. Generate Review Report
 
 **Report structure:**
 
@@ -270,7 +358,7 @@ cat specs/constitution.md
 [What should be done]
 ```
 
-### 9. Make Recommendation
+### 10. Make Recommendation
 
 **If sound (minor issues only):**
 - ✅ Ready for implementation
@@ -289,6 +377,7 @@ cat specs/constitution.md
 
 Use TodoWrite to track:
 
+- [ ] Run `specify validate` on spec
 - [ ] Load and read spec thoroughly
 - [ ] Check structure (all sections present)
 - [ ] Review completeness (no TBD, all covered)
@@ -296,6 +385,7 @@ Use TodoWrite to track:
 - [ ] Validate implementability (can plan from this)
 - [ ] Assess testability (can verify requirements)
 - [ ] Check constitution alignment (if exists)
+- [ ] Run `specify analyze` for cross-artifact consistency (if applicable)
 - [ ] Generate review report
 - [ ] Make recommendation (ready/needs work/major issues)
 

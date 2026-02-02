@@ -83,7 +83,7 @@ Controls automatic spec updates:
 #### sdd.spec_kit
 Spec-kit CLI integration:
 - `enabled` (boolean, default: true) - Use spec-kit CLI if available
-- `path` (string, default: "speckit") - Path to spec-kit binary
+- `path` (string, default: "specify") - Path to spec-kit binary
 
 #### sdd.constitution
 Constitution file settings:
@@ -105,7 +105,7 @@ Specification directory settings:
     },
     "spec_kit": {
       "enabled": true,
-      "path": "/usr/local/bin/speckit"
+      "path": "/usr/local/bin/specify"
     }
   }
 }
@@ -178,7 +178,7 @@ Specification directory settings:
 
 **Purpose**: Documents files bundled with the plugin
 
-**Note**: Templates, scripts, and spec-kit commands are NOT bundled. They are provided by spec-kit CLI via `speckit init` in each project.
+**Note**: Templates, scripts, and spec-kit commands are NOT bundled. They are provided by spec-kit CLI via `specify init` in each project.
 
 **Structure**:
 ```json
@@ -186,7 +186,7 @@ Specification directory settings:
   "bundled_resources": {
     "commands": {
       "path": "commands",
-      "description": "Slash commands for SDD workflows (spec-kit commands installed via speckit init)",
+      "description": "Slash commands for SDD workflows (spec-kit commands installed via specify init)",
       "files": [
         "brainstorm.md",
         "spec.md",
@@ -210,9 +210,9 @@ Specification directory settings:
 - `files`: Array of filenames in the directory
 
 **External Resources** (not bundled):
-- Templates: Provided by `speckit init` in `.specify/templates/`
-- Scripts: Provided by `speckit init` in `.specify/scripts/`
-- Spec-kit commands: Provided by `speckit init` in `.claude/commands/speckit.*`
+- Templates: Provided by `specify init` in `.specify/templates/`
+- Scripts: Provided by `specify init` in `.specify/scripts/`
+- Spec-kit commands: Provided by `specify init` in `.claude/commands/speckit.*`
 - Source of truth: spec-kit repository
 
 ## Skill Categories
