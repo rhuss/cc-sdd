@@ -25,14 +25,13 @@ Before starting the brainstorming workflow, ensure spec-kit is initialized:
 
 If spec-kit prompts for restart, pause this workflow and resume after restart.
 
-## CRITICAL: spec-kit CLI is REQUIRED
+## CRITICAL: Use /speckit.* Slash Commands
 
-This skill MUST use spec-kit CLI commands. Claude MUST NOT:
-- Generate specs internally (use `specify specify` instead)
+This skill should use `/speckit.*` slash commands when available. Claude MUST NOT:
+- Generate specs internally (use `/speckit.specify` instead)
 - Create spec markdown directly (spec-kit handles this)
 
-If any spec-kit command fails, STOP and report the error.
-Do not fall back to internal generation.
+If `/speckit.*` commands are not available, fall back to creating specs manually using the template at `.specify/templates/spec-template.md`.
 
 ## The Process
 
@@ -73,23 +72,17 @@ Do not fall back to internal generation.
 1. **Announce spec creation:**
    "Based on our discussion, I'm creating the specification..."
 
-2. **Create spec file using spec-kit CLI (REQUIRED):**
+2. **Create spec file using /speckit.specify (if available):**
 
-   ```bash
-   specify specify "[feature description based on discussion]"
-   ```
+   Invoke `/speckit.specify` to create the spec interactively.
 
    This creates the spec at `specs/[NNNN]-[feature-name]/spec.md` using the spec-kit template.
 
-   **Do NOT create spec markdown directly. Always use `specify specify`.**
+   **If `/speckit.specify` is not available:** Create the spec manually following `.specify/templates/spec-template.md`.
 
 3. **Run clarification check (RECOMMENDED):**
 
-   After creating the spec, identify any underspecified areas:
-
-   ```bash
-   specify clarify specs/[feature-name]/spec.md
-   ```
+   After creating the spec, invoke `/speckit.clarify` to identify any underspecified areas.
 
    Present clarification results to user for review. If gaps are identified, update the spec before proceeding.
 
@@ -187,16 +180,12 @@ Do not fall back to internal generation.
 ### After spec creation
 
 **Validate the spec:**
-- Use `sdd:review-spec` to check soundness (which will run `specify validate`)
+- Use `sdd:review-spec` to check soundness
 - Ensure spec is implementable
 - Confirm no ambiguities remain
 
 **Run consistency check (RECOMMENDED):**
-```bash
-specify analyze specs/[feature-name]/
-```
-
-This checks for cross-artifact consistency if multiple artifacts exist.
+If `/speckit.analyze` is available, invoke it to check for cross-artifact consistency.
 
 **Offer next steps:**
 - "Spec created and validated. Ready to implement?"
