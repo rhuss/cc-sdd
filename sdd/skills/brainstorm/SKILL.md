@@ -25,6 +25,50 @@ Before starting the brainstorming workflow, ensure spec-kit is initialized:
 
 If spec-kit prompts for restart, pause this workflow and resume after restart.
 
+### Explicit Installation Check (MANDATORY)
+
+**Before proceeding, run these checks:**
+
+```bash
+# Check if specify CLI is installed
+which specify
+```
+
+**If `specify` is NOT found:**
+```
+The 'specify' CLI is required but not installed.
+
+Install with:
+  uv pip install specify-cli
+
+IMPORTANT: The CLI command is 'specify' (not 'speckit').
+           The package is 'specify-cli' (not 'spec-kit').
+
+After installation, run: specify init
+```
+
+**STOP and wait for user to install.**
+
+**If `specify` IS found, check project initialization:**
+
+```bash
+# Check if project is initialized
+[ -d .specify ] && echo "initialized" || echo "not-initialized"
+```
+
+**If NOT initialized:**
+```bash
+specify init
+```
+
+**If `.claude/commands/speckit.*` files were created, inform user:**
+```
+RESTART REQUIRED: New slash commands installed.
+Please restart Claude Code to load /speckit.* commands.
+```
+
+**STOP and wait for restart.**
+
 ## CRITICAL: Use /speckit.* Slash Commands
 
 This skill should use `/speckit.*` slash commands when available. Claude MUST NOT:
@@ -187,6 +231,84 @@ If `/speckit.*` commands are not available, fall back to creating specs manually
 **Run consistency check (RECOMMENDED):**
 If `/speckit.analyze` is available, invoke it to check for cross-artifact consistency.
 
+**Generate review_brief.md:**
+
+After spec is validated, generate a brief for reviewers. Read the spec and synthesize:
+
+1. **Feature Overview** (3-5 sentences from Purpose section)
+2. **Scope Boundaries** (in scope, out of scope, justification)
+3. **Critical Decisions** (choices with trade-offs)
+4. **Areas of Potential Disagreement**:
+   - Trade-offs where reasonable people might disagree
+   - Assumptions that could be challenged
+   - Scope decisions that might be questioned
+   - For each: decision, why controversial, alternative view, feedback requested
+5. **Naming Decisions** (named elements from spec)
+6. **Open Questions** (areas needing stakeholder input)
+7. **Risk Areas** (high-impact concerns)
+
+Write to `specs/[feature-name]/review_brief.md` using the template:
+
+```markdown
+# Review Brief: [Feature Name]
+
+**Spec:** specs/[feature-name]/spec.md
+**Generated:** YYYY-MM-DD
+
+> Reviewer's guide to scope and key decisions. See full spec for details.
+
+---
+
+## Feature Overview
+[3-5 sentences on purpose, scope, and key outcomes]
+
+## Scope Boundaries
+- **In scope:** [What this includes]
+- **Out of scope:** [What this explicitly excludes]
+- **Why these boundaries:** [Brief justification]
+
+## Critical Decisions
+
+### [Decision Title]
+- **Choice:** [What was decided]
+- **Trade-off:** [Key trade-off made]
+- **Feedback:** [Specific question for reviewer]
+
+## Areas of Potential Disagreement
+
+> Decisions or approaches where reasonable reviewers might push back.
+
+### [Topic]
+- **Decision:** [What was decided]
+- **Why this might be controversial:** [Reason]
+- **Alternative view:** [What someone might prefer]
+- **Seeking input on:** [Specific question]
+
+## Naming Decisions
+
+| Item | Name | Context |
+|------|------|---------|
+| ... | ... | ... |
+
+## Open Questions
+
+- [ ] [Question needing stakeholder input]
+
+## Risk Areas
+
+| Risk | Impact | Mitigation |
+|------|--------|------------|
+| ... | High/Med/Low | ... |
+
+---
+*Share with reviewers before implementation.*
+```
+
+**Constraints:**
+- Maximum 2 pages (~800-1000 words)
+- Prioritize: Disagreement Areas > Decisions > Scope > Overview
+- Be explicit about potential pushback points
+
 **Offer next steps:**
 - "Spec created and validated. Ready to implement?"
 - If yes → Use `sdd:implement`
@@ -197,11 +319,11 @@ If `/speckit.analyze` is available, invoke it to check for cross-artifact consis
 git add specs/[NNNN]-[feature-name]/
 git commit -m "Add spec for [feature name]
 
-[Brief description of what the feature does]
+Includes:
+- spec.md (requirements)
+- review_brief.md (reviewer guide)
 
-🤖 Generated with [Claude Code](https://claude.com/claude-code)
-
-Co-Authored-By: Claude <noreply@anthropic.com>"
+Assisted-By: 🤖 Claude Code"
 ```
 
 ## Key Principles

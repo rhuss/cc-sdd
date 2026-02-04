@@ -114,8 +114,7 @@ flowchart TD
 | `/sdd:review-spec` | Review specifications for soundness, completeness, and implementability |
 | `/sdd:review-code` | Review code against spec compliance (checks implementation vs spec) |
 | `/sdd:constitution` | Create and manage project-wide principles that guide all specs |
-| `/sdd:help` | Quick reference for all SDD commands |
-| `/sdd:tutorial` | Interactive guide to SDD methodology and team collaboration workflows |
+| `/sdd:help` | Quick reference for all SDD commands (use --tutorial for interactive guide) |
 
 **Why use `/sdd:*` commands instead of `/speckit.*`?**
 

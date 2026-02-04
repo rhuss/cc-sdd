@@ -38,6 +38,50 @@ Ensure spec-kit is initialized:
 
 If spec-kit prompts for restart, pause this workflow and resume after restart.
 
+### Explicit Installation Check (MANDATORY)
+
+**Before proceeding, run these checks:**
+
+```bash
+# Check if specify CLI is installed
+which specify
+```
+
+**If `specify` is NOT found:**
+```
+The 'specify' CLI is required but not installed.
+
+Install with:
+  uv pip install specify-cli
+
+IMPORTANT: The CLI command is 'specify' (not 'speckit').
+           The package is 'specify-cli' (not 'spec-kit').
+
+After installation, run: specify init
+```
+
+**STOP and wait for user to install.**
+
+**If `specify` IS found, check project initialization:**
+
+```bash
+# Check if project is initialized
+[ -d .specify ] && echo "initialized" || echo "not-initialized"
+```
+
+**If NOT initialized:**
+```bash
+specify init
+```
+
+**If `.claude/commands/speckit.*` files were created, inform user:**
+```
+RESTART REQUIRED: New slash commands installed.
+Please restart Claude Code to load /speckit.* commands.
+```
+
+**STOP and wait for restart.**
+
 ## CRITICAL: Use /speckit.* Slash Commands
 
 This skill should use `/speckit.*` slash commands when available. Claude MUST NOT:
@@ -255,6 +299,121 @@ If `/speckit.analyze` is available, invoke it to validate cross-artifact consist
 - `spec.md` - What to build (requirements)
 - `plan.md` - How to build it (implementation approach)
 - `tasks.md` - Work breakdown (actionable items)
+- `review_brief.md` - Reviewer guide (generated in next step)
+
+### 6.5. Generate review_brief.md
+
+After plan and tasks are complete, generate a brief for reviewers.
+
+**Read source documents:**
+- Read `specs/[feature-name]/spec.md`
+- Read `specs/[feature-name]/plan.md`
+
+**Extract and synthesize:**
+
+1. **Feature Overview** (3-5 sentences from spec Purpose section)
+
+2. **Scope Boundaries**
+   - In scope: From spec requirements
+   - Out of scope: From spec "Out of Scope" section
+   - Why: Brief justification for boundaries
+
+3. **Critical Decisions** - Identify choices with trade-offs
+
+4. **Areas of Potential Disagreement** - Explicitly identify:
+   - Trade-offs where reasonable people might disagree
+   - Assumptions that could be challenged
+   - Scope decisions (inclusions/exclusions) that might be questioned
+   - Unconventional approaches taken
+   - For each: What was decided, why it might be controversial, alternative view, feedback requested
+
+5. **Naming Decisions** - Extract named elements
+
+6. **Schema Definitions** - Condense key structures
+
+7. **Open Questions** - Areas needing stakeholder input
+
+8. **Risk Areas** - High-impact concerns
+
+**Create review_brief.md:**
+
+Write to `specs/[feature-name]/review_brief.md` using this template:
+
+```markdown
+# Review Brief: [Feature Name]
+
+**Spec:** specs/[feature-name]/spec.md | **Plan:** specs/[feature-name]/plan.md
+**Generated:** YYYY-MM-DD
+
+> Reviewer's guide to scope and key decisions. See full spec/plan for details.
+
+---
+
+## Feature Overview
+[3-5 sentences on purpose, scope, and key outcomes]
+
+## Scope Boundaries
+- **In scope:** [What this includes]
+- **Out of scope:** [What this explicitly excludes]
+- **Why these boundaries:** [Brief justification]
+
+## Critical Decisions
+
+### [Decision Title]
+- **Choice:** [What was decided]
+- **Trade-off:** [Key trade-off made]
+- **Feedback:** [Specific question for reviewer]
+
+## Areas of Potential Disagreement
+
+> Decisions or approaches where reasonable reviewers might push back.
+
+### [Topic]
+- **Decision:** [What was decided]
+- **Why this might be controversial:** [Reason]
+- **Alternative view:** [What someone might prefer]
+- **Seeking input on:** [Specific question]
+
+## Naming Decisions
+
+| Item | Name | Context |
+|------|------|---------|
+| API Endpoint | `/api/v1/...` | ... |
+| Field | `field_name` | ... |
+| Error Code | `ERROR_NAME` | ... |
+
+## Schema Definitions (Condensed)
+
+[Key request/response structures only]
+
+## Open Questions
+
+- [ ] [Question needing stakeholder input]
+
+## Risk Areas
+
+| Risk | Impact | Mitigation |
+|------|--------|------------|
+| ... | High/Med/Low | ... |
+
+---
+*Share with reviewers before implementation.*
+```
+
+**Constraints:**
+- Maximum 2 pages (~800-1000 words)
+- Prioritize: Disagreement Areas > Decisions > Scope > Overview
+- Be explicit about potential pushback points
+
+**Verify:**
+
+```bash
+SPEC_DIR="specs/[feature-name]"
+if [ -f "$SPEC_DIR/review_brief.md" ]; then
+  echo "review_brief.md created"
+  wc -w "$SPEC_DIR/review_brief.md"
+fi
+```
 
 ### 7. Commit Spec Package
 
@@ -267,7 +426,8 @@ git commit -m "Add spec package for [feature-name]
 Includes:
 - spec.md (requirements)
 - plan.md (implementation plan)
-- tasks.md (task breakdown)"
+- tasks.md (task breakdown)
+- review_brief.md (reviewer guide)"
 ```
 
 **Spec package is now source of truth** for this feature.

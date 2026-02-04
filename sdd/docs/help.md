@@ -1,13 +1,3 @@
----
-name: sdd:help
-description: Quick reference for all SDD commands
----
-
-Display the following content exactly as written, then offer to answer questions:
-
----
-
-```
                           SDD Quick Reference
 
 WORKFLOW
@@ -60,7 +50,7 @@ EVOLUTION
 
 LEARNING
   /sdd:help           This quick reference (use --tutorial for interactive guide)
-```
+
 
 SDD vs SPEC-KIT COMMANDS
 ┌──────────────────┬────────────────────┬────────────────────────────────┐
@@ -104,7 +94,7 @@ DECISION GUIDE
 │ New project             │ Standards             │ /sdd:constitution     │
 └─────────────────────────┴───────────────────────┴───────────────────────┘
 
-```
+
 KEY PRINCIPLES
 
   • Spec-first: Always spec before code
@@ -121,14 +111,6 @@ TEAM WORKFLOW
   2. Code PR - Review implementation against approved spec
 
   Requires: GitHub MCP server (preferred) or gh CLI tool
-```
 
----
 
-After displaying, add:
-
-```
 Want an interactive tutorial? Run: /sdd:help --tutorial
-```
-
-Then ask: "Any questions about the SDD workflow? I can explain any command in detail."

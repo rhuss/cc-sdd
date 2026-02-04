@@ -5,6 +5,16 @@ description: Technical integration layer for spec-kit - handles automatic initia
 
 # Spec-Kit Technical Integration
 
+## CRITICAL NAMING - READ THIS FIRST
+
+| What | Correct Name | WRONG Names |
+|------|--------------|-------------|
+| CLI command | `specify` | ~~speckit~~, ~~spec-kit~~ |
+| Package name | `specify-cli` | ~~spec-kit~~, ~~speckit~~ |
+| Slash commands | `/speckit.*` | (these are correct) |
+
+**Installation:** `uv pip install specify-cli` or `pip install specify-cli`
+
 ## Purpose
 
 This skill is the **single source of truth** for all spec-kit technical integration:

@@ -1,15 +1,39 @@
 ---
-name: sdd:tutorial
-description: Interactive guide to SDD methodology and team collaboration workflows
+name: help
+description: Quick reference for all SDD commands with optional interactive tutorial mode
 ---
 
-# SDD Tutorial
+# SDD Help
 
 ## Overview
 
-Interactive guide to Specification-Driven Development. Offers 3 learning paths.
+Display the SDD quick reference with workflow diagram, command list, and guidance. Supports an optional `--tutorial` mode for interactive learning.
 
-## Context Detection
+## Argument Parsing
+
+Check if the user passed `--tutorial` or `-t` argument:
+
+- `/sdd:help` → Reference mode (default)
+- `/sdd:help --tutorial` → Tutorial mode
+- `/sdd:help -t` → Tutorial mode
+
+## Reference Mode (Default)
+
+When no `--tutorial` argument is provided:
+
+1. Read and display the quick reference content from `sdd/docs/help.md`
+2. Display the content exactly as written
+3. After displaying, show:
+   ```
+   Want an interactive tutorial? Run: /sdd:help --tutorial
+   ```
+4. Ask: "Any questions about the SDD workflow? I can explain any command in detail."
+
+## Tutorial Mode
+
+When `--tutorial` or `-t` argument is provided:
+
+### 1. Context Detection
 
 Before presenting paths, check the project state to customize messaging:
 
@@ -22,7 +46,7 @@ Adapt messaging based on findings:
 - Existing SDD project: Focus on advanced patterns
 - Team project: Emphasize collaboration workflows
 
-## Learning Path Selection
+### 2. Learning Path Selection
 
 Present the user with 3 learning paths using AskUserQuestion:
 
@@ -38,7 +62,7 @@ Present the user with 3 learning paths using AskUserQuestion:
 - PR workflows and spec reviews
 - Best for: Teams adopting SDD together
 
-## Deliver Content
+### 3. Deliver Content
 
 Based on user's selection:
 
@@ -57,7 +81,7 @@ Based on user's selection:
    - Engage with the user throughout
    - Offer to skip sections if already familiar
 
-## Next Steps
+### 4. Next Steps
 
 After completing the tutorial, suggest next actions based on project state:
 
@@ -72,3 +96,10 @@ After completing the tutorial, suggest next actions based on project state:
 **Team project:**
 - "For team projects, remember to create spec PRs for major features"
 - "This lets the team align on WHAT before debating HOW"
+
+## Key Principles
+
+- **Reference mode is fast**: Just display the help content
+- **Tutorial mode is interactive**: Engage with questions and pauses
+- **Context-aware**: Adapt suggestions based on project state
+- **Non-pushy**: Offer options, don't force workflows
