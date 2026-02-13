@@ -54,6 +54,7 @@ VALIDATION
 
 IMPLEMENTATION
   /sdd:implement      Build code from spec using TDD
+                      Options: --with-beads  Use beads-driven execution
 
 EVOLUTION
   /sdd:evolve         Reconcile spec/code drift
