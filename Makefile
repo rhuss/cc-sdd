@@ -1,4 +1,4 @@
-.PHONY: validate install uninstall reinstall check-upstream help
+.PHONY: validate install uninstall reinstall check-upstream test-hook help
 
 MARKETPLACE := sdd-plugin-development
 PLUGIN := sdd@$(MARKETPLACE)
@@ -30,6 +30,11 @@ uninstall:
 
 reinstall: uninstall install
 
+test-hook:
+	@echo "Testing context-hook.py..."
+	@echo '{"prompt":"/sdd:init","session_id":"test","cwd":"/tmp","hook_event_name":"UserPromptSubmit"}' | \
+		python3 sdd/scripts/hooks/context-hook.py
+
 check-upstream:
 	cd sdd && ./scripts/check-upstream-changes.sh
 
@@ -39,4 +44,5 @@ help:
 	@echo "  install        - Install plugin (adds marketplace, installs/updates plugin)"
 	@echo "  uninstall      - Remove plugin and marketplace"
 	@echo "  reinstall      - Full uninstall and reinstall"
+	@echo "  test-hook      - Test the context hook"
 	@echo "  check-upstream - Check for upstream superpowers changes"

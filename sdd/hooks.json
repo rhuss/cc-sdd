@@ -1,0 +1,16 @@
+{
+  "description": "SDD plugin hooks for context injection",
+  "hooks": {
+    "UserPromptSubmit": [
+      {
+        "matcher": "*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 ${CLAUDE_PLUGIN_ROOT}/scripts/hooks/context-hook.py"
+          }
+        ]
+      }
+    ]
+  }
+}
