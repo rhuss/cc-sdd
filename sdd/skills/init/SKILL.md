@@ -1,78 +1,34 @@
 ---
 name: init
-description: Deterministic, non-interactive initialization and update of spec-kit for Claude Code environments. Single source of truth for all specify CLI setup.
+description: Run the sdd-init.sh script. Do not check for CLI tools or explore the filesystem.
 ---
 
-# Spec-Kit Initialization
+# Step 1: Run the Script
 
-## STOP: Read This First
+Do not run any other commands before this. No `which`, no `--version`, no `Search`, no `Glob`, no `Grep`, no `ls`, no `find`. The script handles everything.
 
-**Do NOT explore.** Do NOT run `which`, `Search`, `Glob`, `Grep`, `find`, or any discovery commands. Do NOT search for `speckit`, `spec-kit`, or `.speckit`. The CLI is called `specify` (not `speckit`). The init script handles all CLI detection internally.
-
-**Your ONLY action**: Run the init script. Nothing else.
-
-1. Derive the plugin root from this file's path: this file is `skills/init/SKILL.md`, so the plugin root is `../../` relative to this file's directory.
-2. Check arguments: `--update` (upgrade CLI + refresh), `--refresh` (re-download templates), or no args (fast check + init if needed).
-3. Run this single Bash command from the project's working directory:
+Derive the plugin root from this file's path (`skills/init/SKILL.md` -> plugin root is `../../`). Then run:
 
 ```bash
 <plugin-root>/scripts/sdd-init.sh [--refresh|--update]
 ```
 
-Then interpret the output per the table below. That's it. Do not run anything else before or after (except Trait Configuration if output is READY).
+Arguments: `--update` (upgrade CLI + refresh), `--refresh` (re-download templates), or no args (fast check + init if needed). Run from the project's working directory (not the plugin directory).
 
-## Interpreting Script Output
+# Step 2: Interpret Output
 
-The script prints a status keyword as its last meaningful line and uses exit codes:
+| Output | Exit Code | Action |
+|--------|-----------|--------|
+| `READY` | 0 | Proceed to **Step 3** (Trait Configuration below) |
+| `NEED_INSTALL` | 2 | Show the script's output to the user and STOP |
+| `RESTART_REQUIRED` | 3 | Show the script's output to the user and STOP |
+| `ERROR: ...` | 1 | Show error, suggest troubleshooting |
 
-| Output | Exit Code | Meaning | Action |
-|--------|-----------|---------|--------|
-| `READY` | 0 | Fully initialized | Return success, calling skill continues |
-| `NEED_INSTALL` | 2 | `specify` CLI not found | Show install instructions from output, STOP |
-| `RESTART_REQUIRED` | 3 | New slash commands installed | Show restart instructions from output, STOP |
-| `ERROR: ...` | 1 | Something failed | Show error from output, suggest troubleshooting |
+Do NOT run any verification commands after the script. Do NOT call `specify version`, `specify --version`, or `specify check`.
 
-**When output is `READY`:** The calling skill can proceed immediately. Do NOT run any additional verification commands.
+# Step 3: Trait Configuration
 
-**When output is `NEED_INSTALL`:** Display the script's output to the user and STOP. Wait for user to install.
-
-**When output is `RESTART_REQUIRED`:** Display the script's output to the user and STOP. User must restart Claude Code.
-
-## Auto-Approval
-
-To eliminate permission prompts for this script, add it to the project's allowed commands in `.claude/settings.json`:
-
-```json
-{
-  "permissions": {
-    "allow": [
-      "Bash(*/scripts/sdd-init.sh*)"
-    ]
-  }
-}
-```
-
-## CRITICAL: Correct Invocation (Reference)
-
-The script uses these flags internally when calling `specify init`. This is documented here for reference only. The LLM should NOT call `specify init` directly; always use the script.
-
-```bash
-specify init --here --ai claude --force
-```
-
-**NEVER call bare `specify init`** without these flags. The bare command prompts interactively and hangs in non-TTY environments.
-
-| Flag | Purpose |
-|------|---------|
-| `--here` | Use current directory (skips directory picker) |
-| `--ai claude` | Select AI provider (skips arrow-key selector) |
-| `--force` | Overwrite existing config (skips confirmation) |
-
-## Trait Configuration
-
-After the init script reports `READY`, configure SDD traits. Traits inject discipline overlays into spec-kit command and template files.
-
-**Derive the plugin root** from this SKILL.md file's location: this file is at `skills/init/SKILL.md`, so the plugin root is `../../` relative to this file (the directory containing `scripts/`, `skills/`, `commands/`, `overlays/`).
+Only reach this step if the script output was `READY`.
 
 ### First-Time Setup (no `.specify/sdd-traits.json`)
 
@@ -112,27 +68,17 @@ If `.specify/sdd-traits.json` already exists:
 3. If "Keep current": run `<plugin-root>/scripts/apply-traits.sh` to ensure overlays are applied.
 4. If "Reconfigure": prompt for new trait selections (same as first-time setup), write updated config, run `apply-traits.sh`.
 
-## Auto-Approval for apply-traits.sh
+# Auto-Approval
 
-To eliminate permission prompts for the traits script, add to `.claude/settings.json`:
+To eliminate permission prompts, add to `.claude/settings.json`:
 
 ```json
 {
   "permissions": {
     "allow": [
+      "Bash(*/scripts/sdd-init.sh*)",
       "Bash(*/scripts/apply-traits.sh*)"
     ]
   }
 }
 ```
-
-## Remember
-
-- **NEVER run `which`, `Search`, `Glob`, `find`, or any exploratory commands.** The script detects everything.
-- **The CLI is `specify`.** Not `speckit`. Not `spec-kit`. Not `spec_kit`. Only `specify`.
-- **Always use the script.** Do not replicate its logic with inline bash commands.
-- **One call, one result.** The script handles the fast path (already initialized) and slow path (needs setup) internally.
-- **Do NOT call `specify version` separately.** The script skips it on the fast path for speed.
-- This skill is infrastructure, not workflow.
-- Workflow skills delegate here via `{Skill: spec-kit}` which calls `{Skill: sdd:init}`.
-- **After init script completes with READY**, always proceed to the Trait Configuration section above.
