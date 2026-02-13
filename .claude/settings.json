@@ -1,7 +1,0 @@
-{
-  "permissions": {
-    "allow": [
-      "Bash(*/sdd/scripts/sdd-init.sh*)"
-    ]
-  }
-}
