@@ -52,7 +52,7 @@ A user runs `/speckit.plan` in a project with the `sdd` trait enabled. The SDD o
 
 **Acceptance Scenarios**:
 
-1. **Given** a project with the `sdd` trait enabled, **When** the user runs `/speckit.plan`, **Then** the SDD overlay invokes `{Skill: sdd:review-spec}` to validate the spec before planning begins, and after `/speckit.tasks` completes, invokes `{Skill: sdd:review-plan}` to validate coverage matrix, red flags, and task quality.
+1. **Given** a project with the `sdd` trait enabled, **When** the user runs `/speckit.plan`, **Then** the SDD overlay first invokes `{Skill: sdd:review-spec}` to validate the spec, then the base plan is generated, then `/speckit.tasks` runs to generate the task breakdown, and finally `{Skill: sdd:review-plan}` validates coverage matrix, red flags, task quality, and generates `review-summary.md`.
 
 2. **Given** a project with no traits enabled, **When** the user runs `/speckit.plan`, **Then** spec-kit generates the plan normally with no additional quality gates.
 
@@ -110,7 +110,10 @@ An existing user who previously used `/sdd:spec`, `/sdd:plan`, and `/sdd:impleme
   - **Retained skills (unchanged purpose)**: `sdd:review-spec`, `sdd:review-code`, `sdd:brainstorm`, `sdd:evolve`, `sdd:constitution`, `sdd:verification-before-completion`, `sdd:spec-kit` (infrastructure), `sdd:spec-refactoring`.
   - **New**: `sdd:review-plan` (command + skill), `sdd:beads-execute` (skill only).
 - **FR-004**: System MUST provide an sdd trait overlay for `speckit.specify` that invokes `{Skill: sdd:review-spec}` and checks constitution alignment after spec creation.
-- **FR-005**: System MUST provide an sdd trait overlay for `speckit.plan` that invokes `{Skill: sdd:review-spec}` before planning and delegates post-planning validation to `{Skill: sdd:review-plan}`.
+- **FR-005**: System MUST provide an sdd trait overlay for `speckit.plan`. The overlay text is appended to the command file, so the agent reads base instructions plus overlay before executing. The overlay uses instruction ordering to specify timing:
+  - "Before generating the plan": invoke `{Skill: sdd:review-spec}` to validate the spec is sound.
+  - "After the plan is generated": instruct the agent to also run `/speckit.tasks`, then invoke `{Skill: sdd:review-plan}` for post-planning validation.
+  - This ensures a single `/speckit.plan` invocation produces the full pipeline: spec review, plan generation, task generation, and plan quality validation.
 - **FR-006**: System MUST provide an sdd trait overlay for `speckit.implement` that verifies spec package completeness before implementation and invokes `{Skill: sdd:review-code}` and `{Skill: sdd:verification-before-completion}` after implementation.
 - **FR-007**: System MUST provide a beads trait overlay for `speckit.implement` that delegates execution to a new `{Skill: sdd:beads-execute}` skill for beads-driven task management.
 - **FR-008**: System MUST provide a beads trait overlay for the tasks template. The overlay target filename should be discovered by matching against available templates in `.specify/templates/` (the current template is `tasks-template.md`). The overlay adds beads usage instructions (how to use `bd` commands, the memory model, discovered work tracking).
@@ -130,7 +133,8 @@ An existing user who previously used `/sdd:spec`, `/sdd:plan`, and `/sdd:impleme
   - Task quality enforcement (Actionable, Testable, Atomic, Ordered)
   - NFR validation (concrete measurement methods, acceptance thresholds)
   - Error/edge case coverage check (every spec error/edge case addressed in plan)
-  - This skill extracts the post-planning validation logic from the current `sdd:plan` SKILL.md (sections 5-7).
+  - Generate `review-summary.md` in the spec directory: distilled decision points, scope boundaries, critical decisions, areas of potential disagreement, naming decisions, schema definitions, open questions, and risk areas for stakeholder review.
+  - This skill extracts the post-planning validation logic and review summary generation from the current `sdd:plan` SKILL.md (sections 5-8). It MUST only run after both plan.md and tasks.md exist.
 - **FR-014**: System MUST update cross-references in all retained skills to point to `/speckit.*` commands instead of removed `/sdd:*` wrappers. Specifically:
   - `sdd:brainstorm` SKILL.md: Replace "offer `sdd:plan` or `sdd:implement`" with "offer `/speckit.plan` or `/speckit.implement`"
   - `sdd:evolve` SKILL.md: Replace "Use `sdd:spec`" with "Use `/speckit.specify`"
@@ -146,7 +150,7 @@ An existing user who previously used `/sdd:spec`, `/sdd:plan`, and `/sdd:impleme
 - **Overlay** (sdd trait, commands): Small markdown fragments appended to `/speckit.specify`, `/speckit.plan`, and `/speckit.implement` command files. Each contains a sentinel marker and `{Skill:}` delegation references.
 - **Overlay** (beads trait, commands): Markdown fragment appended to `/speckit.implement` that delegates to `sdd:beads-execute` for beads-driven task execution.
 - **Overlay** (beads trait, templates): Markdown fragment appended to the tasks template explaining beads usage for task management. Target file discovered dynamically from `.specify/templates/`.
-- **`sdd:review-plan` Command/Skill**: New command and skill extracted from the current `sdd:plan` SKILL.md. Contains coverage matrix validation, red flag scanning, task quality enforcement, NFR validation, and error/edge case coverage checks. Invoked by the sdd trait overlay for `/speckit.plan` after task generation.
+- **`sdd:review-plan` Command/Skill**: New command and skill extracted from the current `sdd:plan` SKILL.md. Contains coverage matrix validation, red flag scanning, task quality enforcement, NFR validation, error/edge case coverage checks, and `review-summary.md` generation. Invoked by the sdd trait overlay for `/speckit.plan` after task generation. Requires both plan.md and tasks.md to exist before running.
 - **`sdd:beads-execute` Skill**: New skill extracted from the current `sdd:implement` SKILL.md. Contains beads bootstrapping, `bd ready` scheduling loop, `bd sync` state persistence, and discovered work tracking.
 - **Removed Commands**: `sdd:spec`, `sdd:plan`, `sdd:implement` command and skill files. Their discipline logic is redistributed into trait overlays that delegate to retained skills (`sdd:review-spec`, `sdd:review-plan`, `sdd:review-code`, `sdd:verification-before-completion`, `sdd:beads-execute`).
 
@@ -162,5 +166,5 @@ An existing user who previously used `/sdd:spec`, `/sdd:plan`, and `/sdd:impleme
 - **SC-006**: The `using-superpowers-sdd` SKILL.md workflow decision tree routes to `/speckit.*` commands and references `/sdd:traits`.
 - **SC-007**: All overlay files are under 20 lines each and contain `{Skill:}` delegation references rather than inlined discipline logic.
 - **SC-008**: The `sdd:beads-execute` skill exists and contains the beads execution loop logic previously housed in `sdd:implement` SKILL.md.
-- **SC-009**: The `sdd:review-plan` command and skill exist and contain the plan quality validation logic (coverage matrix, red flags, task quality, NFR validation) previously housed in `sdd:plan` SKILL.md.
+- **SC-009**: The `sdd:review-plan` command and skill exist and contain the plan quality validation logic (coverage matrix, red flags, task quality, NFR validation) and `review-summary.md` generation previously housed in `sdd:plan` SKILL.md.
 - **SC-010**: No retained skill file contains references to `sdd:spec`, `sdd:plan`, or `sdd:implement` as callable commands. All cross-references point to `/speckit.*` equivalents.
