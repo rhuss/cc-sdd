@@ -387,7 +387,7 @@ do_permissions() {
       remove_sdd_patterns
       echo "Auto-approval set to: none"
       echo "All SDD commands will require confirmation."
-      [ "$before" != "none" ] && echo "CHANGED"
+      [ "$before" != "none" ] && echo "CHANGED" || true
       ;;
     standard)
       ensure_settings
@@ -397,7 +397,7 @@ do_permissions() {
       add_sdd_patterns "$SDD_PATTERN_INIT" "$SDD_PATTERN_TRAITS"
       echo "Auto-approval set to: standard"
       echo "SDD plugin scripts (sdd-init.sh, sdd-traits.sh) will run without confirmation."
-      [ "$before" != "standard" ] && echo "CHANGED"
+      [ "$before" != "standard" ] && echo "CHANGED" || true
       ;;
     yolo)
       ensure_settings
@@ -407,7 +407,7 @@ do_permissions() {
       add_sdd_patterns "$SDD_PATTERN_INIT" "$SDD_PATTERN_TRAITS" "$SDD_PATTERN_SPECIFY" "${SDD_YOLO_EXTRAS[@]}"
       echo "Auto-approval set to: yolo"
       echo "All tools auto-approved: Bash, Read, Edit, Write, MCP, specify CLI, SDD scripts."
-      [ "$before" != "yolo" ] && echo "CHANGED"
+      [ "$before" != "yolo" ] && echo "CHANGED" || true
       ;;
     *)
       echo "ERROR: Invalid permission level '$level'. Use: none, standard, yolo" >&2
