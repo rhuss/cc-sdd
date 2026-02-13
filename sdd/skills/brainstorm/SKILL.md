@@ -36,7 +36,7 @@ You MUST create a task for each of these items and complete them in order:
 5. **Present spec sections** - scaled to their complexity, get user approval after each section
 6. **Create specification** - using spec-kit or manually, validate and commit
 7. **Generate review brief** - synthesize spec into reviewer-friendly summary
-8. **Transition** - offer next steps via `sdd:plan` or `sdd:implement`
+8. **Transition** - offer next steps via `/speckit.plan` or `/speckit.implement`
 
 ## Process Flow
 
@@ -50,7 +50,7 @@ digraph brainstorming {
     "User approves spec?" [shape=diamond];
     "Create specification file" [shape=box];
     "Validate & commit spec" [shape=box];
-    "Offer sdd:plan or sdd:implement" [shape=doublecircle];
+    "Offer /speckit.plan or /speckit.implement" [shape=doublecircle];
 
     "Initialize spec-kit" -> "Explore project context";
     "Explore project context" -> "Ask clarifying questions";
@@ -60,11 +60,11 @@ digraph brainstorming {
     "User approves spec?" -> "Present spec sections" [label="no, revise"];
     "User approves spec?" -> "Create specification file" [label="yes"];
     "Create specification file" -> "Validate & commit spec";
-    "Validate & commit spec" -> "Offer sdd:plan or sdd:implement";
+    "Validate & commit spec" -> "Offer /speckit.plan or /speckit.implement";
 }
 ```
 
-**The terminal state is offering `sdd:plan` or `sdd:implement`.** Do NOT invoke any implementation skill directly. After brainstorming, the ONLY next steps are spec-driven: planning or implementing from the approved spec.
+**The terminal state is offering `/speckit.plan` or `/speckit.implement`.** Do NOT invoke any implementation skill directly. After brainstorming, the ONLY next steps are spec-driven: planning or implementing from the approved spec.
 
 ## Prerequisites
 
@@ -320,7 +320,7 @@ Write to `specs/[feature-name]/review_brief.md` using the template:
 
 **Offer next steps:**
 - "Spec created and validated. Ready to implement?"
-- If yes, ask whether they want to plan first (`sdd:plan`) or implement directly (`sdd:implement`)
+- If yes, ask whether they want to plan first (`/speckit.plan`) or implement directly (`/speckit.implement`)
 - If no, offer to refine spec or pause
 
 **Commit the spec:**
@@ -422,7 +422,7 @@ Spec is sound and implementable.
 Committed to git.
 
 Ready to implement the comment system?
-Would you like to plan first (sdd:plan) or implement directly (sdd:implement)?
+Would you like to plan first (/speckit.plan) or implement directly (/speckit.implement)?
 ```
 
 ## Common Pitfalls

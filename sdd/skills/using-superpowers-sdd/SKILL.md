@@ -66,23 +66,24 @@ Before ANY implementation work:
 
 ## Available SDD Skills
 
-### Phase Entry Points
+### Primary Workflow (via spec-kit commands)
+- `/speckit.specify` - Create specifications (SDD trait adds review gate)
+- `/speckit.plan` - Generate plan and tasks (SDD trait adds spec review + plan review)
+- `/speckit.implement` - Execute implementation (SDD trait adds pre/post quality gates)
+
+### SDD Helper Skills
 - **sdd:brainstorm** - Rough idea → spec through collaborative dialogue
-- **sdd:implement** - Spec → code with TDD and compliance checking
-- **sdd:evolve** - Handle spec/code mismatches with AI guidance
-
-### Modified Core Skills
-- **sdd:plan** - Generate plan and tasks FROM specs with quality gates (coverage matrix, red flag scanning, task quality standards)
-- **sdd:review-code** - Review code-to-spec compliance
-- **sdd:verification-before-completion** - Tests + spec compliance validation
-
-### SDD-Specific Skills
-- **sdd:spec** - Create formal specifications from clear requirements
 - **sdd:review-spec** - Validate spec soundness and completeness
+- **sdd:review-plan** - Post-planning quality validation (coverage, red flags, task quality)
+- **sdd:review-code** - Review code-to-spec compliance
+- **sdd:evolve** - Handle spec/code mismatches with AI guidance
+- **sdd:verification-before-completion** - Tests + spec compliance validation
 - **sdd:spec-refactoring** - Consolidate and improve evolved specs
-- **sdd:spec-kit** - Technical integration for spec-kit CLI (called automatically)
+
+### Configuration
+- **sdd:traits** - Enable/disable SDD discipline overlays (sdd, beads)
+- **sdd:init** - Initialize project with spec-kit and SDD configuration
 - **sdd:constitution** - Create/manage project-wide principles
-- **sdd:tutorial** - Interactive onboarding for SDD methodology and team workflows
 
 ### Compatible Superpowers Skills
 These work as-is with spec context:
@@ -99,14 +100,14 @@ User request arrives
 Is this a new feature/project?
     Yes → Is it a rough idea?
             Yes → sdd:brainstorm
-            No → Create spec using sdd:spec
+            No → Create spec using /speckit.specify
     No → Does spec exist for this area?
             Yes → Is there spec/code mismatch?
                     Yes → sdd:evolve
                     No → Need plan/tasks?
-                            Yes → sdd:plan
-                            No → sdd:implement
-            No → Create spec first using sdd:spec
+                            Yes → /speckit.plan
+                            No → /speckit.implement
+            No → Create spec first using /speckit.specify
 ```
 
 ## Creating Specifications
@@ -128,13 +129,13 @@ User: "I want to add authentication to my app"
 
 ```
 User: "Add a POST /api/users endpoint that validates email and returns 422 on invalid format"
-→ Create spec directly using spec-kit tools
+→ Create spec directly using /speckit.specify
 ```
 
 **Direct spec creation:**
 - Requirements are already clear
 - No exploratory dialogue needed
-- Use spec-kit CLI or templates directly
+- Use `/speckit.specify` to create the spec
 - Follow spec-kit layout conventions
 
 **WHAT vs HOW principle:**
@@ -182,7 +183,7 @@ Before using a skill, announce that you are using it.
 
 **Examples:**
 - "I'm using sdd:brainstorm to refine your idea into a spec."
-- "I'm using sdd:implement to build this feature from the spec."
+- "I'm using /speckit.implement to build this feature from the spec."
 - "I'm using sdd:evolve to reconcile the spec/code mismatch."
 
 **Why:** Transparency helps your human partner understand your process and catch errors early.
@@ -264,7 +265,7 @@ User: "I want to add notifications to my app"
    - Call spec-kit (auto-setup)
    - Explore idea collaboratively
    - Create formal spec
-   - Hand off to sdd:implement
+   - Hand off to /speckit.implement
 ```
 
 ### Pattern 2: New Feature from Clear Requirements
@@ -273,11 +274,10 @@ User: "I want to add notifications to my app"
 User: "Add GET /api/stats endpoint returning JSON with user_count and post_count"
 
 1. Recognize: Clear requirements
-2. Create spec using spec-kit tools
-3. Route to: sdd:implement
-4. Implement will:
-   - Call spec-kit (auto-setup)
-   - Generate plan from spec
+2. Create spec using /speckit.specify
+3. Route to: /speckit.implement
+4. Implementation will:
+   - Quality gates from sdd trait overlay
    - Use TDD
    - Verify spec compliance
 ```

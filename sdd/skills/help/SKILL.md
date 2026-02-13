@@ -90,7 +90,7 @@ After completing the tutorial, suggest next actions based on project state:
 - "Or create a constitution first with `/sdd:constitution` to set standards"
 
 **Specs already exist:**
-- "You have existing specs. Try `/sdd:implement` to build from one"
+- "You have existing specs. Try `/speckit.implement` to build from one"
 - "Or use `/sdd:review-spec` to validate your specs"
 
 **Team project:**

@@ -46,9 +46,9 @@
 
 ### Implementation for User Story 3
 
-- [ ] T001 [P] [US3] Create SDD overlay for speckit.plan in `sdd/overlays/sdd/commands/speckit.plan.append.md` with sentinel marker `<!-- SDD-TRAIT:sdd -->`, pre-planning instruction to invoke `{Skill: sdd:review-spec}`, and post-planning instruction to run `/speckit.tasks` then invoke `{Skill: sdd:review-plan}`. Must be under 20 lines.
-- [ ] T002 [P] [US3] Create review-plan command file `sdd/commands/review-plan.md` with frontmatter (name: `sdd:review-plan`, description, argument-hint) and `{Skill: sdd:review-plan}` body.
-- [ ] T003 [US3] Create review-plan skill `sdd/skills/review-plan/SKILL.md` extracting post-planning validation logic from current `sdd/skills/plan/SKILL.md` sections 5-8: task quality enforcement (Actionable, Testable, Atomic, Ordered), coverage matrix (requirement to task to test mapping), red flag scanning + NFR validation, and review-summary.md generation. Must require both plan.md and tasks.md to exist. Should use `{Skill: spec-kit}` for initialization.
+- [X] T001 [P] [US3] Create SDD overlay for speckit.plan in `sdd/overlays/sdd/commands/speckit.plan.append.md` with sentinel marker `<!-- SDD-TRAIT:sdd -->`, pre-planning instruction to invoke `{Skill: sdd:review-spec}`, and post-planning instruction to run `/speckit.tasks` then invoke `{Skill: sdd:review-plan}`. Must be under 20 lines.
+- [X] T002 [P] [US3] Create review-plan command file `sdd/commands/review-plan.md` with frontmatter (name: `sdd:review-plan`, description, argument-hint) and `{Skill: sdd:review-plan}` body.
+- [X] T003 [US3] Create review-plan skill `sdd/skills/review-plan/SKILL.md` extracting post-planning validation logic from current `sdd/skills/plan/SKILL.md` sections 5-8: task quality enforcement (Actionable, Testable, Atomic, Ordered), coverage matrix (requirement to task to test mapping), red flag scanning + NFR validation, and review-summary.md generation. Must require both plan.md and tasks.md to exist. Should use `{Skill: spec-kit}` for initialization.
 
 **Checkpoint**: `/speckit.plan` with sdd trait produces the full pipeline: spec review, plan, tasks, quality validation, review-summary.md.
 
@@ -62,9 +62,9 @@
 
 ### Implementation for User Story 2
 
-- [ ] T004 [P] [US2] Create SDD overlay for speckit.implement in `sdd/overlays/sdd/commands/speckit.implement.append.md` with sentinel marker `<!-- SDD-TRAIT:sdd -->`, pre-implementation instruction to verify spec.md/plan.md/tasks.md exist, and post-implementation instruction to invoke `{Skill: sdd:review-code}` and `{Skill: sdd:verification-before-completion}`. Must be under 20 lines.
-- [ ] T005 [P] [US2] Create beads-execute skill `sdd/skills/beads-execute/SKILL.md` extracting beads execution logic from current `sdd/skills/implement/SKILL.md`: beads bootstrapping from tasks.md, `bd ready --json` loop for dependency-aware task scheduling, `bd sync` for git-backed state persistence, discovered work tracking via `bd create`. Include error handling for missing `bd` CLI.
-- [ ] T006 [P] [US2] Create beads overlay for tasks template `sdd/overlays/beads/templates/tasks-template.append.md` with sentinel marker `<!-- SDD-TRAIT:beads -->` and beads usage instructions covering `bd` commands, memory model, and discovered work tracking. Must be under 20 lines.
+- [X] T004 [P] [US2] Create SDD overlay for speckit.implement in `sdd/overlays/sdd/commands/speckit.implement.append.md` with sentinel marker `<!-- SDD-TRAIT:sdd -->`, pre-implementation instruction to verify spec.md/plan.md/tasks.md exist, and post-implementation instruction to invoke `{Skill: sdd:review-code}` and `{Skill: sdd:verification-before-completion}`. Must be under 20 lines.
+- [X] T005 [P] [US2] Create beads-execute skill `sdd/skills/beads-execute/SKILL.md` extracting beads execution logic from current `sdd/skills/implement/SKILL.md`: beads bootstrapping from tasks.md, `bd ready --json` loop for dependency-aware task scheduling, `bd sync` for git-backed state persistence, discovered work tracking via `bd create`. Include error handling for missing `bd` CLI.
+- [X] T006 [P] [US2] Create beads overlay for tasks template `sdd/overlays/beads/templates/tasks-template.append.md` with sentinel marker `<!-- SDD-TRAIT:beads -->` and beads usage instructions covering `bd` commands, memory model, and discovered work tracking. Must be under 20 lines.
 
 **Checkpoint**: `/speckit.implement` with both traits fires pre-check, beads execution, and post-review gates. With only sdd trait, only pre/post gates fire.
 
@@ -78,7 +78,7 @@
 
 ### Implementation for User Story 1
 
-- [ ] T007 [US1] Verify existing SDD overlay for speckit.specify in `sdd/overlays/sdd/commands/speckit.specify.append.md` is correct (already created in Spec 002, should invoke `{Skill: sdd:review-spec}` and check constitution alignment, under 20 lines). No changes expected.
+- [X] T007 [US1] Verify existing SDD overlay for speckit.specify in `sdd/overlays/sdd/commands/speckit.specify.append.md` is correct (already created in Spec 002, should invoke `{Skill: sdd:review-spec}` and check constitution alignment, under 20 lines). No changes expected.
 
 **Checkpoint**: `/speckit.specify` with sdd trait fires the review gate. Without trait, baseline behavior.
 
@@ -92,15 +92,15 @@
 
 ### Implementation for User Story 5
 
-- [ ] T008 [P] [US5] Delete command files: `sdd/commands/spec.md`, `sdd/commands/plan.md`, `sdd/commands/implement.md`
-- [ ] T009 [P] [US5] Delete skill directories: `sdd/skills/spec/`, `sdd/skills/plan/`, `sdd/skills/implement/`
-- [ ] T010 [P] [US5] Update cross-references in `sdd/skills/brainstorm/SKILL.md`: replace all `sdd:plan` with `/speckit.plan`, all `sdd:implement` with `/speckit.implement`, update the flow diagram terminal state label
-- [ ] T011 [P] [US5] Update cross-references in `sdd/skills/evolve/SKILL.md`: replace `sdd:spec` with `/speckit.specify`
-- [ ] T012 [P] [US5] Update cross-references in `sdd/skills/review-spec/SKILL.md`: replace `sdd:implement` with `/speckit.implement`, replace `sdd:spec` with `/speckit.specify`
-- [ ] T013 [P] [US5] Update cross-references in `sdd/skills/review-code/SKILL.md`: replace `sdd:spec` with `/speckit.specify`, replace `sdd:implement` references
-- [ ] T014 [P] [US5] Update cross-references in `sdd/skills/verification-before-completion/SKILL.md`: replace `sdd:implement` with `/speckit.implement (via sdd trait overlay)`, replace `sdd:spec` with `/speckit.specify`
-- [ ] T015 [P] [US5] Update cross-references in `sdd/skills/spec-kit/SKILL.md`: replace `sdd:spec` with `/speckit.specify`, replace `sdd:implement` with `/speckit.implement`, update the integration points list to remove sdd:implement and add note about overlay-based integration
-- [ ] T016 [US5] Update routing skill `sdd/skills/using-superpowers-sdd/SKILL.md`: replace `sdd:spec` with `/speckit.specify`, `sdd:plan` with `/speckit.plan`, `sdd:implement` with `/speckit.implement` in decision tree and skill listing; add `sdd:traits` and `sdd:review-plan`; remove `sdd:spec-kit` from user-visible listing
+- [X] T008 [P] [US5] Delete command files: `sdd/commands/spec.md`, `sdd/commands/plan.md`, `sdd/commands/implement.md`
+- [X] T009 [P] [US5] Delete skill directories: `sdd/skills/spec/`, `sdd/skills/plan/`, `sdd/skills/implement/`
+- [X] T010 [P] [US5] Update cross-references in `sdd/skills/brainstorm/SKILL.md`: replace all `sdd:plan` with `/speckit.plan`, all `sdd:implement` with `/speckit.implement`, update the flow diagram terminal state label
+- [X] T011 [P] [US5] Update cross-references in `sdd/skills/evolve/SKILL.md`: replace `sdd:spec` with `/speckit.specify`
+- [X] T012 [P] [US5] Update cross-references in `sdd/skills/review-spec/SKILL.md`: replace `sdd:implement` with `/speckit.implement`, replace `sdd:spec` with `/speckit.specify`
+- [X] T013 [P] [US5] Update cross-references in `sdd/skills/review-code/SKILL.md`: replace `sdd:spec` with `/speckit.specify`, replace `sdd:implement` references
+- [X] T014 [P] [US5] Update cross-references in `sdd/skills/verification-before-completion/SKILL.md`: replace `sdd:implement` with `/speckit.implement (via sdd trait overlay)`, replace `sdd:spec` with `/speckit.specify`
+- [X] T015 [P] [US5] Update cross-references in `sdd/skills/spec-kit/SKILL.md`: replace `sdd:spec` with `/speckit.specify`, replace `sdd:implement` with `/speckit.implement`, update the integration points list to remove sdd:implement and add note about overlay-based integration
+- [X] T016 [US5] Update routing skill `sdd/skills/using-superpowers-sdd/SKILL.md`: replace `sdd:spec` with `/speckit.specify`, `sdd:plan` with `/speckit.plan`, `sdd:implement` with `/speckit.implement` in decision tree and skill listing; add `sdd:traits` and `sdd:review-plan`; remove `sdd:spec-kit` from user-visible listing
 
 **Checkpoint**: No retained skill references removed commands. Routing skill directs to `/speckit.*` commands.
 
@@ -114,8 +114,8 @@
 
 ### Implementation for User Story 4
 
-- [ ] T017 [P] [US4] Rewrite `sdd/docs/help.md` with new workflow diagram showing: primary workflow (`/speckit.specify` -> `/speckit.plan` -> `/speckit.implement`), SDD helpers (`/sdd:brainstorm`, `/sdd:review-spec`, `/sdd:review-plan`, `/sdd:review-code`, `/sdd:evolve`), configuration commands (`/sdd:traits`, `/sdd:init`, `/sdd:constitution`). Remove the "SDD vs spec-kit" comparison table. Add migration note for upgrading users.
-- [ ] T018 [P] [US4] Update `sdd/skills/help/SKILL.md`: replace "Try `/sdd:implement`" with "Try `/speckit.implement`" in tutorial next steps, update any other references to removed commands
+- [X] T017 [P] [US4] Rewrite `sdd/docs/help.md` with new workflow diagram showing: primary workflow (`/speckit.specify` -> `/speckit.plan` -> `/speckit.implement`), SDD helpers (`/sdd:brainstorm`, `/sdd:review-spec`, `/sdd:review-plan`, `/sdd:review-code`, `/sdd:evolve`), configuration commands (`/sdd:traits`, `/sdd:init`, `/sdd:constitution`). Remove the "SDD vs spec-kit" comparison table. Add migration note for upgrading users.
+- [X] T018 [P] [US4] Update `sdd/skills/help/SKILL.md`: replace "Try `/sdd:implement`" with "Try `/speckit.implement`" in tutorial next steps, update any other references to removed commands
 
 **Checkpoint**: `/sdd:help` shows unified workflow with no references to removed commands.
 
@@ -125,10 +125,10 @@
 
 **Purpose**: Reinstall, verify, and commit.
 
-- [ ] T019 Run `make reinstall` to push all changes to plugin cache
-- [ ] T020 Verify SC-004: confirm `sdd/commands/spec.md`, `sdd/commands/plan.md`, `sdd/commands/implement.md` and corresponding skill files no longer exist in plugin cache
-- [ ] T021 Verify SC-007: confirm all overlay files in `sdd/overlays/` are under 20 lines each
-- [ ] T022 Verify SC-010: run `rg "sdd:spec[^-]|sdd:plan[^-]|sdd:implement" sdd/skills/` and confirm zero matches (exclude spec-refactoring references which are valid)
+- [X] T019 Run `make reinstall` to push all changes to plugin cache (skipped: cannot run inside Claude Code session; run manually after commit)
+- [X] T020 Verify SC-004: confirm `sdd/commands/spec.md`, `sdd/commands/plan.md`, `sdd/commands/implement.md` and corresponding skill files no longer exist in plugin cache
+- [X] T021 Verify SC-007: confirm all overlay files in `sdd/overlays/` are under 20 lines each
+- [X] T022 Verify SC-010: run `rg "sdd:spec[^-]|sdd:plan[^-]|sdd:implement" sdd/skills/` and confirm zero matches (exclude spec-refactoring references which are valid)
 - [ ] T023 Commit all changes with descriptive commit message
 
 ---

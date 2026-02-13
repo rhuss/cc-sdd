@@ -221,8 +221,7 @@ No specs found in specs/ directory.
 
 To create a spec:
 - Use `sdd:brainstorm` to refine ideas into a spec
-- Use `sdd:spec` to create a spec from clear requirements
-- Use `/speckit.specify` directly (if available)
+- Use `/speckit.specify` to create a spec from clear requirements
 ```
 
 ### Path Resolution Priority
@@ -304,10 +303,11 @@ Run: specify init --force
 
 **Called by these workflow skills:**
 - sdd:brainstorm (at start)
-- sdd:implement (at start)
 - sdd:evolve (at start)
 - sdd:constitution (at start)
 - sdd:review-spec (at start)
+- sdd:review-plan (at start)
+- `/speckit.implement` via sdd trait overlay (at start)
 - All workflow skills that need spec-kit
 
 **Calls:**

@@ -51,7 +51,7 @@ Skip any step = lying, not verifying
 - After implementation and code review
 - Before claiming work is complete
 - Before committing/merging/deploying
-- As final gate in `sdd:implement` workflow
+- As final gate in `/speckit.implement` (via sdd trait overlay)
 
 ## Spec Selection
 
@@ -78,7 +78,7 @@ Which spec should I verify implementation against?
 No specs found in specs/ directory.
 
 Verification requires a spec to validate against.
-Use `sdd:brainstorm` or `sdd:spec` to create one first.
+Use `sdd:brainstorm` or `/speckit.specify` to create one first.
 ```
 
 ## The Process

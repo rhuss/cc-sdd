@@ -54,7 +54,7 @@ No specs found in specs/ directory.
 
 To create a spec first:
 - Use `sdd:brainstorm` to refine ideas into a spec
-- Use `sdd:spec` to create a spec from clear requirements
+- Use `/speckit.specify` to create a spec from clear requirements
 
 Cannot review without a spec to review.
 ```
@@ -337,7 +337,7 @@ Invoke `/speckit.analyze` to check consistency between:
 
 **If sound (minor issues only):**
 - ✅ Ready for implementation
-- Proceed with `sdd:implement`
+- Proceed with `/speckit.implement`
 
 **If needs work (important issues):**
 - ⚠️ Fix issues before implementing
