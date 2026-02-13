@@ -10,13 +10,11 @@ Manage which SDD traits are active. Traits inject discipline overlays into spec-
 
 **Valid traits**: `sdd`, `beads`
 
-### Step 0: Resolve Plugin Root
+### Step 0: Resolve Script Path
 
-Extract `PLUGIN_ROOT` from the `<sdd-context>` system reminder
-injected by the UserPromptSubmit hook. Use the value from `<plugin-root>`.
+Use `<sdd-traits-command>` from the `<sdd-context>` system reminder injected by the hook. This is the fully resolved path to `sdd-traits.sh`.
 
-If `<sdd-context>` is not present, the hook may not have fired.
-Instruct the user to verify the plugin is installed correctly.
+If `<sdd-context>` is not present, the hook may not have fired. Instruct the user to verify the plugin is installed correctly.
 
 ---
 
@@ -33,7 +31,7 @@ Parse `$ARGUMENTS` for the subcommand and optional trait name:
 Run via Bash:
 
 ```bash
-"$PLUGIN_ROOT/scripts/sdd-traits.sh" list
+"<value from sdd-traits-command>" list
 ```
 
 Display the output to the user.
@@ -43,14 +41,14 @@ Display the output to the user.
 Run via Bash:
 
 ```bash
-"$PLUGIN_ROOT/scripts/sdd-traits.sh" enable <trait-name>
+"<value from sdd-traits-command>" enable <trait-name>
 ```
 
 Report the result to the user.
 
 ## Subcommand: Disable
 
-1. Run `"$PLUGIN_ROOT/scripts/sdd-traits.sh" list` and check if the trait is already disabled. If so, report that and STOP.
+1. Run `"<value from sdd-traits-command>" list` and check if the trait is already disabled. If so, report that and STOP.
 2. **Warn the user**: Disabling a trait requires regenerating all spec-kit files, which resets any manual customizations to `.claude/commands/speckit.*.md` and `.specify/templates/*.md` files.
 3. Use `AskUserQuestion` to confirm:
    - **Question**: "Disabling a trait will reset all spec-kit files to defaults (losing any manual customizations). Proceed?"
@@ -61,8 +59,8 @@ Report the result to the user.
 4. If cancelled: report "Trait disable cancelled." and STOP.
 5. If confirmed, run these commands sequentially via Bash:
    ```bash
-   "$PLUGIN_ROOT/scripts/sdd-traits.sh" disable <trait-name>
+   "<value from sdd-traits-command>" disable <trait-name>
    specify init --here --ai claude --force
-   "$PLUGIN_ROOT/scripts/sdd-traits.sh" apply
+   "<value from sdd-traits-command>" apply
    ```
 6. Report which traits are still active.

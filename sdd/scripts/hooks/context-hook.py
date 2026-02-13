@@ -31,18 +31,35 @@ def main():
     # scripts/hooks/context-hook.py -> scripts/hooks -> scripts -> plugin_root
     plugin_root = Path(__file__).parent.parent.parent
 
+    # Resolve script paths
+    init_script = plugin_root / 'scripts' / 'sdd-init.sh'
+    traits_script = plugin_root / 'scripts' / 'sdd-traits.sh'
+
     # Check if SDD traits are configured
     sdd_configured = (cwd / '.specify' / 'sdd-traits.json').exists()
 
-    response = {
-        "hookSpecificOutput": {
-            "hookEventName": "UserPromptSubmit",
-            "additionalContext": f"""<sdd-context>
+    # Parse init arguments (--refresh, --update)
+    init_args = ''
+    if prompt.startswith('/sdd:init'):
+        parts = prompt.split()
+        for part in parts[1:]:
+            if part in ('--refresh', '--update', '-r', '-u'):
+                init_args = f' {part}'
+                break
+
+    context = f"""<sdd-context>
 <plugin-root>{plugin_root}</plugin-root>
 <project-dir>{cwd}</project-dir>
 <session-id>{session_id}</session-id>
 <sdd-configured>{str(sdd_configured).lower()}</sdd-configured>
+<sdd-init-command>{init_script}{init_args}</sdd-init-command>
+<sdd-traits-command>{traits_script}</sdd-traits-command>
 </sdd-context>"""
+
+    response = {
+        "hookSpecificOutput": {
+            "hookEventName": "UserPromptSubmit",
+            "additionalContext": context
         }
     }
     print(json.dumps(response))
