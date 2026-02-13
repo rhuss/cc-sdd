@@ -2,8 +2,9 @@
 # sdd-init.sh - Fast spec-kit initialization check and setup
 #
 # Usage:
-#   sdd-init.sh          # Check + initialize if needed
-#   sdd-init.sh --update # Update specify-cli and refresh project
+#   sdd-init.sh           # Check + initialize if needed
+#   sdd-init.sh --refresh # Re-download templates and refresh project
+#   sdd-init.sh --update  # Update specify-cli and refresh project
 #
 # Exit codes:
 #   0 - READY (spec-kit fully initialized)
@@ -42,10 +43,10 @@ do_init() {
     echo "The 'specify' CLI is required but not installed."
     echo ""
     echo "Install with:"
-    echo "  uv pip install specify-cli"
+    echo "  uv tool install specify-cli --force --from git+https://github.com/github/spec-kit.git"
     echo ""
     echo "IMPORTANT: The CLI command is 'specify' (not 'speckit')."
-    echo "           The package is 'specify-cli' (not 'spec-kit')."
+    echo "           The package is 'specify-cli' (from github.com/github/spec-kit)."
     exit 2
   fi
 
@@ -87,20 +88,33 @@ do_init() {
   fi
 }
 
+# --- Refresh templates only ---
+do_refresh() {
+  if ! command -v specify &>/dev/null; then
+    echo "ERROR: specify CLI not installed. Run without flags to install, or use --update."
+    exit 2
+  fi
+
+  echo "Refreshing project templates..."
+  if ! specify init --here --ai claude --force; then
+    echo "ERROR: specify init failed"
+    exit 1
+  fi
+
+  fix_constitution
+
+  echo ""
+  echo "RESTART_REQUIRED"
+  echo "Templates and slash commands refreshed. Please restart Claude Code."
+  exit 3
+}
+
 # --- Update protocol ---
 do_update() {
-  if command -v brew &>/dev/null && brew list specify-cli &>/dev/null 2>&1; then
-    echo "Updating via homebrew..."
-    brew upgrade specify-cli
-  elif uv pip show specify-cli &>/dev/null 2>&1; then
-    echo "Updating via uv..."
-    uv pip install --upgrade specify-cli
-  elif pip show specify-cli &>/dev/null 2>&1; then
-    echo "Updating via pip..."
-    pip install --upgrade specify-cli
-  else
-    echo "Cannot determine installation method."
-    echo "Please update manually: uv pip install --upgrade specify-cli"
+  echo "Updating specify-cli from GitHub..."
+  if ! uv tool install specify-cli --force --from git+https://github.com/github/spec-kit.git; then
+    echo "ERROR: Failed to update specify-cli"
+    echo "Please update manually: uv tool install specify-cli --force --from git+https://github.com/github/spec-kit.git"
     exit 1
   fi
 
@@ -119,6 +133,9 @@ do_update() {
 
 # --- Main ---
 case "${1:-}" in
+  --refresh)
+    do_refresh
+    ;;
   --update)
     do_update
     ;;

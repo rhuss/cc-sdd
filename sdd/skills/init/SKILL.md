@@ -13,10 +13,11 @@ Deterministic, non-interactive initialization of spec-kit for Claude Code enviro
 
 ## Argument Handling
 
-Check if `--update` was passed as an argument:
+Check if `--update` or `--refresh` was passed as an argument:
 
-- **If `--update` is present**: Pass `--update` to the script
-- **Otherwise**: Run the script with no arguments
+- **If `--update` is present**: Pass `--update` to the script (upgrades CLI + refreshes templates)
+- **If `--refresh` is present**: Pass `--refresh` to the script (re-downloads templates only)
+- **Otherwise**: Run the script with no arguments (fast check, init if needed)
 
 ## How to Run
 
@@ -28,7 +29,13 @@ Use the absolute path derived from the plugin's installation location. For examp
 /path/to/cc-superpowers-sdd/sdd/scripts/sdd-init.sh
 ```
 
-Or for update:
+For refresh (re-download templates only):
+
+```bash
+/path/to/cc-superpowers-sdd/sdd/scripts/sdd-init.sh --refresh
+```
+
+For update (upgrade CLI + refresh templates):
 
 ```bash
 /path/to/cc-superpowers-sdd/sdd/scripts/sdd-init.sh --update
