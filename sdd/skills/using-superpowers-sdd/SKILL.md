@@ -33,7 +33,7 @@ This plugin combines:
 **NOTE: The `spec-kit` skill handles all technical setup automatically.**
 
 Every SDD workflow skill calls `{Skill: spec-kit}` first, which:
-- Checks if spec-kit CLI is installed
+- Checks if the `specify` CLI is installed (the CLI is called `specify`, NOT `speckit` or `spec-kit`)
 - Initializes the project if needed
 - Prompts restart if new commands installed
 - Validates file structure
