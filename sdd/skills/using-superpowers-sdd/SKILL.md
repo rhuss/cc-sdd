@@ -30,15 +30,7 @@ This plugin combines:
 
 ## Technical Prerequisites
 
-**NOTE: The `spec-kit` skill handles all technical setup automatically.**
-
-Every SDD workflow skill calls `{Skill: spec-kit}` first, which:
-- Checks if the `specify` CLI is installed (the CLI is called `specify`, NOT `speckit` or `spec-kit`)
-- Initializes the project if needed
-- Prompts restart if new commands installed
-- Validates file structure
-
-You don't need to worry about setup. Focus on choosing the right workflow.
+**All technical setup is automatic.** Every SDD workflow skill calls `{Skill: spec-kit}` first, which handles initialization, installation, and validation internally. Do not check for or search for any CLI tools. Focus on choosing the right workflow.
 
 ## MANDATORY FIRST RESPONSE PROTOCOL
 
