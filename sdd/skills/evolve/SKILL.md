@@ -287,9 +287,9 @@ Co-Authored-By: Claude <noreply@anthropic.com>"
 
 **Regenerate plan and tasks to stay in sync:**
 
-If plan.md exists, invoke `/speckit.plan` to regenerate it.
-If tasks.md exists, invoke `/speckit.tasks` to regenerate it.
-Invoke `/speckit.analyze` to verify consistency across all artifacts.
+If plan.md exists, call `Skill(skill: "speckit.plan")` to regenerate it.
+If tasks.md exists, call `Skill(skill: "speckit.tasks")` to regenerate it.
+Call `Skill(skill: "speckit.analyze")` to verify consistency across all artifacts.
 
 **VERIFICATION CHECKPOINT:**
 

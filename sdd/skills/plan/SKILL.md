@@ -105,10 +105,10 @@ fi
 
 ### 4. Generate Plan
 
-**Invoke `/speckit.plan` to generate the implementation plan:**
+**Call the Skill tool to generate the implementation plan:**
 
 ```
-/speckit.plan
+Skill(skill: "speckit.plan")
 ```
 
 This creates `specs/[feature-name]/plan.md` with:
@@ -140,10 +140,10 @@ If any are missing, note the gaps and add them to the plan before proceeding.
 
 ### 5. Generate Tasks
 
-**Invoke `/speckit.tasks` to generate the task breakdown:**
+**Call the Skill tool to generate the task breakdown:**
 
 ```
-/speckit.tasks
+Skill(skill: "speckit.tasks")
 ```
 
 This creates `specs/[feature-name]/tasks.md` with:
@@ -181,10 +181,10 @@ If tasks fail these checks, note the issues and refine before proceeding.
 
 ### 6. Verify Artifact Consistency
 
-**Run consistency check using `/speckit.analyze`:**
+**Run consistency check using the Skill tool:**
 
 ```
-/speckit.analyze
+Skill(skill: "speckit.analyze")
 ```
 
 This verifies:

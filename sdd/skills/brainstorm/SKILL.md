@@ -74,13 +74,13 @@ Before starting the brainstorming workflow, ensure spec-kit is initialized:
 
 If spec-kit prompts for restart, pause this workflow and resume after restart.
 
-## CRITICAL: Use /speckit.* Slash Commands
+## CRITICAL: Use /speckit.* via the Skill Tool
 
-This skill should use `/speckit.*` slash commands when available. Claude MUST NOT:
-- Generate specs internally (use `/speckit.specify` instead)
+All `/speckit.*` operations MUST be invoked via the Skill tool. Claude MUST NOT:
+- Generate specs internally (use `Skill(skill: "speckit.specify", args: "<description>")` instead)
 - Create spec markdown directly (spec-kit handles this)
 
-If `/speckit.*` commands are not available, fall back to creating specs manually using the template at `.specify/templates/spec-template.md`.
+If the Skill tool call fails, fall back to creating specs manually using the template at `.specify/templates/spec-template.md`.
 
 ## The Process
 
@@ -130,17 +130,17 @@ If `/speckit.*` commands are not available, fall back to creating specs manually
 1. **Announce spec creation:**
    "Based on our discussion, I'm creating the specification..."
 
-2. **Create spec file using /speckit.specify (if available):**
+2. **Create spec file using Skill tool:**
 
-   Invoke `/speckit.specify` to create the spec interactively.
+   Call `Skill(skill: "speckit.specify", args: "<feature description from discussion>")` to create the spec.
 
-   This creates the spec at `specs/[NNNN]-[feature-name]/spec.md` using the spec-kit template.
+   This creates the spec at `specs/[NNNN]-[feature-name]/spec.md`, handles branch creation, numbering, and template scaffolding.
 
-   **If `/speckit.specify` is not available:** Create the spec manually following `.specify/templates/spec-template.md`.
+   **If the Skill tool call fails:** Create the spec manually following `.specify/templates/spec-template.md`.
 
 3. **Run clarification check (RECOMMENDED):**
 
-   After creating the spec, invoke `/speckit.clarify` to identify any underspecified areas.
+   After creating the spec, call `Skill(skill: "speckit.clarify")` to identify any underspecified areas.
 
    Present clarification results to user for review. If gaps are identified, update the spec before proceeding.
 

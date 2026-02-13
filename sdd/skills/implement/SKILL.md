@@ -137,15 +137,15 @@ fi
 
 ## PHASE 2: Implementation
 
-### 2.1 Invoke /speckit.implement
+### 2.1 Invoke speckit.implement via Skill Tool
 
 **This is MANDATORY. Do not manually implement.**
 
 ```
-/speckit.implement
+Skill(skill: "speckit.implement")
 ```
 
-The `/speckit.implement` command handles:
+The `speckit.implement` command handles:
 - Loading plan.md and tasks.md
 - Executing tasks in order
 - TDD approach for each task

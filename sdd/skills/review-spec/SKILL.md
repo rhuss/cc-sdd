@@ -227,7 +227,7 @@ fi
 
 **If plan or tasks exist and `/speckit.analyze` is available:**
 
-Invoke `/speckit.analyze` to check consistency between:
+Call `Skill(skill: "speckit.analyze")` to check consistency between:
 - spec.md (requirements)
 - plan.md (implementation approach)
 - tasks.md (task list)

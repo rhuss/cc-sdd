@@ -95,8 +95,8 @@ Make implicit standards explicit.
 
 ### 3. Use /speckit.constitution or Manual Creation
 
-**With /speckit.constitution (if available):**
-Invoke `/speckit.constitution` to create the constitution interactively.
+**With speckit.constitution (invoke via Skill tool):**
+Call `Skill(skill: "speckit.constitution")` to create the constitution interactively.
 
 **After /speckit.constitution completes**, ensure the file is accessible at `specs/constitution.md` (the canonical user-facing location). The command writes to `.specify/memory/constitution.md`, so move and symlink:
 

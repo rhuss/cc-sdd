@@ -18,20 +18,26 @@ Create formal specifications directly when requirements are clear and well-defin
 **This skill creates specs using spec-kit tools and ensures WHAT/WHY focus (not HOW).**
 
 <HARD-GATE>
-You MUST attempt to invoke /speckit.specify before creating any spec file manually.
-Writing spec markdown directly without first trying spec-kit is a FAILURE of this skill.
-The manual fallback path is ONLY for when /speckit.specify has been invoked and returned an error.
+You MUST invoke /speckit.specify via the Skill tool before creating any spec file manually.
+Writing spec markdown directly without first calling the Skill tool is a FAILURE of this skill.
+The manual fallback path is ONLY for when the Skill tool call for speckit.specify has returned an error.
+
+HOW TO INVOKE: Use the Skill tool with skill="speckit.specify" and pass the feature description as args.
+Example: Skill(skill: "speckit.specify", args: "Add user authentication with OAuth2 support")
+
+This is a BLOCKING REQUIREMENT. You MUST call the Skill tool BEFORE writing any spec content.
 </HARD-GATE>
 
 ## Anti-Rationalization: Do Not Bypass spec-kit
 
 If you catch yourself thinking:
-- "I can just write the spec markdown directly" → WRONG. Invoke /speckit.specify first.
-- "The spec-kit commands probably aren't available" → WRONG. Try them. Check with `which specify`.
+- "I can just write the spec markdown directly" → WRONG. Call `Skill(skill: "speckit.specify")` first.
+- "The spec-kit commands probably aren't available" → WRONG. Try them. The Skill tool will report errors.
 - "Manual creation is faster" → WRONG. spec-kit ensures proper structure and directory layout.
 - "I already know the template format" → WRONG. spec-kit may have been updated with new fields.
+- "I'll just create the directory and file myself" → WRONG. speckit.specify handles branch creation, numbering, and file scaffolding.
 
-The manual fallback exists for when spec-kit genuinely fails, not as a convenience shortcut.
+The manual fallback exists for when the Skill tool call genuinely fails, not as a convenience shortcut.
 
 ## When to Use
 
@@ -54,32 +60,45 @@ Ensure spec-kit is initialized:
 
 If spec-kit prompts for restart, pause this workflow and resume after restart.
 
-## CRITICAL: Use /speckit.* Slash Commands
+## CRITICAL: Use /speckit.* via the Skill Tool
 
-This skill should use `/speckit.*` slash commands when available. Claude MUST NOT:
-- Generate specs internally (use `/speckit.specify` instead)
+All `/speckit.*` operations MUST be invoked via the Skill tool. Claude MUST NOT:
+- Generate specs internally (use `Skill(skill: "speckit.specify", args: "<description>")` instead)
 - Create spec markdown directly (spec-kit handles this)
-- Generate plans internally (use `/speckit.plan` instead)
-- Generate tasks internally (use `/speckit.tasks` instead)
+- Generate plans internally (use `Skill(skill: "speckit.plan")` instead)
+- Generate tasks internally (use `Skill(skill: "speckit.tasks")` instead)
 
-**If `/speckit.*` commands fail after being invoked:**
+**How to invoke each command:**
+
+| Operation | Skill Tool Call |
+|-----------|----------------|
+| Create spec | `Skill(skill: "speckit.specify", args: "<feature description>")` |
+| Generate plan | `Skill(skill: "speckit.plan")` |
+| Generate tasks | `Skill(skill: "speckit.tasks")` |
+| Find gaps | `Skill(skill: "speckit.clarify")` |
+| Check consistency | `Skill(skill: "speckit.analyze")` |
+
+**If a Skill tool call fails:**
 Fall back to creating files manually using templates in `.specify/templates/`.
-You MUST invoke the command first and observe the failure before using this fallback.
+You MUST call the Skill tool first and observe the failure before using this fallback.
 
 **FAILURE PROTOCOL:**
-- If a `/speckit.*` command fails → report the error and suggest alternatives
+- If a Skill tool call fails → report the error and suggest alternatives
 - If output is unexpected → STOP and report the issue
-- If commands fail after invocation → use manual creation with templates
+- If Skill tool returns error → use manual creation with templates
 
 **Examples of CORRECT behavior:**
 ```
-When /speckit.* available:
-✓ "Invoking /speckit.specify to create the spec..."
-✓ "Invoking /speckit.plan to generate the implementation plan..."
+CORRECT - Always call Skill tool first:
+✓ Skill(skill: "speckit.specify", args: "Add comment system with threading")
+✓ Skill(skill: "speckit.plan")
 
-When /speckit.* fails after invocation:
-✓ "speckit.specify returned error: [error]. Falling back to manual creation using .specify/templates/spec-template.md"
-✓ "The spec directory doesn't exist. Please run: specify init"
+CORRECT - Fallback only after Skill tool error:
+✓ "Skill call for speckit.specify failed: [error]. Falling back to manual creation using .specify/templates/spec-template.md"
+
+WRONG - Never skip the Skill tool call:
+✗ Reading template and writing spec.md directly
+✗ Creating specs/ directory and files manually without trying Skill tool first
 ```
 
 ## Critical: Specifications are WHAT and WHY, NOT HOW
@@ -137,11 +156,11 @@ You MUST create a task for each of these items and complete them in order:
 1. **Initialize spec-kit** - run {Skill: spec-kit}, verify specify CLI is installed
 2. **Gather requirements** - extract from user input, ask clarifying questions
 3. **Check project context** - review existing specs, constitution, related features
-4. **Invoke /speckit.specify** - create spec via spec-kit (report error if it fails)
-5. **Run /speckit.clarify** - identify underspecified areas
+4. **Invoke speckit.specify via Skill tool** - `Skill(skill: "speckit.specify", args: "<description>")` (report error if it fails)
+5. **Run speckit.clarify via Skill tool** - `Skill(skill: "speckit.clarify")` to identify underspecified areas
 6. **Validate against constitution** - check alignment with project principles
 7. **Review spec soundness** - use sdd:review-spec
-8. **Generate implementation artifacts** - invoke /speckit.plan and /speckit.tasks
+8. **Generate implementation artifacts** - `Skill(skill: "speckit.plan")` and `Skill(skill: "speckit.tasks")`
 9. **Generate review brief** - create review_brief.md
 10. **Commit spec package** - git add and commit all artifacts
 
@@ -191,22 +210,24 @@ fi
 
 ### 3. Create Specification
 
-**MANDATORY: Attempt /speckit.specify first:**
+**MANDATORY: Call Skill tool for speckit.specify first:**
 
-Invoke `/speckit.specify` to create the specification interactively.
+{Skill: speckit.specify}
 
-This creates the spec at `specs/[NNNN]-[feature-name]/spec.md` using the spec-kit template.
+Pass the feature description as args: `Skill(skill: "speckit.specify", args: "<gathered requirements summary>")`
 
-**ONLY if /speckit.specify fails with an error:**
+This creates the spec at `specs/[NNNN]-[feature-name]/spec.md`, handles branch creation, numbering, and template scaffolding.
+
+**ONLY if the Skill tool call fails with an error:**
 1. Report the exact error to the user
 2. Then fall back to creating the spec manually using `.specify/templates/spec-template.md`
 3. Note in the output that spec-kit was unavailable
 
-Do NOT skip straight to manual creation. You MUST invoke /speckit.specify and observe the result.
+Do NOT skip straight to manual creation. You MUST call the Skill tool and observe the result.
 
 **After creation, run clarification check (RECOMMENDED):**
 
-Invoke `/speckit.clarify` to identify underspecified areas. Present results to user and update spec if needed.
+Call `Skill(skill: "speckit.clarify")` to identify underspecified areas. Present results to user and update spec if needed.
 
 **Fill in the spec following template structure:**
 - Purpose - WHY this feature exists
@@ -278,17 +299,17 @@ If the branch name is wrong, ask the user to switch before proceeding.
 
 **Generate plan:**
 
-Invoke `/speckit.plan` to generate the implementation plan from the spec.
+Call `Skill(skill: "speckit.plan")` to generate the implementation plan from the spec.
 
 This creates `specs/[feature-name]/plan.md` from the spec.
 
 **Generate tasks:**
 
-Invoke `/speckit.tasks` to generate the task list with dependency ordering.
+Call `Skill(skill: "speckit.tasks")` to generate the task list with dependency ordering.
 
 This creates `specs/[feature-name]/tasks.md`.
 
-**ONLY if /speckit.* commands fail after being invoked:**
+**ONLY if Skill tool calls fail:**
 Report the error to the user, then generate plan and tasks manually based on the spec requirements.
 
 **VERIFICATION CHECKPOINT:**

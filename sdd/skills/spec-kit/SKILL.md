@@ -57,33 +57,35 @@ After initialization succeeds, this skill provides reference material below.
 
 ## Available Slash Commands
 
-After `specify init`, these `/speckit.*` commands are available:
+After `specify init`, these `/speckit.*` commands are available as project-level slash commands (installed to `.claude/commands/`):
 
-| Command | Purpose | Creates |
-|---------|---------|---------|
-| `/speckit.specify` | Create specification interactively | `specs/[NNNN]-[name]/spec.md` |
-| `/speckit.plan` | Generate implementation plan | `specs/[name]/plan.md` |
-| `/speckit.tasks` | Generate task list | `specs/[name]/tasks.md` |
-| `/speckit.clarify` | Find underspecified areas | (analysis output) |
-| `/speckit.analyze` | Cross-artifact consistency | (analysis output) |
-| `/speckit.checklist` | Generate quality checklist | checklist file |
-| `/speckit.implement` | Execute implementation | code files |
-| `/speckit.constitution` | Create project constitution | `.specify/memory/constitution.md` (also check `specs/constitution.md`) |
+| Command | Skill Tool Call | Creates |
+|---------|----------------|---------|
+| `/speckit.specify` | `Skill(skill: "speckit.specify", args: "<description>")` | `specs/[NNNN]-[name]/spec.md` |
+| `/speckit.plan` | `Skill(skill: "speckit.plan")` | `specs/[name]/plan.md` |
+| `/speckit.tasks` | `Skill(skill: "speckit.tasks")` | `specs/[name]/tasks.md` |
+| `/speckit.clarify` | `Skill(skill: "speckit.clarify")` | (analysis output) |
+| `/speckit.analyze` | `Skill(skill: "speckit.analyze")` | (analysis output) |
+| `/speckit.checklist` | `Skill(skill: "speckit.checklist")` | checklist file |
+| `/speckit.implement` | `Skill(skill: "speckit.implement")` | code files |
+| `/speckit.constitution` | `Skill(skill: "speckit.constitution")` | `.specify/memory/constitution.md` (also check `specs/constitution.md`) |
 
-**Usage in skills:**
+**CRITICAL: How to invoke /speckit.* commands from skills:**
 
-When a skill needs to create a spec, plan, or tasks, it should:
-1. Check that `/speckit.*` commands are available
-2. Invoke the appropriate slash command
-3. If commands not available, fall back to manual creation following templates
+All `/speckit.*` commands MUST be invoked via the **Skill tool**. When any skill in this plugin says "invoke `/speckit.specify`" or "run `/speckit.plan`", the correct action is to call the Skill tool:
 
-**Example:**
 ```
-To create a spec, invoke: /speckit.specify
-
-If /speckit.specify is not available (not initialized),
-create the spec manually following .specify/templates/spec-template.md
+Skill(skill: "speckit.specify", args: "Add user authentication")
+Skill(skill: "speckit.plan")
+Skill(skill: "speckit.tasks")
 ```
+
+Do NOT:
+- Write spec/plan/task markdown directly without calling the Skill tool first
+- Skip the Skill tool call because "it's faster to write manually"
+- Assume commands aren't available without trying the Skill tool
+
+**Fallback:** Only create files manually (using `.specify/templates/`) if the Skill tool call returns an error.
 
 ## Branch Naming Convention
 
