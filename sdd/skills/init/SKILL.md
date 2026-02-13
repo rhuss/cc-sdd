@@ -21,27 +21,17 @@ Check if `--update` or `--refresh` was passed as an argument:
 
 ## How to Run
 
-The script is at `sdd/scripts/sdd-init.sh` within this plugin's root directory. Since this SKILL.md is at `sdd/skills/init/SKILL.md`, the script is two directories up at `sdd/scripts/sdd-init.sh`.
+**ZERO exploration required.** Do NOT use Explore agents, Glob, Grep, or Read tools to locate the script. The path is deterministic.
 
-Use the absolute path derived from the plugin's installation location. For example, if this plugin is installed at `/path/to/cc-superpowers-sdd/`, run:
+This SKILL.md is at `skills/init/SKILL.md` within the plugin root. The script is at `scripts/sdd-init.sh` in the same plugin root. Derive the absolute script path by resolving `../../scripts/sdd-init.sh` relative to this file's directory.
 
-```bash
-/path/to/cc-superpowers-sdd/sdd/scripts/sdd-init.sh
-```
-
-For refresh (re-download templates only):
+**Your first and only action** should be a single Bash tool call:
 
 ```bash
-/path/to/cc-superpowers-sdd/sdd/scripts/sdd-init.sh --refresh
+<plugin-root>/scripts/sdd-init.sh [--refresh|--update]
 ```
 
-For update (upgrade CLI + refresh templates):
-
-```bash
-/path/to/cc-superpowers-sdd/sdd/scripts/sdd-init.sh --update
-```
-
-**The script must be run from the project's working directory** (not the plugin directory), since it checks for `.specify/` and `.claude/commands/` relative to `pwd`.
+Where `<plugin-root>` is the root directory of this plugin (the directory containing `scripts/`, `skills/`, `commands/`). The script must be run from the project's working directory (not the plugin directory), since it checks for `.specify/` and `.claude/commands/` relative to `pwd`.
 
 ## Interpreting Script Output
 
@@ -68,7 +58,7 @@ To eliminate permission prompts for this script, add it to the project's allowed
 {
   "permissions": {
     "allow": [
-      "Bash(*/sdd/scripts/sdd-init.sh*)"
+      "Bash(*/scripts/sdd-init.sh*)"
     ]
   }
 }
@@ -92,6 +82,7 @@ specify init --here --ai claude --force
 
 ## Remember
 
+- **No exploration, no reading, no searching.** Run the script immediately. The path is known.
 - **Always use the script.** Do not replicate its logic with inline bash commands.
 - **One call, one result.** The script handles the fast path (already initialized) and slow path (needs setup) internally.
 - **Do NOT call `specify version` separately.** The script skips it on the fast path for speed.
