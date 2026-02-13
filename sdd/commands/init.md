@@ -29,7 +29,7 @@ You MUST ask the user these two questions using AskUserQuestion before doing any
 Then apply using `<sdd-traits-command>` from `<sdd-context>`:
 
 ```bash
-"<value from sdd-traits-command>" init --enable <selected-traits>
+"<value from sdd-traits-command>" init --enable "<selected-traits-as-csv e.g. sdd,beads>"
 "<value from sdd-traits-command>" permissions <none|standard|yolo>
 ```
 
