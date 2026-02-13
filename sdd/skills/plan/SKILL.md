@@ -359,73 +359,8 @@ Write to `specs/[feature-name]/review-summary.md` using this structure:
 *Share this with reviewers. Full context in linked spec and plan.*
 ```
 
-**Also create review_brief.md:**
-
-Write to `specs/[feature-name]/review_brief.md` using this template:
-
-```markdown
-# Review Brief: [Feature Name]
-
-**Spec:** specs/[feature-name]/spec.md | **Plan:** specs/[feature-name]/plan.md
-**Generated:** YYYY-MM-DD
-
-> Reviewer's guide to scope and key decisions. See full spec/plan for details.
-
----
-
-## Feature Overview
-[3-5 sentences on purpose, scope, and key outcomes]
-
-## Scope Boundaries
-- **In scope:** [What this includes]
-- **Out of scope:** [What this explicitly excludes]
-- **Why these boundaries:** [Brief justification]
-
-## Critical Decisions
-
-### [Decision Title]
-- **Choice:** [What was decided]
-- **Trade-off:** [Key trade-off made]
-- **Feedback:** [Specific question for reviewer]
-
-## Areas of Potential Disagreement
-
-> Decisions or approaches where reasonable reviewers might push back.
-
-### [Topic]
-- **Decision:** [What was decided]
-- **Why this might be controversial:** [Reason]
-- **Alternative view:** [What someone might prefer]
-- **Seeking input on:** [Specific question]
-
-## Naming Decisions
-
-| Item | Name | Context |
-|------|------|---------|
-| API Endpoint | `/api/v1/...` | ... |
-| Field | `field_name` | ... |
-| Error Code | `ERROR_NAME` | ... |
-
-## Schema Definitions (Condensed)
-
-[Key request/response structures only]
-
-## Open Questions
-
-- [ ] [Question needing stakeholder input]
-
-## Risk Areas
-
-| Risk | Impact | Mitigation |
-|------|--------|------------|
-| ... | High/Med/Low | ... |
-
----
-*Share with reviewers before implementation.*
-```
-
 **Constraints:**
-- Maximum 2 pages (~800-1000 words) each
+- Maximum 2 pages (~800-1000 words)
 - Prioritize: Disagreement Areas > Decisions > Scope > Overview
 - Be explicit about potential pushback points
 - Be ruthless: Summarize, don't transcribe
@@ -437,10 +372,6 @@ SPEC_DIR="specs/[feature-name]"
 if [ -f "$SPEC_DIR/review-summary.md" ]; then
   echo "review-summary.md created"
   wc -w "$SPEC_DIR/review-summary.md"
-fi
-if [ -f "$SPEC_DIR/review_brief.md" ]; then
-  echo "review_brief.md created"
-  wc -w "$SPEC_DIR/review_brief.md"
 fi
 ```
 
@@ -455,8 +386,7 @@ fi
 - specs/[feature-name]/spec.md (requirements)
 - specs/[feature-name]/plan.md (implementation approach)
 - specs/[feature-name]/tasks.md (work breakdown)
-- specs/[feature-name]/review-summary.md (for reviewers)
-- specs/[feature-name]/review_brief.md (reviewer guide)
+- specs/[feature-name]/review-summary.md (reviewer guide)
 
 ### Plan Overview
 [Brief summary of plan approach]
@@ -479,7 +409,7 @@ fi
 [PASS/FAIL with details]
 
 ### Next Steps
-**For team review:** Share `review_brief.md` or `review-summary.md` with stakeholders before implementation.
+**For team review:** Share `review-summary.md` with stakeholders before implementation.
 
 **Ready to implement:** Use `/sdd:implement` to start.
 ```
@@ -516,8 +446,7 @@ Full context is available in the linked spec and plan.
 - [spec.md](specs/[feature-name]/spec.md) - Requirements (WHAT/WHY)
 - [plan.md](specs/[feature-name]/plan.md) - Implementation approach (HOW)
 - [tasks.md](specs/[feature-name]/tasks.md) - Work breakdown
-- [review_brief.md](specs/[feature-name]/review_brief.md) - **Start here for review**
-- [review-summary.md](specs/[feature-name]/review-summary.md) - Detailed review summary
+- [review-summary.md](specs/[feature-name]/review-summary.md) - **Start here for review**
 ```
 
 **Create PR using:**
@@ -544,7 +473,6 @@ Use TodoWrite to track:
 - [ ] Run red flag scan (vague language, TBD, missing paths)
 - [ ] Validate NFR measurement methods
 - [ ] Generate review summary (review-summary.md)
-- [ ] Generate review brief (review_brief.md)
 - [ ] Present summary and next steps
 
 ## Integration with Superpowers Skills

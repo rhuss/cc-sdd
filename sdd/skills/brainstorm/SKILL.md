@@ -35,7 +35,7 @@ You MUST create a task for each of these items and complete them in order:
 4. **Propose 2-3 approaches** - with trade-offs and your recommendation
 5. **Present spec sections** - scaled to their complexity, get user approval after each section
 6. **Create specification** - using spec-kit or manually, validate and commit
-7. **Generate review brief** - synthesize spec into reviewer-friendly summary
+7. **Generate review summary** - synthesize spec into reviewer-friendly summary
 8. **Transition** - offer next steps via `sdd:plan` or `sdd:implement`
 
 ## Process Flow
@@ -240,9 +240,9 @@ If the Skill tool call fails, fall back to creating specs manually using the tem
 **Run consistency check (RECOMMENDED):**
 If `/speckit.analyze` is available, invoke it to check for cross-artifact consistency.
 
-**Generate review_brief.md:**
+**Generate review-summary.md:**
 
-After spec is validated, generate a brief for reviewers. Read the spec and synthesize:
+After spec is validated, generate a summary for reviewers. Read the spec and synthesize:
 
 1. **Feature Overview** (3-5 sentences from Purpose section)
 2. **Scope Boundaries** (in scope, out of scope, justification)
@@ -256,15 +256,15 @@ After spec is validated, generate a brief for reviewers. Read the spec and synth
 6. **Open Questions** (areas needing stakeholder input)
 7. **Risk Areas** (high-impact concerns)
 
-Write to `specs/[feature-name]/review_brief.md` using the template:
+Write to `specs/[feature-name]/review-summary.md` using the template:
 
 ```markdown
-# Review Brief: [Feature Name]
+# Review Summary: [Feature Name]
 
 **Spec:** specs/[feature-name]/spec.md
 **Generated:** YYYY-MM-DD
 
-> Reviewer's guide to scope and key decisions. See full spec for details.
+> Distilled decision points for reviewers. See full spec for details.
 
 ---
 
@@ -280,6 +280,7 @@ Write to `specs/[feature-name]/review_brief.md` using the template:
 
 ### [Decision Title]
 - **Choice:** [What was decided]
+- **Alternatives:** [What else was considered]
 - **Trade-off:** [Key trade-off made]
 - **Feedback:** [Specific question for reviewer]
 
@@ -330,7 +331,7 @@ git commit -m "Add spec for [feature name]
 
 Includes:
 - spec.md (requirements)
-- review_brief.md (reviewer guide)
+- review-summary.md (reviewer guide)
 
 Assisted-By: 🤖 Claude Code"
 ```

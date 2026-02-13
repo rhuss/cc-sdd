@@ -161,7 +161,7 @@ You MUST create a task for each of these items and complete them in order:
 6. **Validate against constitution** - check alignment with project principles
 7. **Review spec soundness** - use sdd:review-spec
 8. **Generate implementation artifacts** - `Skill(skill: "speckit.plan")` and `Skill(skill: "speckit.tasks")`
-9. **Generate review brief** - create review_brief.md
+9. **Generate review summary** - create review-summary.md
 10. **Commit spec package** - git add and commit all artifacts
 
 ## The Process
@@ -334,11 +334,11 @@ If `/speckit.analyze` is available, invoke it to validate cross-artifact consist
 - `spec.md` - What to build (requirements)
 - `plan.md` - How to build it (implementation approach)
 - `tasks.md` - Work breakdown (actionable items)
-- `review_brief.md` - Reviewer guide (generated in next step)
+- `review-summary.md` - Reviewer guide (generated in next step)
 
-### 6.5. Generate review_brief.md
+### 6.5. Generate review-summary.md
 
-After plan and tasks are complete, generate a brief for reviewers.
+After plan and tasks are complete, generate a summary for reviewers.
 
 **Read source documents:**
 - Read `specs/[feature-name]/spec.md`
@@ -370,17 +370,17 @@ After plan and tasks are complete, generate a brief for reviewers.
 
 8. **Risk Areas** - High-impact concerns
 
-**Create review_brief.md:**
+**Create review-summary.md:**
 
-Write to `specs/[feature-name]/review_brief.md` using this template:
+Write to `specs/[feature-name]/review-summary.md` using this template:
 
 ```markdown
-# Review Brief: [Feature Name]
+# Review Summary: [Feature Name]
 
 **Spec:** specs/[feature-name]/spec.md | **Plan:** specs/[feature-name]/plan.md
 **Generated:** YYYY-MM-DD
 
-> Reviewer's guide to scope and key decisions. See full spec/plan for details.
+> Distilled decision points for reviewers. See full spec/plan for details.
 
 ---
 
@@ -396,6 +396,7 @@ Write to `specs/[feature-name]/review_brief.md` using this template:
 
 ### [Decision Title]
 - **Choice:** [What was decided]
+- **Alternatives:** [What else was considered]
 - **Trade-off:** [Key trade-off made]
 - **Feedback:** [Specific question for reviewer]
 
@@ -421,6 +422,12 @@ Write to `specs/[feature-name]/review_brief.md` using this template:
 
 [Key request/response structures only]
 
+## Architecture Choices
+
+- **Pattern:** [Brief description]
+- **Components:** [Key components]
+- **Integration:** [What it touches]
+
 ## Open Questions
 
 - [ ] [Question needing stakeholder input]
@@ -444,9 +451,9 @@ Write to `specs/[feature-name]/review_brief.md` using this template:
 
 ```bash
 SPEC_DIR="specs/[feature-name]"
-if [ -f "$SPEC_DIR/review_brief.md" ]; then
-  echo "review_brief.md created"
-  wc -w "$SPEC_DIR/review_brief.md"
+if [ -f "$SPEC_DIR/review-summary.md" ]; then
+  echo "review-summary.md created"
+  wc -w "$SPEC_DIR/review-summary.md"
 fi
 ```
 
@@ -462,7 +469,7 @@ Includes:
 - spec.md (requirements)
 - plan.md (implementation plan)
 - tasks.md (task breakdown)
-- review_brief.md (reviewer guide)"
+- review-summary.md (reviewer guide)"
 ```
 
 **Spec package is now source of truth** for this feature.
