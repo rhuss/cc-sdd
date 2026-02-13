@@ -6,6 +6,15 @@
 sdd/.claude/settings.local.json
 # BUT: Keep .claude/commands/ for plugin maintenance commands
 
+# ===================
+# Spec-kit (regenerable tooling, reinstalled via sdd:init --refresh)
+# ===================
+.specify/templates/
+.specify/scripts/
+
+# Spec-kit slash commands (installed by plugin)
+.claude/commands/speckit.*.md
+
 # Editor swap files
 *.swp
 *.swo
