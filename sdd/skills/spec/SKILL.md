@@ -17,6 +17,22 @@ Create formal specifications directly when requirements are clear and well-defin
 
 **This skill creates specs using spec-kit tools and ensures WHAT/WHY focus (not HOW).**
 
+<HARD-GATE>
+You MUST attempt to invoke /speckit.specify before creating any spec file manually.
+Writing spec markdown directly without first trying spec-kit is a FAILURE of this skill.
+The manual fallback path is ONLY for when /speckit.specify has been invoked and returned an error.
+</HARD-GATE>
+
+## Anti-Rationalization: Do Not Bypass spec-kit
+
+If you catch yourself thinking:
+- "I can just write the spec markdown directly" → WRONG. Invoke /speckit.specify first.
+- "The spec-kit commands probably aren't available" → WRONG. Try them. Check with `which specify`.
+- "Manual creation is faster" → WRONG. spec-kit ensures proper structure and directory layout.
+- "I already know the template format" → WRONG. spec-kit may have been updated with new fields.
+
+The manual fallback exists for when spec-kit genuinely fails, not as a convenience shortcut.
+
 ## When to Use
 
 **Use this skill when:**
@@ -38,50 +54,6 @@ Ensure spec-kit is initialized:
 
 If spec-kit prompts for restart, pause this workflow and resume after restart.
 
-### Explicit Installation Check (MANDATORY)
-
-**Before proceeding, run these checks:**
-
-```bash
-# Check if specify CLI is installed
-which specify
-```
-
-**If `specify` is NOT found:**
-```
-The 'specify' CLI is required but not installed.
-
-Install with:
-  uv pip install specify-cli
-
-IMPORTANT: The CLI command is 'specify' (not 'speckit').
-           The package is 'specify-cli' (not 'spec-kit').
-
-After installation, run: specify init
-```
-
-**STOP and wait for user to install.**
-
-**If `specify` IS found, check project initialization:**
-
-```bash
-# Check if project is initialized
-[ -d .specify ] && echo "initialized" || echo "not-initialized"
-```
-
-**If NOT initialized:**
-```bash
-specify init
-```
-
-**If `.claude/commands/speckit.*` files were created, inform user:**
-```
-RESTART REQUIRED: New slash commands installed.
-Please restart Claude Code to load /speckit.* commands.
-```
-
-**STOP and wait for restart.**
-
 ## CRITICAL: Use /speckit.* Slash Commands
 
 This skill should use `/speckit.*` slash commands when available. Claude MUST NOT:
@@ -90,13 +62,14 @@ This skill should use `/speckit.*` slash commands when available. Claude MUST NO
 - Generate plans internally (use `/speckit.plan` instead)
 - Generate tasks internally (use `/speckit.tasks` instead)
 
-**If `/speckit.*` commands are not available:**
+**If `/speckit.*` commands fail after being invoked:**
 Fall back to creating files manually using templates in `.specify/templates/`.
+You MUST invoke the command first and observe the failure before using this fallback.
 
 **FAILURE PROTOCOL:**
 - If a `/speckit.*` command fails → report the error and suggest alternatives
 - If output is unexpected → STOP and report the issue
-- If commands are not available → use manual creation with templates
+- If commands fail after invocation → use manual creation with templates
 
 **Examples of CORRECT behavior:**
 ```
@@ -104,8 +77,8 @@ When /speckit.* available:
 ✓ "Invoking /speckit.specify to create the spec..."
 ✓ "Invoking /speckit.plan to generate the implementation plan..."
 
-When /speckit.* not available:
-✓ "Commands not available. Creating spec manually using .specify/templates/spec-template.md"
+When /speckit.* fails after invocation:
+✓ "speckit.specify returned error: [error]. Falling back to manual creation using .specify/templates/spec-template.md"
 ✓ "The spec directory doesn't exist. Please run: specify init"
 ```
 
@@ -157,6 +130,21 @@ When /speckit.* not available:
 - **Clearer reviews** - Easy to see if requirements are met vs implementation quality
 - **Better evolution** - When code diverges from spec, know which to update
 
+## Checklist
+
+You MUST create a task for each of these items and complete them in order:
+
+1. **Initialize spec-kit** - run {Skill: spec-kit}, verify specify CLI is installed
+2. **Gather requirements** - extract from user input, ask clarifying questions
+3. **Check project context** - review existing specs, constitution, related features
+4. **Invoke /speckit.specify** - create spec via spec-kit (report error if it fails)
+5. **Run /speckit.clarify** - identify underspecified areas
+6. **Validate against constitution** - check alignment with project principles
+7. **Review spec soundness** - use sdd:review-spec
+8. **Generate implementation artifacts** - invoke /speckit.plan and /speckit.tasks
+9. **Generate review brief** - create review_brief.md
+10. **Commit spec package** - git add and commit all artifacts
+
 ## The Process
 
 ### 1. Gather Requirements
@@ -203,17 +191,18 @@ fi
 
 ### 3. Create Specification
 
-**Use /speckit.specify (if available):**
+**MANDATORY: Attempt /speckit.specify first:**
 
 Invoke `/speckit.specify` to create the specification interactively.
 
-**This will:**
-- Create feature directory (e.g., `specs/0001-feature-name/`)
-- Initialize spec.md from template
-- Set up directory structure (docs/, checklists/, contracts/)
+This creates the spec at `specs/[NNNN]-[feature-name]/spec.md` using the spec-kit template.
 
-**If /speckit.specify is not available:**
-Create the spec manually using `.specify/templates/spec-template.md`.
+**ONLY if /speckit.specify fails with an error:**
+1. Report the exact error to the user
+2. Then fall back to creating the spec manually using `.specify/templates/spec-template.md`
+3. Note in the output that spec-kit was unavailable
+
+Do NOT skip straight to manual creation. You MUST invoke /speckit.specify and observe the result.
 
 **After creation, run clarification check (RECOMMENDED):**
 
@@ -299,8 +288,8 @@ Invoke `/speckit.tasks` to generate the task list with dependency ordering.
 
 This creates `specs/[feature-name]/tasks.md`.
 
-**If /speckit.* commands are not available:**
-Generate plan and tasks manually based on the spec requirements.
+**ONLY if /speckit.* commands fail after being invoked:**
+Report the error to the user, then generate plan and tasks manually based on the spec requirements.
 
 **VERIFICATION CHECKPOINT:**
 

@@ -74,50 +74,6 @@ Before starting the brainstorming workflow, ensure spec-kit is initialized:
 
 If spec-kit prompts for restart, pause this workflow and resume after restart.
 
-### Explicit Installation Check (MANDATORY)
-
-**Before proceeding, run these checks:**
-
-```bash
-# Check if specify CLI is installed
-which specify
-```
-
-**If `specify` is NOT found:**
-```
-The 'specify' CLI is required but not installed.
-
-Install with:
-  uv pip install specify-cli
-
-IMPORTANT: The CLI command is 'specify' (not 'speckit').
-           The package is 'specify-cli' (not 'spec-kit').
-
-After installation, run: specify init
-```
-
-**STOP and wait for user to install.**
-
-**If `specify` IS found, check project initialization:**
-
-```bash
-# Check if project is initialized
-[ -d .specify ] && echo "initialized" || echo "not-initialized"
-```
-
-**If NOT initialized:**
-```bash
-specify init
-```
-
-**If `.claude/commands/speckit.*` files were created, inform user:**
-```
-RESTART REQUIRED: New slash commands installed.
-Please restart Claude Code to load /speckit.* commands.
-```
-
-**STOP and wait for restart.**
-
 ## CRITICAL: Use /speckit.* Slash Commands
 
 This skill should use `/speckit.*` slash commands when available. Claude MUST NOT:

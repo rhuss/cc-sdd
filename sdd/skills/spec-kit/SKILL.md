@@ -45,171 +45,15 @@ This skill is the **single source of truth** for all spec-kit technical integrat
 
 **NEVER call `specify validate`, `specify plan`, etc. - these commands don't exist!**
 
-## Automatic Initialization Protocol
+## Automatic Initialization
 
 **IMPORTANT: This runs automatically when called by any workflow skill.**
 
-Every SDD workflow skill calls this skill first via `{Skill: spec-kit}`. When called, execute this initialization sequence once per session.
+{Skill: sdd:init}
 
-### Session Tracking
+If init prompts for restart, pause this workflow and resume after restart.
 
-```bash
-# Check if already initialized this session
-# Use an environment variable or similar mechanism
-# If "sdd_init_done" flag is set, skip to step 4
-```
-
-### Step 1: Check specify CLI Installation
-
-```bash
-which specify
-```
-
-**If NOT found:**
-
-Provide installation instructions:
-```
-The 'specify' CLI is required to initialize spec-kit.
-
-Installation options (preferred first):
-1. uv: uv pip install specify-cli
-2. pip: pip install specify-cli
-3. Manual: Visit https://github.com/anthropics/specify
-
-After installation, run: specify init
-```
-
-**If found:**
-```bash
-# Get version for logging
-specify version
-```
-
-Proceed to step 2.
-
-### Step 2: Check Project Initialization
-
-```bash
-# Check if .specify/ directory exists
-[ -d .specify ] && echo "initialized" || echo "not-initialized"
-```
-
-**If NOT initialized:**
-
-Display message:
-```
-specify CLI is installed
-
-This project needs initialization...
-Running: specify init
-```
-
-Execute initialization:
-```bash
-specify init
-```
-
-**Check for errors:**
-- Permission denied: suggest running with proper permissions
-- Command failed: display error and suggest manual init
-- Success: proceed to step 3
-
-**If already initialized:**
-Skip to step 3.
-
-### Step 3: Check for Slash Commands (Restart Detection)
-
-After `specify init` runs, check if local commands were installed:
-
-```bash
-# Check if spec-kit installed Claude Code commands
-if [ -d .claude/commands ]; then
-  ls .claude/commands/ | grep -q speckit
-  if [ $? -eq 0 ]; then
-    echo "commands-installed"
-  fi
-fi
-```
-
-**If commands were installed:**
-
-Display restart prompt:
-```
-Project initialized successfully!
-
-RESTART REQUIRED
-
-spec-kit has installed local slash commands in:
-  .claude/commands/speckit.*
-
-To load these new commands, please:
-1. Save your work
-2. Close this conversation
-3. Restart Claude Code application
-4. Return to this project
-5. Continue your workflow
-
-After restart, you'll have access to:
-- /sdd:* commands (from this plugin)
-- /speckit.* commands (from local spec-kit installation)
-
-[Workflow paused - resume after restart]
-```
-
-**STOP workflow.** User must restart before continuing.
-
-**If no new commands installed:**
-Proceed to step 4.
-
-### Step 4: Verify Installation
-
-Quick sanity check:
-```bash
-# Verify key files exist
-[ -f .specify/templates/spec-template.md ] && \
-[ -d .claude/commands ] && \
-ls .claude/commands/speckit.* >/dev/null 2>&1 && \
-echo "verified" || echo "incomplete"
-```
-
-**If verification fails:**
-```
-.specify/ exists but slash commands are missing.
-
-Please run: specify init --force
-
-Then restart Claude Code to load the new commands.
-```
-
-**STOP workflow.**
-
-**If verification succeeds:**
-Proceed to step 5.
-
-### Step 5: Ensure Constitution Symlink
-
-The `/speckit.constitution` command expects the constitution at `.specify/memory/constitution.md`, but the canonical location is `specs/constitution.md`. Ensure a symlink bridges the two:
-
-```bash
-# If constitution exists at specs/ but not at .specify/memory/, create symlink
-if [ -f "specs/constitution.md" ] && [ ! -e ".specify/memory/constitution.md" ]; then
-  mkdir -p .specify/memory
-  ln -s ../../specs/constitution.md .specify/memory/constitution.md
-  echo "symlink-created: .specify/memory/constitution.md -> specs/constitution.md"
-elif [ -f ".specify/memory/constitution.md" ] && [ ! -L ".specify/memory/constitution.md" ] && [ ! -f "specs/constitution.md" ]; then
-  # Constitution exists only at .specify/memory/ (created by speckit command) - move and symlink
-  mv .specify/memory/constitution.md specs/constitution.md
-  ln -s ../../specs/constitution.md .specify/memory/constitution.md
-  echo "moved-and-linked: constitution.md -> specs/constitution.md"
-else
-  echo "constitution-ok"
-fi
-```
-
-**After symlink step:**
-- Set session flag: "sdd_init_done"
-- Return success to calling skill
-- Calling skill continues with its workflow
+After initialization succeeds, this skill provides reference material below.
 
 ## Available Slash Commands
 
@@ -467,10 +311,10 @@ Run: specify init --force
 - All workflow skills that need spec-kit
 
 **Calls:**
-- `specify` CLI (for init only)
+- `{Skill: sdd:init}` (for initialization)
+- `specify` CLI (for init only, via sdd:init)
 - `/speckit.*` slash commands (for all operations)
 - File system operations
-- No other skills (this is a leaf skill)
 
 ## Session Management
 

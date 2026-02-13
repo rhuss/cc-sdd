@@ -33,6 +33,9 @@ WORKFLOW
 
 COMMANDS
 
+SETUP
+  /sdd:init             Initialize spec-kit (--update to upgrade CLI and refresh commands)
+
 SPECIFICATION
   /sdd:brainstorm     Rough idea → formal spec (interactive dialogue)
   /sdd:spec           Clear requirements → spec (direct creation)
