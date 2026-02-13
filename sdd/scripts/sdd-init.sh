@@ -23,6 +23,17 @@ check_ready() {
   return 0
 }
 
+# --- Apply trait overlays if configured ---
+apply_traits() {
+  local script_dir
+  script_dir="$(dirname "$0")"
+  if [ -f .specify/sdd-traits.json ] && [ -x "$script_dir/apply-traits.sh" ]; then
+    if ! "$script_dir/apply-traits.sh" "$@"; then
+      echo "WARNING: apply-traits.sh failed (traits not applied). spec-kit is still usable." >&2
+    fi
+  fi
+}
+
 # --- Fix constitution symlink silently ---
 fix_constitution() {
   if [ -f "specs/constitution.md" ] && [ ! -e ".specify/memory/constitution.md" ]; then
@@ -80,6 +91,7 @@ do_init() {
   # Verify after init
   if check_ready; then
     fix_constitution
+    apply_traits
     echo ""
     echo "READY"
   else
@@ -102,6 +114,7 @@ do_refresh() {
   fi
 
   fix_constitution
+  apply_traits
 
   echo ""
   echo "RESTART_REQUIRED"
@@ -121,6 +134,8 @@ do_update() {
   echo ""
   echo "Refreshing project setup..."
   specify init --here --ai claude --force
+
+  apply_traits
 
   echo ""
   specify version
@@ -143,6 +158,7 @@ case "${1:-}" in
     # Fast path: already ready?
     if check_ready; then
       fix_constitution
+      apply_traits >/dev/null 2>&1 || true
       echo "READY"
       exit 0
     fi

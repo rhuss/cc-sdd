@@ -19,9 +19,9 @@
 
 **Purpose**: Create the overlay directory structure and placeholder files
 
-- [ ] T001 Create overlay directory structure at `sdd/overlays/sdd/commands/` and `sdd/overlays/beads/commands/`
-- [ ] T002 [P] Create placeholder overlay file `sdd/overlays/sdd/commands/speckit.specify.append.md` with sentinel marker `<!-- SDD-TRAIT:sdd -->`, a placeholder comment noting content comes from Spec B, and a `{Skill: sdd:review-spec}` delegation reference
-- [ ] T003 [P] Create placeholder overlay file `sdd/overlays/beads/commands/speckit.implement.append.md` with sentinel marker `<!-- SDD-TRAIT:beads -->`, a placeholder comment noting content comes from Spec B, and a `{Skill: sdd:beads-execute}` delegation reference
+- [x] T001 Create overlay directory structure at `sdd/overlays/sdd/commands/` and `sdd/overlays/beads/commands/`
+- [x] T002 [P] Create placeholder overlay file `sdd/overlays/sdd/commands/speckit.specify.append.md` with sentinel marker `<!-- SDD-TRAIT:sdd -->`, a placeholder comment noting content comes from Spec B, and a `{Skill: sdd:review-spec}` delegation reference
+- [x] T003 [P] Create placeholder overlay file `sdd/overlays/beads/commands/speckit.implement.append.md` with sentinel marker `<!-- SDD-TRAIT:beads -->`, a placeholder comment noting content comes from Spec B, and a `{Skill: sdd:beads-execute}` delegation reference
 
 ---
 
@@ -29,8 +29,8 @@
 
 **Purpose**: Create `apply-traits.sh`, the core patching script that all user stories depend on
 
-- [ ] T004 Create `sdd/scripts/apply-traits.sh` with the following behavior: (a) derive plugin root from script location via `$(dirname "$0")/..`, (b) validate `.specify/sdd-traits.json` exists and contains valid JSON using `jq`, (c) for each enabled trait, find overlay files in `sdd/overlays/<trait>/`, (d) for each overlay, derive target path per FR-013 mapping (`commands/<name>.append.md` -> `.claude/commands/<name>.md`, `templates/<name>.append.md` -> `.specify/templates/<name>.md`), (e) check sentinel marker `<!-- SDD-TRAIT:<trait> -->` in target file via `grep -q`, (f) if sentinel not found, append overlay content to target file with newline separator, (g) if sentinel found, skip (idempotent), (h) exit 0 on success, exit 1 on validation errors with messages to stderr
-- [ ] T005 Make `sdd/scripts/apply-traits.sh` executable with `chmod +x`
+- [x] T004 Create `sdd/scripts/apply-traits.sh` with the following behavior: (a) derive plugin root from script location via `$(dirname "$0")/..`, (b) validate `.specify/sdd-traits.json` exists and contains valid JSON using `jq`, (c) for each enabled trait, find overlay files in `sdd/overlays/<trait>/`, (d) for each overlay, derive target path per FR-013 mapping (`commands/<name>.append.md` -> `.claude/commands/<name>.md`, `templates/<name>.append.md` -> `.specify/templates/<name>.md`), (e) check sentinel marker `<!-- SDD-TRAIT:<trait> -->` in target file via `grep -q`, (f) if sentinel not found, append overlay content to target file with newline separator, (g) if sentinel found, skip (idempotent), (h) exit 0 on success, exit 1 on validation errors with messages to stderr
+- [x] T005 Make `sdd/scripts/apply-traits.sh` executable with `chmod +x`
 
 **Checkpoint**: `apply-traits.sh` works standalone. Can manually create `.specify/sdd-traits.json` and run the script to verify overlays are appended with sentinels, and that running twice produces identical output.
 
@@ -44,9 +44,9 @@
 
 ### Implementation for User Story 1
 
-- [ ] T006 [US1] Modify `sdd/skills/init/SKILL.md` to add trait selection after the script reports READY. Add a new section "## Trait Configuration" that instructs: (1) check if `.specify/sdd-traits.json` exists, (2) if not, use `AskUserQuestion` with multiSelect to ask which traits to enable (options: "sdd" with description "SDD quality gates on speckit commands", "beads" with description "Beads memory integration for task execution"), (3) write `.specify/sdd-traits.json` with schema `{"version": 1, "traits": {"sdd": <bool>, "beads": <bool>}, "applied_at": "<ISO8601>"}` using the Write tool, (4) invoke `apply-traits.sh` via Bash tool using the plugin root path
-- [ ] T007 [US1] Modify `sdd/skills/init/SKILL.md` to handle re-init (FR-014): if `.specify/sdd-traits.json` already exists, read it, display current trait settings to the user, and use `AskUserQuestion` to ask whether to keep current settings or reconfigure. If reconfigure, prompt for new selections and rewrite the config, then invoke `apply-traits.sh`
-- [ ] T008 [US1] Modify `sdd/scripts/sdd-init.sh` to call `apply-traits.sh` after `specify init` in `do_init` function: after the `check_ready` verification succeeds, add a conditional block that checks `[ -f .specify/sdd-traits.json ]` and if true, runs `"$(dirname "$0")/apply-traits.sh"` with a warning on failure but without blocking the init (non-fatal)
+- [x] T006 [US1] Modify `sdd/skills/init/SKILL.md` to add trait selection after the script reports READY. Add a new section "## Trait Configuration" that instructs: (1) check if `.specify/sdd-traits.json` exists, (2) if not, use `AskUserQuestion` with multiSelect to ask which traits to enable (options: "sdd" with description "SDD quality gates on speckit commands", "beads" with description "Beads memory integration for task execution"), (3) write `.specify/sdd-traits.json` with schema `{"version": 1, "traits": {"sdd": <bool>, "beads": <bool>}, "applied_at": "<ISO8601>"}` using the Write tool, (4) invoke `apply-traits.sh` via Bash tool using the plugin root path
+- [x] T007 [US1] Modify `sdd/skills/init/SKILL.md` to handle re-init (FR-014): if `.specify/sdd-traits.json` already exists, read it, display current trait settings to the user, and use `AskUserQuestion` to ask whether to keep current settings or reconfigure. If reconfigure, prompt for new selections and rewrite the config, then invoke `apply-traits.sh`
+- [x] T008 [US1] Modify `sdd/scripts/sdd-init.sh` to call `apply-traits.sh` after `specify init` in `do_init` function: after the `check_ready` verification succeeds, add a conditional block that checks `[ -f .specify/sdd-traits.json ]` and if true, runs `"$(dirname "$0")/apply-traits.sh"` with a warning on failure but without blocking the init (non-fatal)
 
 **Checkpoint**: Running `/sdd:init` in a fresh project prompts for trait selection, creates `.specify/sdd-traits.json`, and appends overlay content to spec-kit files. Running `/sdd:init` again shows current settings and offers to reconfigure.
 
@@ -60,9 +60,9 @@
 
 ### Implementation for User Story 2
 
-- [ ] T009 [US2] Modify `sdd/scripts/sdd-init.sh` `do_refresh` function: after `specify init --here --ai claude --force` and `fix_constitution`, add conditional `apply-traits.sh` call (same pattern as T008)
-- [ ] T010 [US2] Modify `sdd/scripts/sdd-init.sh` `do_update` function: after `specify init --here --ai claude --force`, add conditional `apply-traits.sh` call (same pattern as T008)
-- [ ] T011 [US2] Modify `sdd/scripts/sdd-init.sh` `check_ready` fast path: after `fix_constitution` and before `echo "READY"`, add conditional `apply-traits.sh` call (silent, suppress stdout) to ensure overlays are always applied on the fast path if config exists
+- [x] T009 [US2] Modify `sdd/scripts/sdd-init.sh` `do_refresh` function: after `specify init --here --ai claude --force` and `fix_constitution`, add conditional `apply-traits.sh` call (same pattern as T008)
+- [x] T010 [US2] Modify `sdd/scripts/sdd-init.sh` `do_update` function: after `specify init --here --ai claude --force`, add conditional `apply-traits.sh` call (same pattern as T008)
+- [x] T011 [US2] Modify `sdd/scripts/sdd-init.sh` `check_ready` fast path: after `fix_constitution` and before `echo "READY"`, add conditional `apply-traits.sh` call (silent, suppress stdout) to ensure overlays are always applied on the fast path if config exists
 
 **Checkpoint**: After `specify init --force` + `/sdd:init --refresh`, all previously enabled trait overlays are present in spec-kit files with sentinel markers.
 
@@ -76,7 +76,7 @@
 
 ### Implementation for User Story 3
 
-- [ ] T012 [US3] Create `sdd/commands/traits.md` command file with frontmatter (`name: sdd:traits`, `description: Manage SDD trait overlays - enable, disable, or list active traits`). The command body parses `$ARGUMENTS` for subcommand: (a) no args or "list" -> read and display `.specify/sdd-traits.json` status, or report no config and suggest `/sdd:init`, (b) "enable <trait>" -> validate trait name against known list [sdd, beads], read current config, set trait to true, write updated config with new `applied_at`, invoke `apply-traits.sh`, (c) "disable <trait>" -> warn about destructive side effect via `AskUserQuestion`, if confirmed: update config setting trait to false, run `specify init --here --ai claude --force`, then invoke `apply-traits.sh` to reapply only remaining enabled traits
+- [x] T012 [US3] Create `sdd/commands/traits.md` command file with frontmatter (`name: sdd:traits`, `description: Manage SDD trait overlays - enable, disable, or list active traits`). The command body parses `$ARGUMENTS` for subcommand: (a) no args or "list" -> read and display `.specify/sdd-traits.json` status, or report no config and suggest `/sdd:init`, (b) "enable <trait>" -> validate trait name against known list [sdd, beads], read current config, set trait to true, write updated config with new `applied_at`, invoke `apply-traits.sh`, (c) "disable <trait>" -> warn about destructive side effect via `AskUserQuestion`, if confirmed: update config setting trait to false, run `specify init --here --ai claude --force`, then invoke `apply-traits.sh` to reapply only remaining enabled traits
 
 **Checkpoint**: `/sdd:traits enable beads` adds beads overlays. `/sdd:traits disable beads` warns, confirms, resets files, and reapplies only sdd overlays.
 
@@ -90,7 +90,7 @@
 
 ### Implementation for User Story 4
 
-- [ ] T013 [US4] Verify the list functionality in `sdd/commands/traits.md` (created in T012) handles both cases: (a) config exists, displays formatted output like "sdd: enabled, beads: disabled", (b) no config exists, displays "No traits configured. Run /sdd:init to set up traits."
+- [x] T013 [US4] Verify the list functionality in `sdd/commands/traits.md` (created in T012) handles both cases: (a) config exists, displays formatted output like "sdd: enabled, beads: disabled", (b) no config exists, displays "No traits configured. Run /sdd:init to set up traits."
 
 **Checkpoint**: `/sdd:traits list` accurately reflects `.specify/sdd-traits.json` state.
 
@@ -100,10 +100,10 @@
 
 **Purpose**: Verification and documentation
 
-- [ ] T014 Verify idempotency: run `apply-traits.sh` twice and confirm file contents are identical (SC-002)
-- [ ] T015 Verify update survival: enable traits, run `specify init --force`, run `apply-traits.sh`, confirm overlays present (SC-003)
-- [ ] T016 Verify error handling: test with invalid JSON in `.specify/sdd-traits.json`, missing target files, and missing config file. Confirm appropriate error messages to stderr and non-zero exit codes
-- [ ] T017 [P] Add `Bash(*/scripts/apply-traits.sh*)` to suggested auto-approval commands in init SKILL.md documentation
+- [x] T014 Verify idempotency: run `apply-traits.sh` twice and confirm file contents are identical (SC-002)
+- [x] T015 Verify update survival: enable traits, run `specify init --force`, run `apply-traits.sh`, confirm overlays present (SC-003)
+- [x] T016 Verify error handling: test with invalid JSON in `.specify/sdd-traits.json`, missing target files, and missing config file. Confirm appropriate error messages to stderr and non-zero exit codes
+- [x] T017 [P] Add `Bash(*/scripts/apply-traits.sh*)` to suggested auto-approval commands in init SKILL.md documentation
 
 ---
 
