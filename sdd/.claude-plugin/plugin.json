@@ -20,5 +20,6 @@
     "process-discipline",
     "quality-gates",
     "superpowers"
-  ]
+  ],
+  "hooks": "./hooks.json"
 }

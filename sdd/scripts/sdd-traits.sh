@@ -1,0 +1,473 @@
+#!/bin/bash
+# sdd-traits.sh - Manage SDD trait configuration and overlay application
+#
+# Combines config management and overlay application into a single script.
+# All trait operations go through this script for reproducibility.
+#
+# Usage:
+#   sdd-traits.sh list                      # Show current trait status
+#   sdd-traits.sh enable <trait>            # Enable a trait and apply overlays
+#   sdd-traits.sh disable <trait>           # Disable a trait (config only, no reinit)
+#   sdd-traits.sh init [--enable t1,t2]     # Create config (all disabled, or enable specified)
+#   sdd-traits.sh apply                     # Apply overlays for all enabled traits
+#   sdd-traits.sh permissions [level]       # Show or set auto-approval level
+#
+# Permission levels:
+#   none       - No auto-approvals (confirm every command)
+#   standard   - Auto-approve SDD plugin scripts
+#   yolo       - Auto-approve SDD scripts + specify CLI
+#
+# Must be run from the project root (where .specify/ and .claude/ exist).
+#
+# Exit codes:
+#   0 - Success
+#   1 - Error
+#   2 - Invalid arguments
+
+set -euo pipefail
+
+PLUGIN_ROOT="$(cd "$(dirname "$0")/.." && pwd)"
+TRAITS_CONFIG=".specify/sdd-traits.json"
+VALID_TRAITS="sdd beads"
+
+# --- Helpers ---
+
+now_iso() {
+  date -u +%Y-%m-%dT%H:%M:%SZ
+}
+
+is_valid_trait() {
+  local trait="$1"
+  for t in $VALID_TRAITS; do
+    [ "$t" = "$trait" ] && return 0
+  done
+  return 1
+}
+
+ensure_config() {
+  # Create config with all traits disabled if it doesn't exist
+  if [ ! -f "$TRAITS_CONFIG" ]; then
+    mkdir -p "$(dirname "$TRAITS_CONFIG")"
+    cat > "$TRAITS_CONFIG" <<EOF
+{
+  "version": 1,
+  "traits": {
+    "sdd": false,
+    "beads": false
+  },
+  "applied_at": "$(now_iso)"
+}
+EOF
+    echo "Created $TRAITS_CONFIG with all traits disabled."
+  fi
+
+  # Validate JSON
+  if ! jq empty "$TRAITS_CONFIG" 2>/dev/null; then
+    echo "ERROR: Invalid JSON in $TRAITS_CONFIG" >&2
+    exit 1
+  fi
+}
+
+# --- Subcommands ---
+
+do_list() {
+  ensure_config
+  echo "SDD Traits:"
+  for trait in $VALID_TRAITS; do
+    val=$(jq -r ".traits[\"$trait\"] // false" "$TRAITS_CONFIG")
+    if [ "$val" = "true" ]; then
+      echo "  $trait: enabled"
+    else
+      echo "  $trait: disabled"
+    fi
+  done
+  applied_at=$(jq -r '.applied_at // "unknown"' "$TRAITS_CONFIG")
+  echo "  applied_at: $applied_at"
+}
+
+do_enable() {
+  local trait="$1"
+
+  if ! is_valid_trait "$trait"; then
+    echo "ERROR: Invalid trait '$trait'. Valid traits: $VALID_TRAITS" >&2
+    exit 2
+  fi
+
+  ensure_config
+
+  # Check if already enabled
+  current=$(jq -r ".traits[\"$trait\"] // false" "$TRAITS_CONFIG")
+  if [ "$current" = "true" ]; then
+    echo "Trait '$trait' is already enabled."
+    do_apply
+    return
+  fi
+
+  # Update config
+  local tmp
+  tmp=$(mktemp)
+  jq --arg t "$trait" --arg ts "$(now_iso)" \
+    '.traits[$t] = true | .applied_at = $ts' "$TRAITS_CONFIG" > "$tmp"
+  mv "$tmp" "$TRAITS_CONFIG"
+  echo "Trait '$trait' enabled."
+
+  # Apply overlays
+  do_apply
+}
+
+do_disable() {
+  local trait="$1"
+
+  if ! is_valid_trait "$trait"; then
+    echo "ERROR: Invalid trait '$trait'. Valid traits: $VALID_TRAITS" >&2
+    exit 2
+  fi
+
+  ensure_config
+
+  # Check if already disabled
+  current=$(jq -r ".traits[\"$trait\"] // false" "$TRAITS_CONFIG")
+  if [ "$current" = "false" ]; then
+    echo "Trait '$trait' is already disabled."
+    return
+  fi
+
+  # Update config only (caller handles spec-kit reinit and reapply)
+  local tmp
+  tmp=$(mktemp)
+  jq --arg t "$trait" --arg ts "$(now_iso)" \
+    '.traits[$t] = false | .applied_at = $ts' "$TRAITS_CONFIG" > "$tmp"
+  mv "$tmp" "$TRAITS_CONFIG"
+  echo "Trait '$trait' disabled in config."
+  echo "NOTE: Run 'specify init --here --ai claude --force' then '$0 apply' to regenerate files."
+}
+
+do_init() {
+  local enable_list=""
+
+  # Parse --enable flag
+  while [ $# -gt 0 ]; do
+    case "$1" in
+      --enable)
+        shift
+        enable_list="${1:-}"
+        if [ -z "$enable_list" ]; then
+          echo "ERROR: --enable requires a comma-separated list of traits" >&2
+          exit 2
+        fi
+        ;;
+      *)
+        echo "ERROR: Unknown argument '$1'" >&2
+        echo "Usage: sdd-traits.sh init [--enable trait1,trait2]" >&2
+        exit 2
+        ;;
+    esac
+    shift
+  done
+
+  # Build the traits JSON object
+  local sdd_val="false" beads_val="false"
+
+  if [ -n "$enable_list" ]; then
+    IFS=',' read -ra traits_arr <<< "$enable_list"
+    for t in "${traits_arr[@]}"; do
+      t=$(echo "$t" | tr -d ' ')
+      if ! is_valid_trait "$t"; then
+        echo "ERROR: Invalid trait '$t'. Valid traits: $VALID_TRAITS" >&2
+        exit 2
+      fi
+      case "$t" in
+        sdd) sdd_val="true" ;;
+        beads) beads_val="true" ;;
+      esac
+    done
+  fi
+
+  mkdir -p "$(dirname "$TRAITS_CONFIG")"
+  cat > "$TRAITS_CONFIG" <<EOF
+{
+  "version": 1,
+  "traits": {
+    "sdd": $sdd_val,
+    "beads": $beads_val
+  },
+  "applied_at": "$(now_iso)"
+}
+EOF
+
+  echo "Traits config created."
+  do_list
+  do_apply
+}
+
+do_apply() {
+  ensure_config
+
+  # Collect enabled traits
+  enabled_traits=$(jq -r '.traits | to_entries[] | select(.value == true) | .key' "$TRAITS_CONFIG")
+
+  if [ -z "$enabled_traits" ]; then
+    echo "No traits enabled. Nothing to apply."
+    return
+  fi
+
+  # Collect overlays and validate targets
+  declare -a overlay_files=()
+  declare -a target_files=()
+  declare -a trait_names=()
+  local errors=0
+
+  for trait in $enabled_traits; do
+    overlay_dir="$PLUGIN_ROOT/overlays/$trait"
+
+    if [ ! -d "$overlay_dir" ]; then
+      echo "WARNING: No overlay directory for trait '$trait' at $overlay_dir" >&2
+      continue
+    fi
+
+    while IFS= read -r -d '' overlay_file; do
+      rel_path="${overlay_file#"$overlay_dir"/}"
+      overlay_subdir=$(dirname "$rel_path")
+      overlay_basename=$(basename "$rel_path")
+      target_basename="${overlay_basename%.append.md}.md"
+
+      case "$overlay_subdir" in
+        commands)
+          target_file=".claude/commands/$target_basename"
+          ;;
+        templates)
+          target_file=".specify/templates/$target_basename"
+          ;;
+        *)
+          echo "WARNING: Unknown overlay subdirectory '$overlay_subdir', skipping" >&2
+          continue
+          ;;
+      esac
+
+      if [ ! -f "$target_file" ]; then
+        echo "ERROR: Target file not found: $target_file (from $overlay_file)" >&2
+        errors=$((errors + 1))
+        continue
+      fi
+
+      overlay_files+=("$overlay_file")
+      target_files+=("$target_file")
+      trait_names+=("$trait")
+    done < <(find "$overlay_dir" -name "*.append.md" -print0 2>/dev/null)
+  done
+
+  if [ "$errors" -gt 0 ]; then
+    echo "ERROR: $errors target file(s) missing. No overlays applied." >&2
+    return 1
+  fi
+
+  if [ ${#overlay_files[@]} -eq 0 ]; then
+    echo "No overlay files found for enabled traits."
+    return
+  fi
+
+  # Apply overlays (idempotent via sentinel markers)
+  local applied=0 skipped=0
+
+  for i in "${!overlay_files[@]}"; do
+    local sentinel="<!-- SDD-TRAIT:${trait_names[$i]} -->"
+
+    if grep -q "$sentinel" "${target_files[$i]}" 2>/dev/null; then
+      skipped=$((skipped + 1))
+      continue
+    fi
+
+    printf '\n' >> "${target_files[$i]}"
+    cat "${overlay_files[$i]}" >> "${target_files[$i]}"
+    applied=$((applied + 1))
+  done
+
+  echo "Traits applied: $applied overlay(s) appended, $skipped already present."
+}
+
+# --- Permissions ---
+
+SETTINGS_FILE=".claude/settings.local.json"
+
+# SDD-specific permission patterns
+SDD_PATTERN_INIT='Bash(*/scripts/sdd-init.sh*)'
+SDD_PATTERN_TRAITS='Bash(*/scripts/sdd-traits.sh*)'
+SDD_PATTERN_SPECIFY='Bash(specify *)'
+# Broad tool patterns for YOLO level
+SDD_YOLO_EXTRAS=("Bash" "Read" "Edit" "Write" "mcp__*")
+
+ensure_settings() {
+  if [ ! -f "$SETTINGS_FILE" ]; then
+    mkdir -p .claude
+    echo '{}' > "$SETTINGS_FILE"
+  fi
+  if ! jq empty "$SETTINGS_FILE" 2>/dev/null; then
+    echo "ERROR: Invalid JSON in $SETTINGS_FILE" >&2
+    exit 1
+  fi
+}
+
+# Remove all SDD-managed patterns from the allow list
+remove_sdd_patterns() {
+  local tmp
+  tmp=$(mktemp)
+  jq '
+    if .permissions.allow then
+      .permissions.allow = [
+        .permissions.allow[] |
+        select(
+          # SDD script patterns
+          (test("sdd-init\\.sh|sdd-traits\\.sh|^Bash\\(specify ") | not)
+          and
+          # YOLO broad patterns (exact matches only)
+          (. != "Bash" and . != "Read" and . != "Edit" and . != "Write" and . != "mcp__*")
+        )
+      ]
+    else . end
+  ' "$SETTINGS_FILE" > "$tmp"
+  mv "$tmp" "$SETTINGS_FILE"
+}
+
+# Add patterns to the allow list
+add_sdd_patterns() {
+  local tmp
+  tmp=$(mktemp)
+  # Build the pattern array from arguments
+  local patterns="[]"
+  for p in "$@"; do
+    patterns=$(echo "$patterns" | jq --arg p "$p" '. + [$p]')
+  done
+  jq --argjson new "$patterns" '
+    .permissions //= {} |
+    .permissions.allow //= [] |
+    .permissions.allow += $new
+  ' "$SETTINGS_FILE" > "$tmp"
+  mv "$tmp" "$SETTINGS_FILE"
+}
+
+detect_permission_level() {
+  ensure_settings
+  local allow
+  allow=$(jq -r '.permissions.allow // [] | .[]' "$SETTINGS_FILE")
+
+  local has_init=false has_traits=false has_specify=false has_bash=false
+  echo "$allow" | grep -q "sdd-init" && has_init=true
+  echo "$allow" | grep -q "sdd-traits" && has_traits=true
+  echo "$allow" | grep -q "specify " && has_specify=true
+  echo "$allow" | grep -qx "Bash" && has_bash=true
+
+  if [ "$has_init" = true ] && [ "$has_traits" = true ] && [ "$has_specify" = true ] && [ "$has_bash" = true ]; then
+    echo "yolo"
+  elif [ "$has_init" = true ] && [ "$has_traits" = true ]; then
+    echo "standard"
+  else
+    echo "none"
+  fi
+}
+
+do_permissions() {
+  local level="${1:-show}"
+
+  case "$level" in
+    show)
+      ensure_settings
+      local current
+      current=$(detect_permission_level)
+      echo "SDD auto-approval: $current"
+      echo ""
+      echo "Levels:"
+      echo "  none       No auto-approvals (confirm every command)"
+      echo "  standard   Auto-approve SDD plugin scripts"
+      echo "  yolo       Auto-approve all tools (Bash, Read, Edit, Write, MCP, specify)"
+      ;;
+    none)
+      ensure_settings
+      local before
+      before=$(detect_permission_level)
+      remove_sdd_patterns
+      echo "Auto-approval set to: none"
+      echo "All SDD commands will require confirmation."
+      [ "$before" != "none" ] && echo "CHANGED"
+      ;;
+    standard)
+      ensure_settings
+      local before
+      before=$(detect_permission_level)
+      remove_sdd_patterns
+      add_sdd_patterns "$SDD_PATTERN_INIT" "$SDD_PATTERN_TRAITS"
+      echo "Auto-approval set to: standard"
+      echo "SDD plugin scripts (sdd-init.sh, sdd-traits.sh) will run without confirmation."
+      [ "$before" != "standard" ] && echo "CHANGED"
+      ;;
+    yolo)
+      ensure_settings
+      local before
+      before=$(detect_permission_level)
+      remove_sdd_patterns
+      add_sdd_patterns "$SDD_PATTERN_INIT" "$SDD_PATTERN_TRAITS" "$SDD_PATTERN_SPECIFY" "${SDD_YOLO_EXTRAS[@]}"
+      echo "Auto-approval set to: yolo"
+      echo "All tools auto-approved: Bash, Read, Edit, Write, MCP, specify CLI, SDD scripts."
+      [ "$before" != "yolo" ] && echo "CHANGED"
+      ;;
+    *)
+      echo "ERROR: Invalid permission level '$level'. Use: none, standard, yolo" >&2
+      exit 2
+      ;;
+  esac
+}
+
+show_usage() {
+  echo "Usage: sdd-traits.sh <command> [options]"
+  echo ""
+  echo "Commands:"
+  echo "  list                      Show current trait status"
+  echo "  enable <trait>            Enable a trait and apply overlays"
+  echo "  disable <trait>           Disable a trait (config update only)"
+  echo "  init [--enable t1,t2]     Create config (default: all disabled)"
+  echo "  apply                     Apply overlays for all enabled traits"
+  echo "  permissions [level]       Show or set auto-approval (none|standard|yolo)"
+  echo ""
+  echo "Valid traits: $VALID_TRAITS"
+}
+
+# --- Main ---
+
+case "${1:-}" in
+  list|"")
+    do_list
+    ;;
+  enable)
+    if [ -z "${2:-}" ]; then
+      echo "ERROR: 'enable' requires a trait name" >&2
+      show_usage >&2
+      exit 2
+    fi
+    do_enable "$2"
+    ;;
+  disable)
+    if [ -z "${2:-}" ]; then
+      echo "ERROR: 'disable' requires a trait name" >&2
+      show_usage >&2
+      exit 2
+    fi
+    do_disable "$2"
+    ;;
+  init)
+    shift
+    do_init "$@"
+    ;;
+  apply)
+    do_apply
+    ;;
+  permissions)
+    do_permissions "${2:-show}"
+    ;;
+  -h|--help|help)
+    show_usage
+    ;;
+  *)
+    echo "ERROR: Unknown command '$1'" >&2
+    show_usage >&2
+    exit 2
+    ;;
+esac

@@ -27,9 +27,9 @@ check_ready() {
 apply_traits() {
   local script_dir
   script_dir="$(dirname "$0")"
-  if [ -f .specify/sdd-traits.json ] && [ -x "$script_dir/apply-traits.sh" ]; then
-    if ! "$script_dir/apply-traits.sh" "$@"; then
-      echo "WARNING: apply-traits.sh failed (traits not applied). spec-kit is still usable." >&2
+  if [ -f .specify/sdd-traits.json ] && [ -x "$script_dir/sdd-traits.sh" ]; then
+    if ! "$script_dir/sdd-traits.sh" apply "$@"; then
+      echo "WARNING: sdd-traits.sh apply failed (traits not applied). spec-kit is still usable." >&2
     fi
   fi
 }

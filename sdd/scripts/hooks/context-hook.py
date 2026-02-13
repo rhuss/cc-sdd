@@ -1,0 +1,53 @@
+#!/usr/bin/env python3
+"""Hook script for UserPromptSubmit event.
+Injects SDD plugin context as system reminder when sdd commands detected.
+"""
+import json
+import sys
+from pathlib import Path
+
+
+def read_hook_input():
+    """Read and parse hook input JSON from stdin."""
+    try:
+        return json.loads(sys.stdin.read())
+    except Exception as e:
+        print(f"ERROR: {e}", file=sys.stderr)
+        sys.exit(2)
+
+
+def main():
+    hook_input = read_hook_input()
+
+    prompt = hook_input.get('prompt', '')
+    session_id = hook_input.get('session_id')
+    cwd = Path(hook_input.get('cwd', '.'))
+
+    # Only process SDD commands
+    if not prompt.startswith('/sdd:'):
+        sys.exit(0)
+
+    # Resolve plugin root from script location:
+    # scripts/hooks/context-hook.py -> scripts/hooks -> scripts -> plugin_root
+    plugin_root = Path(__file__).parent.parent.parent
+
+    # Check if SDD traits are configured
+    sdd_configured = (cwd / '.specify' / 'sdd-traits.json').exists()
+
+    response = {
+        "hookSpecificOutput": {
+            "hookEventName": "UserPromptSubmit",
+            "additionalContext": f"""<sdd-context>
+<plugin-root>{plugin_root}</plugin-root>
+<project-dir>{cwd}</project-dir>
+<session-id>{session_id}</session-id>
+<sdd-configured>{str(sdd_configured).lower()}</sdd-configured>
+</sdd-context>"""
+        }
+    }
+    print(json.dumps(response))
+    sys.exit(0)
+
+
+if __name__ == "__main__":
+    main()
