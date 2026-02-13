@@ -5,33 +5,21 @@ description: Deterministic, non-interactive initialization and update of spec-ki
 
 # Spec-Kit Initialization
 
-## Overview
+## STOP: Read This First
 
-Deterministic, non-interactive initialization of spec-kit for Claude Code environments. This skill is the single source of truth for all `specify` CLI setup operations.
+**Do NOT explore.** Do NOT run `which`, `Search`, `Glob`, `Grep`, `find`, or any discovery commands. Do NOT search for `speckit`, `spec-kit`, or `.speckit`. The CLI is called `specify` (not `speckit`). The init script handles all CLI detection internally.
 
-**Performance is critical.** This skill is called as a precondition by every SDD workflow skill. The entire check runs as a single script invocation.
+**Your ONLY action**: Run the init script. Nothing else.
 
-## Argument Handling
-
-Check if `--update` or `--refresh` was passed as an argument:
-
-- **If `--update` is present**: Pass `--update` to the script (upgrades CLI + refreshes templates)
-- **If `--refresh` is present**: Pass `--refresh` to the script (re-downloads templates only)
-- **Otherwise**: Run the script with no arguments (fast check, init if needed)
-
-## How to Run
-
-**ZERO exploration required.** Do NOT use Explore agents, Glob, Grep, or Read tools to locate the script or check for CLI availability. The path is deterministic. Do NOT run `which speckit`, `which spec-kit`, or any other variant. The CLI command is `specify` (not `speckit`, not `spec-kit`). The init script handles all CLI detection internally.
-
-This SKILL.md is at `skills/init/SKILL.md` within the plugin root. The script is at `scripts/sdd-init.sh` in the same plugin root. Derive the absolute script path by resolving `../../scripts/sdd-init.sh` relative to this file's directory.
-
-**Your first and only action** should be a single Bash tool call:
+1. Derive the plugin root from this file's path: this file is `skills/init/SKILL.md`, so the plugin root is `../../` relative to this file's directory.
+2. Check arguments: `--update` (upgrade CLI + refresh), `--refresh` (re-download templates), or no args (fast check + init if needed).
+3. Run this single Bash command from the project's working directory:
 
 ```bash
 <plugin-root>/scripts/sdd-init.sh [--refresh|--update]
 ```
 
-Where `<plugin-root>` is the root directory of this plugin (the directory containing `scripts/`, `skills/`, `commands/`). The script must be run from the project's working directory (not the plugin directory), since it checks for `.specify/` and `.claude/commands/` relative to `pwd`.
+Then interpret the output per the table below. That's it. Do not run anything else before or after (except Trait Configuration if output is READY).
 
 ## Interpreting Script Output
 
@@ -140,9 +128,9 @@ To eliminate permission prompts for the traits script, add to `.claude/settings.
 
 ## Remember
 
-- **No exploration, no reading, no searching.** Run the init script immediately. The path is known.
+- **NEVER run `which`, `Search`, `Glob`, `find`, or any exploratory commands.** The script detects everything.
+- **The CLI is `specify`.** Not `speckit`. Not `spec-kit`. Not `spec_kit`. Only `specify`.
 - **Always use the script.** Do not replicate its logic with inline bash commands.
-- **Do NOT search for the CLI.** Never run `which speckit`, `which spec-kit`, `npm list`, or any exploratory commands. The CLI is called `specify` and the script detects it internally.
 - **One call, one result.** The script handles the fast path (already initialized) and slow path (needs setup) internally.
 - **Do NOT call `specify version` separately.** The script skips it on the fast path for speed.
 - This skill is infrastructure, not workflow.
