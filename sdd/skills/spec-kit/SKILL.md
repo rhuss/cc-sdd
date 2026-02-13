@@ -184,6 +184,29 @@ Then restart Claude Code to load the new commands.
 **STOP workflow.**
 
 **If verification succeeds:**
+Proceed to step 5.
+
+### Step 5: Ensure Constitution Symlink
+
+The `/speckit.constitution` command expects the constitution at `.specify/memory/constitution.md`, but the canonical location is `specs/constitution.md`. Ensure a symlink bridges the two:
+
+```bash
+# If constitution exists at specs/ but not at .specify/memory/, create symlink
+if [ -f "specs/constitution.md" ] && [ ! -e ".specify/memory/constitution.md" ]; then
+  mkdir -p .specify/memory
+  ln -s ../../specs/constitution.md .specify/memory/constitution.md
+  echo "symlink-created: .specify/memory/constitution.md -> specs/constitution.md"
+elif [ -f ".specify/memory/constitution.md" ] && [ ! -L ".specify/memory/constitution.md" ] && [ ! -f "specs/constitution.md" ]; then
+  # Constitution exists only at .specify/memory/ (created by speckit command) - move and symlink
+  mv .specify/memory/constitution.md specs/constitution.md
+  ln -s ../../specs/constitution.md .specify/memory/constitution.md
+  echo "moved-and-linked: constitution.md -> specs/constitution.md"
+else
+  echo "constitution-ok"
+fi
+```
+
+**After symlink step:**
 - Set session flag: "sdd_init_done"
 - Return success to calling skill
 - Calling skill continues with its workflow
@@ -201,7 +224,7 @@ After `specify init`, these `/speckit.*` commands are available:
 | `/speckit.analyze` | Cross-artifact consistency | (analysis output) |
 | `/speckit.checklist` | Generate quality checklist | checklist file |
 | `/speckit.implement` | Execute implementation | code files |
-| `/speckit.constitution` | Create project constitution | `.specify/memory/constitution.md` |
+| `/speckit.constitution` | Create project constitution | `.specify/memory/constitution.md` (also check `specs/constitution.md`) |
 
 **Usage in skills:**
 
@@ -218,18 +241,61 @@ If /speckit.specify is not available (not initialized),
 create the spec manually following .specify/templates/spec-template.md
 ```
 
+## Branch Naming Convention
+
+**Spec-kit requires feature branches named `NNN-feature-name`** where `NNN` is a three-digit numeric prefix matching the spec directory number.
+
+| Pattern | Valid | Example |
+|---------|-------|---------|
+| `NNN-feature-name` | Yes | `002-operator-config` |
+| `feature/name` | No | Fails branch validation |
+| `spec/NNN-name` | No | Fails branch validation |
+| `fix/NNN-name` | No | Fails branch validation |
+
+The validation regex is `^[0-9]{3}-` (must start with exactly three digits followed by a hyphen).
+
+**Why this matters:** Spec-kit uses the branch name to locate the corresponding spec directory under `specs/`. The numeric prefix links branch `002-operator-config` to `specs/002-operator-config/`.
+
+**Validation helper:**
+
+```bash
+check_branch_for_speckit() {
+  local branch=$(git branch --show-current)
+  if [[ "$branch" =~ ^[0-9]{3}- ]]; then
+    echo "valid: $branch"
+  else
+    echo "invalid: $branch (must match NNN-feature-name pattern)"
+  fi
+}
+```
+
+**If the branch name is wrong**, create or switch to a properly named branch before running any `/speckit.*` commands:
+
+```bash
+# Example: for spec in specs/002-operator-config/
+git checkout -b 002-operator-config
+```
+
 ## Layout Validation
 
 Use these helpers to validate spec-kit file structure:
 
 ### Check Constitution
 
-```bash
-# Constitution location (per spec-kit convention)
-CONSTITUTION=".specify/memory/constitution.md"
+The constitution can exist in two locations depending on how it was created:
+- `.specify/memory/constitution.md` (created by `/speckit.constitution`)
+- `specs/constitution.md` (created manually via `sdd:constitution`)
 
-if [ -f "$CONSTITUTION" ]; then
-  echo "constitution-exists"
+**Always check both locations:**
+
+```bash
+# Check both possible constitution locations
+if [ -f ".specify/memory/constitution.md" ]; then
+  CONSTITUTION=".specify/memory/constitution.md"
+  echo "constitution-exists: $CONSTITUTION"
+elif [ -f "specs/constitution.md" ]; then
+  CONSTITUTION="specs/constitution.md"
+  echo "constitution-exists: $CONSTITUTION"
 else
   echo "no-constitution"
 fi

@@ -103,6 +103,11 @@ Use /sdd:plan to generate plan.md and tasks.md.
 
 ### 1.4 Set Up Feature Branch
 
+**IMPORTANT: Spec-kit requires branches named `NNN-feature-name`** (e.g., `002-operator-config`).
+The numeric prefix must match the spec directory number (e.g., spec in `specs/002-operator-config/` requires branch `002-operator-config` or `002-some-other-name`).
+
+Branches with prefixes like `feature/`, `spec/`, or `fix/` will fail spec-kit validation.
+
 Check current git state:
 
 ```bash
@@ -110,10 +115,23 @@ git branch --show-current
 git status --short
 ```
 
-**Ask user using AskUserQuestion:**
-1. Create feature branch: `git checkout -b feature/[name]`
-2. Create git worktree: `git worktree add ../feature-[name] -b feature/[name]`
-3. Use current branch (proceed as-is)
+**Determine the spec number from the selected spec directory** (e.g., `specs/002-operator-config` → prefix is `002`).
+
+**Check if current branch already matches `^[0-9]{3}-` pattern:**
+
+```bash
+BRANCH=$(git branch --show-current)
+if [[ "$BRANCH" =~ ^[0-9]{3}- ]]; then
+  echo "Branch '$BRANCH' matches spec-kit convention"
+else
+  echo "Branch '$BRANCH' does NOT match spec-kit convention (must be NNN-feature-name)"
+fi
+```
+
+**If branch does NOT match, ask user using AskUserQuestion:**
+1. Create feature branch: `git checkout -b NNN-feature-name` (e.g., `002-operator-config`)
+2. Create git worktree: `git worktree add ../NNN-feature-name -b NNN-feature-name`
+3. Use current branch (proceed as-is, but spec-kit commands may fail)
 
 ---
 
@@ -206,7 +224,7 @@ Present completion summary:
 ### Next Steps
 - [ ] Review changes: `git diff`
 - [ ] Commit: `git add . && git commit`
-- [ ] Push: `git push -u origin feature/[name]`
+- [ ] Push: `git push -u origin NNN-feature-name`
 - [ ] Create PR: `gh pr create`
 ```
 

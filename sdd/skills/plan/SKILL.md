@@ -126,7 +126,25 @@ Fix these issues first, then run /sdd:plan again.
 **If review passes or only minor issues:**
 Proceed to planning.
 
-### 3. Generate Plan
+### 3. Validate Branch Name
+
+**IMPORTANT: Spec-kit requires branches named `NNN-feature-name`** (e.g., `002-operator-config`).
+The numeric prefix must match the spec directory number. Branches with prefixes like `feature/`, `spec/`, or `fix/` will fail.
+
+```bash
+BRANCH=$(git branch --show-current)
+if [[ "$BRANCH" =~ ^[0-9]{3}- ]]; then
+  echo "Branch '$BRANCH' matches spec-kit convention"
+else
+  echo "WARNING: Branch '$BRANCH' does NOT match spec-kit convention (must be NNN-feature-name)"
+fi
+```
+
+**If branch does NOT match, ask user using AskUserQuestion:**
+1. Switch to a properly named branch: `git checkout -b NNN-feature-name` (e.g., `002-operator-config`)
+2. Use current branch (spec-kit commands may fail with branch validation errors)
+
+### 4. Generate Plan
 
 **Invoke `/speckit.plan` to generate the implementation plan:**
 
@@ -151,7 +169,7 @@ else
 fi
 ```
 
-### 4. Generate Tasks
+### 5. Generate Tasks
 
 **Invoke `/speckit.tasks` to generate the task breakdown:**
 
@@ -176,7 +194,7 @@ else
 fi
 ```
 
-### 5. Verify Artifact Consistency
+### 6. Verify Artifact Consistency
 
 **Run consistency check using `/speckit.analyze`:**
 
@@ -192,7 +210,7 @@ This verifies:
 **If consistency check fails:**
 Report issues and suggest fixes.
 
-### 6. Generate Review Summary and Brief
+### 7. Generate Review Summary and Brief
 
 After plan and tasks are complete, generate review documents for stakeholders.
 
@@ -404,7 +422,7 @@ if [ -f "$SPEC_DIR/review_brief.md" ]; then
 fi
 ```
 
-### 7. Summary and Next Steps
+### 8. Summary and Next Steps
 
 **Present summary to user:**
 

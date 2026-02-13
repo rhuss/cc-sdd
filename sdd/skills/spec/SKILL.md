@@ -184,9 +184,16 @@ ls -la specs/features/
 # Or: ls -la specs/[NNNN]-*/
 ```
 
-**Check for constitution:**
+**Check for constitution (can be in either location):**
 ```bash
-cat .specify/memory/constitution.md
+# Check both possible locations
+if [ -f ".specify/memory/constitution.md" ]; then
+  cat .specify/memory/constitution.md
+elif [ -f "specs/constitution.md" ]; then
+  cat specs/constitution.md
+else
+  echo "no-constitution"
+fi
 ```
 
 **Look for related features:**
@@ -231,10 +238,14 @@ Invoke `/speckit.clarify` to identify underspecified areas. Present results to u
 
 ### 4. Validate Against Constitution
 
-**If constitution exists:**
+**If constitution exists (check both locations):**
 
 ```bash
-cat .specify/memory/constitution.md
+if [ -f ".specify/memory/constitution.md" ]; then
+  cat .specify/memory/constitution.md
+elif [ -f "specs/constitution.md" ]; then
+  cat specs/constitution.md
+fi
 ```
 
 **Check alignment:**
@@ -260,7 +271,21 @@ cat .specify/memory/constitution.md
 
 ### 6. Generate Implementation Artifacts
 
-After spec is validated, generate the implementation plan and tasks:
+After spec is validated, generate the implementation plan and tasks.
+
+**Check branch name first:**
+
+Spec-kit requires branches named `NNN-feature-name` (e.g., `002-operator-config`). Branches with prefixes like `feature/`, `spec/`, or `fix/` will fail validation.
+
+```bash
+BRANCH=$(git branch --show-current)
+if [[ ! "$BRANCH" =~ ^[0-9]{3}- ]]; then
+  echo "WARNING: Branch '$BRANCH' does not match spec-kit convention (NNN-feature-name)"
+  echo "Consider: git checkout -b NNN-feature-name"
+fi
+```
+
+If the branch name is wrong, ask the user to switch before proceeding.
 
 **Generate plan:**
 
