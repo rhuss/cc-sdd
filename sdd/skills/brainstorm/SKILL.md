@@ -1,6 +1,6 @@
 ---
 name: brainstorm
-description: Use when starting from rough ideas - refines concepts into executable specifications through collaborative questioning, alternative exploration, and incremental validation, use this skill when called from a command
+description: "You MUST use this before any creative work - refines rough ideas into executable specifications through collaborative questioning, alternative exploration, and incremental validation. Use this skill when called from a command."
 ---
 
 # Brainstorming Ideas Into Specifications
@@ -9,13 +9,62 @@ description: Use when starting from rough ideas - refines concepts into executab
 
 Help turn rough ideas into formal, executable specifications through natural collaborative dialogue.
 
-Start by understanding the current project context, then ask questions one at a time to refine the idea. Once you understand what you're building, create the specification using spec-kit (if available) or directly as markdown.
+Start by understanding the current project context, then ask questions one at a time to refine the idea. Once you understand what you're building, present the specification and get user approval.
 
 **Key Difference from Standard Brainstorming:**
 - **Output is a SPEC**, not a design document
 - Spec is the **source of truth** for implementation
 - Focus on **"what" and "why"**, defer "how" to implementation phase
 - Validate spec soundness before finishing
+
+<HARD-GATE>
+Do NOT invoke any implementation skill, write any code, scaffold any project, or take any implementation action until you have presented a specification and the user has approved it. This applies to EVERY project regardless of perceived simplicity.
+</HARD-GATE>
+
+## Anti-Pattern: "This Is Too Simple To Need A Spec"
+
+Every project goes through this process. A todo list, a single-function utility, a config change: all of them. "Simple" projects are where unexamined assumptions cause the most wasted work. The spec can be short (a few sentences for truly simple projects), but you MUST present it and get approval.
+
+## Checklist
+
+You MUST create a task for each of these items and complete them in order:
+
+1. **Initialize spec-kit** - ensure specify CLI and project are set up
+2. **Explore project context** - check files, specs, constitution, recent commits
+3. **Ask clarifying questions** - one at a time, understand purpose/constraints/success criteria
+4. **Propose 2-3 approaches** - with trade-offs and your recommendation
+5. **Present spec sections** - scaled to their complexity, get user approval after each section
+6. **Create specification** - using spec-kit or manually, validate and commit
+7. **Generate review brief** - synthesize spec into reviewer-friendly summary
+8. **Transition** - offer next steps via `sdd:plan` or `sdd:implement`
+
+## Process Flow
+
+```dot
+digraph brainstorming {
+    "Initialize spec-kit" [shape=box];
+    "Explore project context" [shape=box];
+    "Ask clarifying questions" [shape=box];
+    "Propose 2-3 approaches" [shape=box];
+    "Present spec sections" [shape=box];
+    "User approves spec?" [shape=diamond];
+    "Create specification file" [shape=box];
+    "Validate & commit spec" [shape=box];
+    "Offer sdd:plan or sdd:implement" [shape=doublecircle];
+
+    "Initialize spec-kit" -> "Explore project context";
+    "Explore project context" -> "Ask clarifying questions";
+    "Ask clarifying questions" -> "Propose 2-3 approaches";
+    "Propose 2-3 approaches" -> "Present spec sections";
+    "Present spec sections" -> "User approves spec?";
+    "User approves spec?" -> "Present spec sections" [label="no, revise"];
+    "User approves spec?" -> "Create specification file" [label="yes"];
+    "Create specification file" -> "Validate & commit spec";
+    "Validate & commit spec" -> "Offer sdd:plan or sdd:implement";
+}
+```
+
+**The terminal state is offering `sdd:plan` or `sdd:implement`.** Do NOT invoke any implementation skill directly. After brainstorming, the ONLY next steps are spec-driven: planning or implementing from the approved spec.
 
 ## Prerequisites
 
@@ -89,7 +138,8 @@ If `/speckit.*` commands are not available, fall back to creating specs manually
 
 **Ask questions to refine:**
 - Ask questions one at a time
-- Prefer multiple choice when possible
+- Only one question per message. If a topic needs more exploration, break it into multiple questions
+- Prefer multiple choice when possible, but open-ended is fine too
 - Focus on: purpose, constraints, success criteria, edge cases
 - Identify dependencies and integrations
 
@@ -109,9 +159,17 @@ If `/speckit.*` commands are not available, fall back to creating specs manually
 - How does this integrate with existing features?
 - What are the success criteria?
 
+### Presenting the specification
+
+**Once you believe you understand what you're building, present the spec:**
+- Scale each section to its complexity: a few sentences if straightforward, up to 200-300 words if nuanced
+- Ask after each section whether it looks right so far
+- Cover: purpose, requirements, success criteria, error handling, edge cases, dependencies
+- Be ready to go back and clarify if something doesn't make sense
+
 ### Creating the specification
 
-**Once you understand what you're building:**
+**Once the user approves the presented spec:**
 
 1. **Announce spec creation:**
    "Based on our discussion, I'm creating the specification..."
@@ -216,11 +274,6 @@ If `/speckit.*` commands are not available, fall back to creating specs manually
    - Check spec aligns with project principles
    - Note any violations and address them
 
-7. **Present spec in sections:**
-   - Show 200-300 words at a time
-   - Ask: "Does this look right so far?"
-   - Be ready to revise based on feedback
-
 ### After spec creation
 
 **Validate the spec:**
@@ -311,8 +364,8 @@ Write to `specs/[feature-name]/review_brief.md` using the template:
 
 **Offer next steps:**
 - "Spec created and validated. Ready to implement?"
-- If yes → Use `sdd:implement`
-- If no → Offer to refine spec or pause
+- If yes, ask whether they want to plan first (`sdd:plan`) or implement directly (`sdd:implement`)
+- If no, offer to refine spec or pause
 
 **Commit the spec:**
 ```bash
@@ -329,10 +382,10 @@ Assisted-By: 🤖 Claude Code"
 ## Key Principles
 
 - **One question at a time** - Don't overwhelm with multiple questions
-- **Multiple choice preferred** - Easier to answer than open-ended
+- **Multiple choice preferred** - Easier to answer than open-ended when possible
 - **YAGNI ruthlessly** - Remove unnecessary features from all specs
 - **Explore alternatives** - Always propose 2-3 approaches before settling
-- **Incremental validation** - Present spec in sections, validate each
+- **Incremental validation** - Present spec sections, get approval before moving on
 - **Be flexible** - Go back and clarify when something doesn't make sense
 - **Separate WHAT from HOW** - Spec focuses on requirements and contracts; implementation notes capture technical decisions
 - **Capture context** - If technical details emerge, put them in implementation-notes.md, not the spec
@@ -350,22 +403,9 @@ If no constitution exists and this seems to be early in project:
   - Quality gates
   - Error handling approaches
 - "Would you like to create one? It ensures consistency across features."
-- If yes → Use `sdd:constitution`
+- If yes, use `sdd:constitution`
 
 **Don't be pushy:** Constitution is optional but recommended.
-
-## Checklist
-
-Use TodoWrite to track:
-
-- [ ] Understand current project context
-- [ ] Ask questions to refine idea
-- [ ] Explore 2-3 approaches with trade-offs
-- [ ] Create specification file
-- [ ] Validate against constitution (if exists)
-- [ ] Review spec for soundness
-- [ ] Commit spec to git
-- [ ] Offer next steps (implement or refine)
 
 ## Example Flow
 
@@ -394,12 +434,7 @@ C) Two levels (reply and one nested level)
 
 [... conversation continues ...]
 
-You: Based on our discussion, I'm creating the specification at:
-specs/features/blog-comments.md
-
-[Creates spec with all discussed requirements]
-
-Here's the Purpose and Requirements section:
+You: Based on our discussion, here's the spec:
 
 ## Purpose
 Enable readers to discuss blog posts through threaded comments,
@@ -419,17 +454,19 @@ Does this look right so far?
 
 User: Yes
 
-[... continues through all sections ...]
+[... continues through all sections, getting approval ...]
 
-You: Spec created! Let me validate it for soundness...
+You: Spec approved! Creating the specification file...
 
+[Creates spec via /speckit.specify or manually]
 [Runs sdd:review-spec]
 
-Spec is sound and implementable ✓
+Spec is sound and implementable.
 
-Committed to git ✓
+Committed to git.
 
 Ready to implement the comment system?
+Would you like to plan first (sdd:plan) or implement directly (sdd:implement)?
 ```
 
 ## Common Pitfalls
@@ -440,6 +477,8 @@ Ready to implement the comment system?
 - Make decisions that belong in implementation phase
 - Skip exploring alternatives
 - Rush to spec creation before understanding the problem
+- Skip the approval step, even for "simple" projects
+- Invoke implementation skills before spec approval
 
 **Do:**
 - Focus on requirements and behavior
@@ -448,6 +487,7 @@ Ready to implement the comment system?
 - Validate incrementally
 - Check against constitution
 - Ensure spec is implementable
+- Get explicit approval before proceeding
 
 ## Remember
 

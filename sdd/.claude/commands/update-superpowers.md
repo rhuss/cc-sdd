@@ -96,6 +96,18 @@ For each modified skill, we'll use AI agents to merge upstream changes with SDD 
 
 For each skill in `sdd/.superpowers-sync` → `modified_skills`:
 
+**Special case: writing-plans (reference-only)**
+
+If the skill has `"sync_mode": "reference-only"` in `.superpowers-sync`:
+1. Read the upstream changes to `skills/writing-plans/SKILL.md`
+2. Read the target skill specified in `"feeds_into"` (e.g., `sdd/skills/plan/SKILL.md`)
+3. Identify new quality patterns, validation approaches, or anti-rationalization improvements
+4. Adapt relevant changes into the target skill's post-generation quality checks
+5. Status becomes "Evaluated" instead of "Merged"
+6. **Do NOT create a local writing-plans SKILL.md.** All patterns go into `sdd:plan`.
+
+**Standard case: all other skills**
+
 1. **Read three sources**:
    - Upstream current version: `$TEMP_DIR/superpowers-upstream/skills/[skill]/SKILL.md`
    - Local current version: `sdd/skills/[skill]/SKILL.md`
@@ -181,7 +193,7 @@ Execute the above process for each skill:
 4. `brainstorm` (upstream: `skills/brainstorming/SKILL.md`)
 
 **Use TodoWrite to track progress:**
-- [ ] Merge writing-plans
+- [ ] Evaluate writing-plans changes for sdd:plan quality gates
 - [ ] Merge review-code
 - [ ] Merge verification-before-completion
 - [ ] Merge brainstorm
@@ -205,19 +217,19 @@ Create `docs/sync-reports/sync-YYYY-MM-DD.md`:
 
 ## Skills Updated
 
-### writing-plans
-**Status**: ✅ Merged / ⚠️ Needs Review
+### writing-plans (reference-only, feeds into sdd:plan)
+**Status**: ✅ Evaluated / ⚠️ Needs Review
 
-**Upstream Changes Integrated**:
+**Upstream Changes Identified**:
 - [List improvements from upstream commits]
 
-**SDD Enhancements Preserved**:
-- Spec-first input parsing
-- Requirements coverage validation
-- Plan-to-spec validation
+**Adapted into sdd:plan**:
+- [New quality patterns adapted into post-generation checks]
+- [New validation approaches integrated]
+- [Anti-rationalization improvements absorbed]
 
-**Conflicts Resolved**:
-- [List any conflicts and how resolved, or "None"]
+**Not Applicable**:
+- [Changes that don't apply to the sdd:plan model, with reason]
 
 ---
 
@@ -258,7 +270,7 @@ Add entry:
 
 ### Changed
 - Synced with superpowers@[COMMIT_SHORT] ([DATE])
-  - `writing-plans`: [summary of upstream improvements]
+  - `writing-plans`: [evaluated, adapted into sdd:plan quality gates]
   - `review-code`: [summary]
   - `verification-before-completion`: [summary]
   - `brainstorm`: [summary]
@@ -281,10 +293,12 @@ After merge, verify each skill:
 
 ```bash
 # Read through each modified skill
-cat sdd/skills/writing-plans/SKILL.md
 cat sdd/skills/review-code/SKILL.md
 cat sdd/skills/verification-before-completion/SKILL.md
 cat sdd/skills/brainstorm/SKILL.md
+
+# writing-plans is reference-only: check that sdd:plan absorbed any new patterns
+cat sdd/skills/plan/SKILL.md
 
 # Check for:
 # - SDD sections still present (spec-first, compliance checking, etc.)
@@ -292,6 +306,7 @@ cat sdd/skills/brainstorm/SKILL.md
 # - Improved examples/wording from upstream integrated
 # - No merge artifacts (<<<<<<, >>>>>>, etc.)
 # - Consistent tone and structure
+# - sdd:plan quality gates reflect any new writing-plans patterns
 ```
 
 ## Final Output
@@ -305,7 +320,7 @@ Present to user:
 **Skills updated**: 4
 
 **Summary**:
-- writing-plans: ✅ [X changes integrated]
+- writing-plans: ✅ [evaluated, X patterns adapted into sdd:plan]
 - review-code: ✅ [X changes integrated]
 - verification-before-completion: ✅ [X changes integrated]
 - brainstorm: ✅ [X changes integrated]

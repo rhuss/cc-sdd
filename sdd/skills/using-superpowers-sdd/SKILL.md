@@ -80,11 +80,12 @@ Before ANY implementation work:
 - **sdd:evolve** - Handle spec/code mismatches with AI guidance
 
 ### Modified Core Skills
-- **sdd:writing-plans** - Generate plans FROM specs (not from scratch)
+- **sdd:plan** - Generate plan and tasks FROM specs with quality gates (coverage matrix, red flag scanning, task quality standards)
 - **sdd:review-code** - Review code-to-spec compliance
 - **sdd:verification-before-completion** - Tests + spec compliance validation
 
 ### SDD-Specific Skills
+- **sdd:spec** - Create formal specifications from clear requirements
 - **sdd:review-spec** - Validate spec soundness and completeness
 - **sdd:spec-refactoring** - Consolidate and improve evolved specs
 - **sdd:spec-kit** - Technical integration for spec-kit CLI (called automatically)
@@ -106,12 +107,14 @@ User request arrives
 Is this a new feature/project?
     Yes → Is it a rough idea?
             Yes → sdd:brainstorm
-            No → Create spec using spec-kit tools
+            No → Create spec using sdd:spec
     No → Does spec exist for this area?
             Yes → Is there spec/code mismatch?
                     Yes → sdd:evolve
-                    No → sdd:implement
-            No → Create spec first using spec-kit tools
+                    No → Need plan/tasks?
+                            Yes → sdd:plan
+                            No → sdd:implement
+            No → Create spec first using sdd:spec
 ```
 
 ## Creating Specifications

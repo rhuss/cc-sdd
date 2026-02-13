@@ -14,6 +14,9 @@ This skill generates implementation artifacts (plan.md, tasks.md) from a validat
 2. Validating the spec before planning
 3. Running spec review to catch issues early
 4. Verifying generated artifacts are complete
+5. Coverage matrix validation (requirement to task to test mapping)
+6. Red flag scanning (detecting vague language, missing file paths, TBD items)
+7. Task quality enforcement (Actionable, Testable, Atomic, Ordered)
 
 ## When to Use
 
@@ -169,6 +172,16 @@ else
 fi
 ```
 
+**Post-generation check: Error/Edge Case and Success Criteria Coverage**
+
+After plan.md is generated, read both the spec and the plan, then verify:
+
+1. **Error case coverage**: Every error case listed in the spec has a corresponding handling approach in the plan.
+2. **Edge case coverage**: Every edge case from the spec is addressed in the plan.
+3. **Success criteria reference**: The plan references the spec's success criteria and has verification approaches for each.
+
+If any are missing, note the gaps and add them to the plan before proceeding.
+
 ### 5. Generate Tasks
 
 **Invoke `/speckit.tasks` to generate the task breakdown:**
@@ -194,6 +207,22 @@ else
 fi
 ```
 
+**Post-generation check: Task Quality Standards**
+
+After tasks.md is generated, verify every task meets these criteria:
+
+- **Actionable**: Clear what to do (not "figure out..." or "investigate...")
+- **Testable**: Can verify completion objectively
+- **Atomic**: One clear outcome per task
+- **Ordered**: Dependencies between tasks are respected, phases are sequenced correctly
+
+Also check:
+- Every task specifies concrete file paths (not "somewhere" or "TBD")
+- Phase ordering is logical (setup before core, tests before integration)
+- No tasks duplicate work already covered by other tasks
+
+If tasks fail these checks, note the issues and refine before proceeding.
+
 ### 6. Verify Artifact Consistency
 
 **Run consistency check using `/speckit.analyze`:**
@@ -207,10 +236,47 @@ This verifies:
 - Tasks implement all plan items
 - No orphaned tasks or missing coverage
 
+**Coverage Matrix Output**
+
+After the consistency check, produce an explicit coverage matrix mapping every spec requirement to its implementing tasks and tests:
+
+```
+Requirement 1 → Tasks [X,Y], Tests [A,B]     ✓
+Requirement 2 → Tasks [Z],   Tests [C,D]     ✓
+NFR 1         → Tasks [W],   Validation [E]  ✓
+...
+```
+
+Any requirement without task coverage or test coverage must be flagged and resolved before proceeding.
+
 **If consistency check fails:**
 Report issues and suggest fixes.
 
-### 7. Generate Review Summary and Brief
+### 7. Scan for Plan Quality Issues
+
+**Red flag scan**: Search plan.md and tasks.md for vague or incomplete language:
+
+```bash
+SPEC_DIR="specs/[feature-name]"
+rg -i "figure out|tbd|todo|implement later|somehow|somewhere|not sure|maybe|probably" "$SPEC_DIR/plan.md" "$SPEC_DIR/tasks.md" || echo "No red flags found"
+```
+
+Review any matches. Each is a potential gap:
+- "Figure out..." = missing research, needs concrete approach
+- "TBD" = incomplete planning, must be resolved
+- "Implement later" = deferred work that should be scoped explicitly
+- Missing file paths = tasks are not actionable
+
+**NFR validation check**: For each non-functional requirement in the spec, verify the plan includes:
+- A concrete measurement method (not just "should be fast")
+- A validation approach (how will you verify the NFR is met?)
+- Acceptance thresholds where applicable (response time < 200ms, etc.)
+
+If any NFR lacks a measurement method, add one before proceeding.
+
+**Resolve all red flags and NFR gaps before moving to the next step.**
+
+### 8. Generate Review Summary and Brief
 
 After plan and tasks are complete, generate review documents for stakeholders.
 
@@ -422,7 +488,7 @@ if [ -f "$SPEC_DIR/review_brief.md" ]; then
 fi
 ```
 
-### 8. Summary and Next Steps
+### 9. Summary and Next Steps
 
 **Present summary to user:**
 
@@ -512,9 +578,15 @@ Use TodoWrite to track:
 - [ ] Run spec review (sdd:review-spec)
 - [ ] Invoke /speckit.plan
 - [ ] Verify plan.md created
+- [ ] Check error/edge case coverage against spec
+- [ ] Check success criteria are referenced
 - [ ] Invoke /speckit.tasks
 - [ ] Verify tasks.md created
+- [ ] Verify task quality (Actionable, Testable, Atomic, Ordered)
 - [ ] Run consistency check (/speckit.analyze)
+- [ ] Produce coverage matrix (requirement to task to test)
+- [ ] Run red flag scan (vague language, TBD, missing paths)
+- [ ] Validate NFR measurement methods
 - [ ] Generate review summary (review-summary.md)
 - [ ] Generate review brief (review_brief.md)
 - [ ] Present summary and next steps
@@ -565,4 +637,8 @@ Ensure plan.md exists and try again.
 **Quality gates matter:**
 - Spec review before planning catches issues early
 - Consistency check ensures complete coverage
+- Coverage matrix maps every requirement to tasks and tests
+- Red flag scanning catches vague language before it becomes implementation confusion
+- Task quality standards (Actionable, Testable, Atomic, Ordered) prevent ambiguous work items
+- NFR validation ensures non-functional requirements have concrete measurement methods
 - These steps are why /sdd:plan is better than calling /speckit.* directly

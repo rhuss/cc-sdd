@@ -1,24 +1,22 @@
 {
   "upstream_repo": "https://github.com/obra/superpowers",
-  "last_sync_commit": "469a6d81ebb8b827e284d4afb090c6c622d97747",
-  "last_sync_date": "2026-01-29",
-  "note": "Initial baseline sync via /update-superpowers",
+  "last_sync_commit": "e16d611eee14ac4c3253b4bf4c55a98d905c2e64",
+  "last_sync_date": "2026-02-13",
+  "note": "Synced via /update-superpowers",
   "modified_skills": {
     "writing-plans": {
       "upstream_file": "skills/writing-plans/SKILL.md",
-      "local_file": "skills/writing-plans/SKILL.md",
-      "modification_summary": "Plans generated FROM specs (not from scratch); validates completeness against spec requirements",
-      "key_sections_modified": [
-        "Overview: Added spec-first principle",
-        "When to Use: Added prerequisites (spec must exist)",
-        "The Process - Step 1: Read and Parse Specification (new section)",
-        "Requirements Coverage: Validates plan covers all spec requirements (new section)",
-        "Plan structure: References spec sections explicitly"
-      ],
-      "sdd_additions": [
-        "## 1. Read and Parse Specification",
-        "## Requirements Coverage",
-        "Spec reference in plan template"
+      "local_file": null,
+      "sync_mode": "reference-only",
+      "feeds_into": "skills/plan/SKILL.md",
+      "modification_summary": "No local copy. Upstream changes evaluated and adapted into sdd:plan post-generation quality gates (coverage matrix, red flag scanning, task quality standards, error/edge case coverage checks).",
+      "patterns_absorbed": [
+        "Coverage Matrix (requirement -> task -> test mapping)",
+        "Red Flag Scanning (vague language detection)",
+        "Task Quality Standards (Actionable, Testable, Atomic, Ordered)",
+        "Error/Edge Case Coverage Checks",
+        "NFR Validation Approach",
+        "Success Criteria Reference"
       ]
     },
     "review-code": {
