@@ -3,41 +3,60 @@
 ![Version](https://img.shields.io/badge/version-0.2.0-blue)
 ![License](https://img.shields.io/badge/license-MIT-green)
 ![Claude Code](https://img.shields.io/badge/Claude%20Code-Plugin-purple)
+[![Builds on Superpowers](https://img.shields.io/badge/builds%20on-Superpowers-orange)](https://github.com/obra/superpowers)
+[![Builds on Spec-Kit](https://img.shields.io/badge/builds%20on-Spec--Kit-blue)](https://github.com/github/spec-kit)
 
-> Specification-Driven Development with Process Discipline for Claude Code
+> Specification-Driven Development for Claude Code, powered by traits.
 
-A Claude Code plugin that combines rigorous process discipline with specification-driven development, making specs your single source of truth while maintaining workflow flexibility.
+## Why cc-sdd?
 
-## What is SDD?
+[Spec-Kit](https://github.com/github/spec-kit) gives you a CLI and templates for specification-driven development. You write specs, generate plans, and implement features with a structured workflow. [Superpowers](https://github.com/obra/superpowers) gives you process discipline: code reviews, verification gates, and quality checks that keep Claude Code on track.
 
-Specification-Driven Development treats specifications as the single source of truth:
+The problem is that these two systems don't talk to each other. Spec-Kit doesn't know about Superpowers' quality gates, and Superpowers doesn't know about your specs. You end up manually bridging the gap, reminding Claude to review specs before planning or to verify compliance after implementation.
+
+cc-sdd connects them through a technique called **traits**. Traits are overlay files that inject quality gates directly into Spec-Kit's commands. When you enable the `superpowers` trait, your `/speckit.specify` command automatically includes spec review. Your `/speckit.implement` command automatically includes code review and verification. No wrappers, no manual reminders. The discipline is built into the commands you already use.
+
+## Workflow
 
 ```mermaid
-graph LR
-    A[Idea] --> B[Spec]
-    B --> C[Plan]
-    C --> D[Code]
-    D --> E[Verification]
-    E -->|Drift Detected| F[Evolve]
-    F -->|Update Spec| B
-    F -->|Fix Code| D
-```
+flowchart TD
+    Start([Idea]) --> HasClarity{Clear\nrequirements?}
 
-**Key Principles:**
-- **Specs first, always** - No code without specification
-- **Executable specs** - Specs drive implementation, not just describe it
-- **Living documentation** - Specs evolve with implementation reality
-- **Process discipline** - Mandatory workflows ensure quality
+    HasClarity -->|Not yet| Brainstorm["/sdd:brainstorm\nRefine idea"]
+    HasClarity -->|Yes| Specify["/speckit.specify\nCreate spec"]
+
+    Brainstorm --> Specify
+
+    Specify --> Review["/sdd:review-spec\nValidate spec"]
+    Review --> Plan["/speckit.plan\nGenerate plan + tasks"]
+    Plan --> Implement["/speckit.implement\nBuild with TDD"]
+
+    Implement --> Verify{Tests pass?\nSpec compliant?}
+
+    Verify -->|Yes| Done([Complete])
+    Verify -->|Drift detected| Evolve["/sdd:evolve\nReconcile"]
+
+    Evolve -->|Update spec| Review
+    Evolve -->|Fix code| Implement
+
+    style Start fill:#f5f5f5,stroke:#999
+    style Brainstorm fill:#e1f5ff,stroke:#0288d1
+    style Specify fill:#e1f5ff,stroke:#0288d1
+    style Review fill:#fff4e1,stroke:#f57c00
+    style Plan fill:#fff4e1,stroke:#f57c00
+    style Implement fill:#e8f5e9,stroke:#388e3c
+    style Verify fill:#fff4e1,stroke:#f57c00
+    style Evolve fill:#fce4ec,stroke:#c62828
+    style Done fill:#c8e6c9,stroke:#388e3c
+```
 
 ## Quick Start
 
-### Installation
-
 **Prerequisites:**
-1. Install [Claude Code](https://claude.com/claude-code)
-2. Install [spec-kit](https://github.com/github/spec-kit)
+1. [Claude Code](https://docs.anthropic.com/en/docs/claude-code) installed
+2. [Spec-Kit](https://github.com/github/spec-kit) installed (`npm install -g @anthropic/spec-kit` or see their docs)
 
-**Install the plugin:**
+**Install cc-sdd:**
 
 ```bash
 git clone https://github.com/rhuss/cc-sdd.git
@@ -45,286 +64,87 @@ cd cc-sdd
 make install
 ```
 
-### Makefile Targets
+**Initialize your project:**
 
-| Target | Description |
-|--------|-------------|
-| `make install` | Install plugin (adds marketplace, installs/updates plugin automatically) |
-| `make uninstall` | Remove plugin and marketplace |
-| `make reinstall` | Full uninstall and reinstall |
-| `make validate` | Validate plugin manifests |
-| `make check-upstream` | Check for upstream superpowers changes |
-
-### First Use
-
-Run any `/sdd:*` command and the plugin will automatically initialize:
-
-```bash
-# Start with a rough idea
-/sdd:brainstorm
-
-# Or jump straight to specs with clear requirements
-/sdd:spec
-
-# Or implement from an existing spec
-/sdd:implement
+```
+/sdd:init
 ```
 
-## Workflow Cheat Sheet
+This runs Spec-Kit's `specify init`, asks which traits to enable, and configures permission auto-approval. After initialization, all `/speckit.*` commands are enhanced with your selected traits.
 
-```mermaid
-flowchart TD
-    Start([User Request]) --> HasIdea{Have rough<br/>idea?}
-    HasIdea -->|Yes| Brainstorm[/sdd:brainstorm<br/>Refine idea to Spec]
-    HasIdea -->|No, clear reqs| Spec[/sdd:spec<br/>Create spec directly]
+## The Traits System
 
-    Brainstorm --> Review[/sdd:review-spec<br/>Validate spec]
-    Spec --> Review
+Traits are the core idea behind cc-sdd. Instead of wrapping Spec-Kit commands with separate `/sdd:*` versions, traits modify the commands directly by appending overlay content.
 
-    Review --> Implement[/sdd:implement<br/>TDD + Compliance]
+### How It Works
 
-    Implement --> Verify[Verification<br/>Tests + Spec Check]
+Each trait is a collection of small `.append.md` files. When you enable a trait, cc-sdd appends these files to the corresponding Spec-Kit command files. A sentinel marker (an HTML comment like `<!-- SDD-TRAIT:superpowers -->`) prevents duplicate application. The process is idempotent: you can run it multiple times safely.
 
-    Verify -->|Pass| Done([Complete])
-    Verify -->|Drift| Evolve[/sdd:evolve<br/>Reconcile]
+When Spec-Kit updates wipe the command files (via `specify init --force`), running `/sdd:init` reapplies all enabled trait overlays from scratch.
 
-    Evolve -->|Update Spec| Review
-    Evolve -->|Fix Code| Implement
+### Available Traits
 
-    style Brainstorm fill:#e1f5ff
-    style Spec fill:#e1f5ff
-    style Review fill:#fff4e1
-    style Implement fill:#e8f5e9
-    style Evolve fill:#fce4ec
-    style Verify fill:#fff4e1
-    style Done fill:#c8e6c9
+**`superpowers`** adds quality gates to Spec-Kit commands:
+- `/speckit.specify` gets automatic spec review after creation
+- `/speckit.plan` gets spec validation before planning and consistency checks after
+- `/speckit.implement` gets code review and verification gates
+
+**`beads`** adds persistent task execution through the [bd CLI](https://github.com/obra/beads):
+- `/speckit.plan` syncs generated tasks to the beads database
+- `/speckit.implement` uses dependency-aware task scheduling via `bd ready`
+- Tasks persist across Claude Code sessions
+
+### Managing Traits
+
 ```
+/sdd:traits list                  # Show which traits are active
+/sdd:traits enable superpowers    # Enable a trait
+/sdd:traits disable beads         # Disable a trait
+```
+
+Trait configuration is stored in `.specify/sdd-traits.json`, which survives Spec-Kit updates.
 
 ## Commands Reference
 
+### Workflow Commands
+
+These are the commands you'll use day-to-day. The `/speckit.*` commands come from Spec-Kit and are enhanced by your enabled traits.
+
+| Command | Purpose |
+|---------|---------|
+| `/speckit.specify` | Define requirements and create a formal spec |
+| `/speckit.plan` | Generate an implementation plan from a spec |
+| `/speckit.tasks` | Create actionable tasks from a plan |
+| `/speckit.implement` | Build features following the plan and tasks |
+| `/speckit.constitution` | Define project-wide governance principles |
+| `/speckit.clarify` | Clarify underspecified areas of a spec |
+| `/speckit.analyze` | Check consistency across spec artifacts |
+| `/speckit.checklist` | Generate a quality validation checklist |
+| `/speckit.taskstoissues` | Convert tasks to GitHub issues |
+
 ### SDD Commands
 
-| Command | Purpose |
-|---------|---------|
-| `/sdd:brainstorm` | Refine rough ideas into executable specifications through dialogue |
-| `/sdd:spec` | Create formal specifications directly from clear requirements |
-| `/sdd:plan` | Generate implementation plan and tasks from a validated spec |
-| `/sdd:implement` | Implement features from validated specs with full quality gates |
-| `/sdd:evolve` | Reconcile spec/code mismatches with AI-guided evolution |
-| `/sdd:review-spec` | Review specifications for soundness, completeness, and implementability |
-| `/sdd:review-code` | Review code against spec compliance (checks implementation vs spec) |
-| `/sdd:constitution` | Create and manage project-wide principles that guide all specs |
-| `/sdd:help` | Quick reference for all SDD commands |
-
-**Why use `/sdd:*` commands instead of `/speckit.*`?**
-
-The `/sdd:*` commands wrap `/speckit.*` with superpowers discipline:
-
-| `/sdd:*` command | Wraps | Adds |
-|------------------|-------|------|
-| `/sdd:plan` | `/speckit.plan` + `/speckit.tasks` | Spec review before planning, consistency check after |
-| `/sdd:implement` | `/speckit.implement` | Pre: init, spec discovery, branch setup. Post: code review, verification |
-
-### Spec-Kit Commands
-
-After initialization, these spec-kit commands are available:
+These commands provide functionality beyond what Spec-Kit offers.
 
 | Command | Purpose |
 |---------|---------|
-| `/speckit.constitution` | Create project governance principles (alternative to /sdd:constitution) |
-| `/speckit.specify` | Define project requirements and user stories |
-| `/speckit.plan` | Create technical implementation strategy |
-| `/speckit.tasks` | Generate actionable task list from specs |
-| `/speckit.implement` | Execute tasks to build features |
-| `/speckit.clarify` | Clarify underspecified areas (optional) |
-| `/speckit.analyze` | Check cross-artifact consistency (optional) |
-| `/speckit.checklist` | Generate quality validation checklist (optional) |
-
-## Skills Reference
-
-### SDD-Specific Skills (New)
-
-| Skill | Description |
-|-------|-------------|
-| `sdd:using-superpowers` | **Entry point** - Establishes SDD methodology, workflow routing, and skill discovery |
-| `sdd:brainstorm` | Refine rough ideas into executable specs through collaborative questioning |
-| `sdd:spec` | Create formal specifications directly from clear requirements using spec-kit |
-| `sdd:plan` | Generate plan.md and tasks.md with spec review and consistency checking |
-| `sdd:implement` | Wraps /speckit.implement with pre/post quality gates |
-| `sdd:evolve` | Reconcile spec/code mismatches with AI recommendations |
-| `sdd:review-spec` | Validate spec soundness, completeness, and implementability |
-| `sdd:review-code` | Review code against spec compliance |
-| `sdd:constitution` | Create/manage project-wide principles and standards |
-| `sdd:spec-kit` | **Technical layer** - Automatic initialization, installation validation, project setup |
-| `sdd:verification-before-completion` | Run tests and validate spec compliance before completing |
-
-### Modified Superpowers Skills
-
-These skills are enhanced with spec-awareness:
-
-| Skill | Modification |
-|-------|--------------|
-| `sdd:writing-plans` | Generates implementation plans **FROM specs** (not from scratch) |
-| `sdd:review-code` | Reviews code-to-spec compliance, not just code quality |
-| `sdd:verification-before-completion` | Extended verification: tests + spec compliance + drift detection |
-
-### Preserved Superpowers Skills
-
-These work as-is with spec context:
-
-- `test-driven-development` - Use AFTER spec creation, during implementation
-- `systematic-debugging` - Use spec as reference during debugging
-- `using-git-worktrees` - For isolated feature development
-- `dispatching-parallel-agents` - For independent parallel work
-
-## Complete Walkthrough: Building a Feature
-
-### Phase 1: Ideation → Specification
-
-**Starting point:** "I want to add user authentication"
-
-```bash
-/sdd:brainstorm
-```
-
-**What happens:**
-1. Claude explores your idea through questions (OAuth vs JWT? Session management?)
-2. Proposes 2-3 approaches with trade-offs
-3. Collaboratively refines design
-4. Creates formal spec at `specs/features/authentication.md`
-
-**Output:** `specs/features/authentication.md`
-
-### Phase 2: Validate Specification
-
-```bash
-/sdd:review-spec
-```
-
-**What happens:**
-1. Checks spec structure and clarity
-2. Identifies ambiguities and gaps
-3. Validates against constitution (if exists)
-4. Confirms implementability
-
-**Output:** Validation report with any issues to address
-
-### Phase 3: Implementation
-
-```bash
-/sdd:implement
-```
-
-**What happens:**
-1. Generates implementation plan FROM spec
-2. Creates tests first (TDD)
-3. Implements feature to pass tests
-4. Continuously validates against spec
-
-**Output:**
-- `docs/plans/[date]-authentication-implementation.md`
-- Implementation code with tests
-- Spec compliance verification
-
-### Phase 4: Verification & Evolution
-
-**Automatic verification runs:**
-1. All tests must pass
-2. Spec compliance check
-3. Drift detection
-
-**If drift detected:**
-
-```bash
-/sdd:evolve
-```
-
-**What happens:**
-1. AI analyzes spec vs code differences
-2. Recommends: update spec OR fix code (with reasoning)
-3. You decide or auto-updates based on threshold
-4. Restores compliance
-
-**Output:** Updated spec and/or code with full compliance
-
-### Phase 5: Completion
-
-All verification passes:
-- ✅ Tests passing
-- ✅ Spec compliant
-- ✅ No drift detected
-
-**Result:** Feature complete with living documentation!
-
-## Configuration
-
-Create `.claude/settings.json` in your project:
-
-```json
-{
-  "sdd": {
-    "auto_update_spec": {
-      "enabled": true,
-      "threshold": "minor",
-      "notify": true
-    },
-    "spec_kit": {
-      "enabled": true,
-      "path": "specify"
-    }
-  }
-}
-```
-
-**Auto-update thresholds:**
-- `none` - Never auto-update, always ask
-- `minor` - Auto-update naming, organization, implementation details
-- `moderate` - Include minor behavior changes that don't affect contracts
-- `always` - Auto-update everything (not recommended)
-
-## Architecture
-
-The plugin uses a **canonical two-skill design**:
-
-1. **`spec-kit`** (Technical Integration Layer)
-   - Automatic initialization and setup
-   - Installation validation
-   - CLI command wrappers
-   - Called automatically by all workflow skills
-
-2. **`using-superpowers`** (Methodology Layer)
-   - Workflow routing and skill discovery
-   - Process discipline enforcement
-   - Spec-first principle
-   - Quality gates and verification
-
-**Every workflow skill calls `spec-kit` first for automatic setup.**
-
-## Why SDD?
-
-**Traditional development:**
-- Code and docs drift apart
-- Specs become outdated documentation
-- Implementation details override design intent
-
-**SDD provides:**
-- ✅ Specs as source of truth
-- ✅ Process discipline with quality gates
-- ✅ AI-guided spec evolution when reality differs from plan
-- ✅ Intent before implementation ("what" and "why" before "how")
-- ✅ Flexible entry points (idea → spec → code)
-- ✅ Automated compliance checking
+| `/sdd:init` | Initialize Spec-Kit, select traits, configure permissions |
+| `/sdd:brainstorm` | Refine a rough idea into a spec through dialogue |
+| `/sdd:evolve` | Reconcile spec/code drift with guided resolution |
+| `/sdd:review-spec` | Validate a spec for soundness, completeness, and clarity |
+| `/sdd:review-code` | Review code against its spec for compliance |
+| `/sdd:review-plan` | Review a plan for feasibility and spec alignment |
+| `/sdd:constitution` | Create or update project governance principles |
+| `/sdd:traits` | Enable, disable, or list active traits |
+| `/sdd:help` | Show a quick reference for all commands |
 
 ## Acknowledgements
 
-This plugin builds on:
-- **[Superpowers](https://github.com/obra/superpowers)** by Jesse Vincent - Process discipline and quality gates
-- **[Spec-Kit](https://github.com/github/spec-kit)** by GitHub - Specification-driven development workflows
+cc-sdd builds on two excellent projects:
+
+- **[Superpowers](https://github.com/obra/superpowers)** by Jesse Vincent, which provides process discipline, quality gates, and verification workflows for Claude Code.
+- **[Spec-Kit](https://github.com/github/spec-kit)** by GitHub, which provides specification-driven development templates and the `specify` CLI.
 
 ## License
 
-MIT License - see [LICENSE](LICENSE)
-
----
-
-**Built with process discipline. Guided by specifications.**
+MIT License. See [LICENSE](LICENSE) for details.
