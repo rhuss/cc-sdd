@@ -23,8 +23,8 @@ from pathlib import Path
 # --- Patterns ---
 
 RE_PHASE = re.compile(r'^## Phase (\d+):\s*(.*)')
-RE_TASK = re.compile(r'^- \[([ Xx])\] (T\d+)\s+(\(bd-[a-z0-9-]+\)\s+)?(.*)')
-RE_BD_MARKER = re.compile(r'\(bd-([a-z0-9-]+)\)')
+RE_TASK = re.compile(r'^- \[([ Xx])\] (T\d+)\s+(\(bd-[a-zA-Z0-9_-]+\)\s*)?(.*)')
+RE_BD_MARKER = re.compile(r'\(bd-([a-zA-Z0-9_-]+)\)')
 RE_PARALLEL = re.compile(r'\[P\]')
 RE_USER_STORY = re.compile(r'\[(US\d+)\]')
 RE_DEPS_HEADER = re.compile(r'^## Dependenc', re.IGNORECASE)
