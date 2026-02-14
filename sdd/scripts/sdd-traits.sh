@@ -28,7 +28,7 @@ set -euo pipefail
 
 PLUGIN_ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 TRAITS_CONFIG=".specify/sdd-traits.json"
-VALID_TRAITS="sdd beads"
+VALID_TRAITS="superpowers beads"
 
 # --- Helpers ---
 
@@ -52,7 +52,7 @@ ensure_config() {
 {
   "version": 1,
   "traits": {
-    "sdd": false,
+    "superpowers": false,
     "beads": false
   },
   "applied_at": "$(now_iso)"
@@ -66,6 +66,24 @@ EOF
     echo "ERROR: Invalid JSON in $TRAITS_CONFIG" >&2
     exit 1
   fi
+}
+
+ensure_beads_db() {
+  # Initialize bd database if bd is installed but no database exists
+  if ! command -v bd &>/dev/null; then
+    echo "NOTE: bd CLI not found. Install beads to use the beads trait:"
+    echo "  See https://github.com/beads-project/beads"
+    echo "  Beads trait is enabled but bd commands will be skipped until installed."
+    return
+  fi
+
+  if bd list --json &>/dev/null; then
+    return  # database already exists
+  fi
+
+  echo "Initializing beads database..."
+  bd init
+  echo "Beads database initialized."
 }
 
 # --- Subcommands ---
@@ -110,6 +128,11 @@ do_enable() {
     '.traits[$t] = true | .applied_at = $ts' "$TRAITS_CONFIG" > "$tmp"
   mv "$tmp" "$TRAITS_CONFIG"
   echo "Trait '$trait' enabled."
+
+  # Trait-specific post-enable setup
+  if [ "$trait" = "beads" ]; then
+    ensure_beads_db
+  fi
 
   # Apply overlays
   do_apply
@@ -166,7 +189,7 @@ do_init() {
   done
 
   # Build the traits JSON object
-  local sdd_val="false" beads_val="false"
+  local superpowers_val="false" beads_val="false"
 
   if [ -n "$enable_list" ]; then
     IFS=',' read -ra traits_arr <<< "$enable_list"
@@ -177,7 +200,7 @@ do_init() {
         exit 2
       fi
       case "$t" in
-        sdd) sdd_val="true" ;;
+        superpowers) superpowers_val="true" ;;
         beads) beads_val="true" ;;
       esac
     done
@@ -188,7 +211,7 @@ do_init() {
 {
   "version": 1,
   "traits": {
-    "sdd": $sdd_val,
+    "superpowers": $superpowers_val,
     "beads": $beads_val
   },
   "applied_at": "$(now_iso)"
@@ -196,6 +219,12 @@ do_init() {
 EOF
 
   echo "Traits config created."
+
+  # Initialize beads database if beads trait was enabled
+  if [ "$beads_val" = "true" ]; then
+    ensure_beads_db
+  fi
+
   do_list
   do_apply
 }
@@ -292,6 +321,8 @@ SETTINGS_FILE=".claude/settings.local.json"
 # SDD-specific permission patterns
 SDD_PATTERN_INIT='Bash(*/scripts/sdd-init.sh*)'
 SDD_PATTERN_TRAITS='Bash(*/scripts/sdd-traits.sh*)'
+SDD_PATTERN_BEADS_SYNC='Bash(*/scripts/sdd-beads-sync.py*)'
+SDD_PATTERN_BEADS_BD='Bash(bd *)'
 SDD_PATTERN_SPECIFY='Bash(specify *)'
 # Broad tool patterns for YOLO level
 SDD_YOLO_EXTRAS=("Bash" "Read" "Edit" "Write" "mcp__*")
@@ -317,7 +348,7 @@ remove_sdd_patterns() {
         .permissions.allow[] |
         select(
           # SDD script patterns
-          (test("sdd-init\\.sh|sdd-traits\\.sh|^Bash\\(specify ") | not)
+          (test("sdd-init\\.sh|sdd-traits\\.sh|sdd-beads-sync\\.py|^Bash\\(specify |^Bash\\(bd ") | not)
           and
           # YOLO broad patterns (exact matches only)
           (. != "Bash" and . != "Read" and . != "Edit" and . != "Write" and . != "mcp__*")
@@ -350,15 +381,17 @@ detect_permission_level() {
   local allow
   allow=$(jq -r '.permissions.allow // [] | .[]' "$SETTINGS_FILE")
 
-  local has_init=false has_traits=false has_specify=false has_bash=false
+  local has_init=false has_traits=false has_beads_sync=false has_bd=false has_specify=false has_bash=false
   echo "$allow" | grep -q "sdd-init" && has_init=true
   echo "$allow" | grep -q "sdd-traits" && has_traits=true
+  echo "$allow" | grep -q "sdd-beads-sync\." && has_beads_sync=true
+  echo "$allow" | grep -q "Bash(bd " && has_bd=true
   echo "$allow" | grep -q "specify " && has_specify=true
   echo "$allow" | grep -qx "Bash" && has_bash=true
 
-  if [ "$has_init" = true ] && [ "$has_traits" = true ] && [ "$has_specify" = true ] && [ "$has_bash" = true ]; then
+  if [ "$has_init" = true ] && [ "$has_traits" = true ] && [ "$has_beads_sync" = true ] && [ "$has_bd" = true ] && [ "$has_specify" = true ] && [ "$has_bash" = true ]; then
     echo "yolo"
-  elif [ "$has_init" = true ] && [ "$has_traits" = true ]; then
+  elif [ "$has_init" = true ] && [ "$has_traits" = true ] && [ "$has_beads_sync" = true ] && [ "$has_bd" = true ]; then
     echo "standard"
   else
     echo "none"
@@ -377,7 +410,7 @@ do_permissions() {
       echo ""
       echo "Levels:"
       echo "  none       No auto-approvals (confirm every command)"
-      echo "  standard   Auto-approve SDD plugin scripts"
+      echo "  standard   Auto-approve SDD plugin scripts and beads CLI (bd)"
       echo "  yolo       Auto-approve all tools (Bash, Read, Edit, Write, MCP, specify)"
       ;;
     none)
@@ -394,9 +427,13 @@ do_permissions() {
       local before
       before=$(detect_permission_level)
       remove_sdd_patterns
-      add_sdd_patterns "$SDD_PATTERN_INIT" "$SDD_PATTERN_TRAITS"
+      add_sdd_patterns "$SDD_PATTERN_INIT" "$SDD_PATTERN_TRAITS" "$SDD_PATTERN_BEADS_SYNC" "$SDD_PATTERN_BEADS_BD"
       echo "Auto-approval set to: standard"
-      echo "SDD plugin scripts (sdd-init.sh, sdd-traits.sh) will run without confirmation."
+      echo "Auto-approved:"
+      echo "  sdd-init.sh        Project initialization"
+      echo "  sdd-traits.sh      Trait configuration and overlay management"
+      echo "  sdd-beads-sync.py  Bidirectional sync between tasks.md and bd issues"
+      echo "  bd *               Beads CLI (create, close, sync, ready, list, dep)"
       [ "$before" != "standard" ] && echo "CHANGED" || true
       ;;
     yolo)
@@ -404,9 +441,9 @@ do_permissions() {
       local before
       before=$(detect_permission_level)
       remove_sdd_patterns
-      add_sdd_patterns "$SDD_PATTERN_INIT" "$SDD_PATTERN_TRAITS" "$SDD_PATTERN_SPECIFY" "${SDD_YOLO_EXTRAS[@]}"
+      add_sdd_patterns "$SDD_PATTERN_INIT" "$SDD_PATTERN_TRAITS" "$SDD_PATTERN_BEADS_SYNC" "$SDD_PATTERN_BEADS_BD" "$SDD_PATTERN_SPECIFY" "${SDD_YOLO_EXTRAS[@]}"
       echo "Auto-approval set to: yolo"
-      echo "All tools auto-approved: Bash, Read, Edit, Write, MCP, specify CLI, SDD scripts."
+      echo "All tools auto-approved: Bash, Read, Edit, Write, MCP, specify CLI, SDD scripts, beads CLI."
       [ "$before" != "yolo" ] && echo "CHANGED" || true
       ;;
     *)

@@ -318,6 +318,10 @@ Write to `specs/[feature-name]/review_brief.md` using the template:
 - Prioritize: Disagreement Areas > Decisions > Scope > Overview
 - Be explicit about potential pushback points
 
+**Check if SDD is initialized:**
+If `.specify/` directory does not exist or `.claude/commands/speckit.specify.md` does not exist, warn the user:
+- "Before running `/speckit.plan` or `/speckit.implement`, you need to initialize the project with `/sdd:init`. This sets up spec-kit templates, commands, and trait configuration."
+
 **Offer next steps:**
 - "Spec created and validated. Ready to implement?"
 - If yes, ask whether they want to plan first (`/speckit.plan`) or implement directly (`/speckit.implement`)
