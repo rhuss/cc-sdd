@@ -129,7 +129,7 @@
 - [X] T020 Verify SC-004: confirm `sdd/commands/spec.md`, `sdd/commands/plan.md`, `sdd/commands/implement.md` and corresponding skill files no longer exist in plugin cache
 - [X] T021 Verify SC-007: confirm all overlay files in `sdd/overlays/` are under 20 lines each
 - [X] T022 Verify SC-010: run `rg "sdd:spec[^-]|sdd:plan[^-]|sdd:implement" sdd/skills/` and confirm zero matches (exclude spec-refactoring references which are valid)
-- [ ] T023 Commit all changes with descriptive commit message
+- [X] T023 Commit all changes with descriptive commit message
 
 ---
 

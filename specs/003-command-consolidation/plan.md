@@ -19,7 +19,12 @@ Remove the SDD wrapper commands (`sdd:spec`, `sdd:plan`, `sdd:implement`) and re
 
 ## Constitution Check
 
-No project constitution exists. No gate violations.
+Validated against `.specify/memory/constitution.md` (v1.1.0). No violations found.
+
+- **II. Overlay Delegation**: All overlays delegate via `{Skill:}`, stay under 20 lines, include sentinel markers. Compliant.
+- **III. Trait Composability**: sdd and beads overlays coexist on `speckit.implement` via separate sentinels. Compliant.
+- **V. Naming Discipline**: `/speckit.*` prefix and `sdd:` skill prefix used consistently. Compliant.
+- **VI. Skill Autonomy**: New skills (review-plan, beads-execute) are self-contained with single purposes. Compliant.
 
 ## Project Structure
 

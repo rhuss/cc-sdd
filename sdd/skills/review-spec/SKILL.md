@@ -430,7 +430,7 @@ performance requirement.
 
 **Ready for implementation:** Yes (after performance clarification)
 
-**Next steps:** Clarify "fast" requirement, then proceed to sdd:implement
+**Next steps:** Clarify "fast" requirement, then proceed to `/speckit.implement`
 ```
 
 ## Example: Needs Work
