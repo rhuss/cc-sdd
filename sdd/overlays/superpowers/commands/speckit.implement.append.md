@@ -1,5 +1,5 @@
 
-<!-- SDD-TRAIT:sdd -->
+<!-- SDD-TRAIT:superpowers -->
 ## SDD Quality Gates for Implementation
 
 **Before implementation begins:**

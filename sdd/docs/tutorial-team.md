@@ -67,7 +67,7 @@ SDD team approach: Create spec, get team alignment, then implement. The PR revie
    Developer now has approved contract
 
 5. IMPLEMENT IN SEPARATE PR
-   Developer runs /sdd:implement
+   Developer runs /speckit.implement
    Creates implementation PR
    Code review is faster: "Does this match the spec?"
 
@@ -96,6 +96,32 @@ Think of specs as contracts between team members:
 - Build exactly what's specified
 - Use `/sdd:evolve` if reality differs
 - Don't silently deviate from spec
+
+## Traits for Team Workflows
+
+For teams, enabling the **superpowers trait** is strongly recommended. It automates the review steps that catch issues early and integrates spec PRs directly into the workflow.
+
+### Automated Spec PRs
+
+With the superpowers trait enabled, `/speckit.plan` handles spec PR creation automatically:
+
+1. Spec review runs before planning begins
+2. Plan, tasks, and review summary are generated
+3. All spec artifacts are committed to the feature branch
+4. A spec PR is offered, targeting `upstream` if configured (for fork-based workflows) or `origin` otherwise
+
+This fits naturally with the "Spec PRs before implementation" pattern described above. Instead of manually creating spec PRs, the trait handles it as part of the planning step.
+
+### Beads for Cross-Session Continuity
+
+For teams where multiple developers touch the same feature, the **beads trait** provides persistent task tracking through `bd` issues. Tasks survive across sessions and machines, and dependency ordering ensures work proceeds in the right sequence.
+
+Enable both traits for the full experience:
+
+```
+/sdd:traits enable superpowers
+/sdd:traits enable beads
+```
 
 ## Multi-Developer Patterns
 

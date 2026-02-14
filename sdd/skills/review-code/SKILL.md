@@ -17,7 +17,7 @@ Review code implementation against specification to ensure compliance.
 
 ## When to Use
 
-- After implementation complete (called via sdd trait overlay on `/speckit.implement`)
+- After implementation complete (called via superpowers trait overlay on `/speckit.implement`)
 - Before merging/deploying code
 - When validating existing code against spec
 - As part of verification workflow

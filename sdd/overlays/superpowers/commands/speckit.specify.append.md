@@ -1,5 +1,5 @@
 
-<!-- SDD-TRAIT:sdd -->
+<!-- SDD-TRAIT:superpowers -->
 ## SDD Quality Gate
 
 After completing the specification, validate quality:

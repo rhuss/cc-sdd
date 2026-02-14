@@ -34,6 +34,7 @@ def main():
     # Resolve script paths
     init_script = plugin_root / 'scripts' / 'sdd-init.sh'
     traits_script = plugin_root / 'scripts' / 'sdd-traits.sh'
+    beads_sync_script = plugin_root / 'scripts' / 'sdd-beads-sync.py'
 
     # Check if SDD traits are configured
     sdd_configured = (cwd / '.specify' / 'sdd-traits.json').exists()
@@ -54,6 +55,7 @@ def main():
 <sdd-configured>{str(sdd_configured).lower()}</sdd-configured>
 <sdd-init-command>{init_script}{init_args}</sdd-init-command>
 <sdd-traits-command>{traits_script}</sdd-traits-command>
+<sdd-beads-sync-command>{beads_sync_script}</sdd-beads-sync-command>
 </sdd-context>"""
 
     response = {

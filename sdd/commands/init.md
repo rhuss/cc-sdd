@@ -18,7 +18,7 @@ Run the command from `<sdd-init-command>` in the `<sdd-context>` system reminder
 You MUST ask the user these two questions using AskUserQuestion before doing anything else:
 
 1. (`multiSelect: true`, header: "Traits"): "Which SDD traits do you want to enable?"
-   - "sdd": "SDD quality gates on speckit commands (review-spec, review-code, verification)"
+   - "superpowers": "Quality gates on speckit commands (review-spec, review-code, verification)"
    - "beads": "Beads memory integration for persistent task execution across sessions"
 
 2. (`multiSelect: false`, header: "Permissions"): "How should SDD commands handle permission prompts?"
@@ -29,7 +29,7 @@ You MUST ask the user these two questions using AskUserQuestion before doing any
 Then apply using `<sdd-traits-command>` from `<sdd-context>`:
 
 ```bash
-"<value from sdd-traits-command>" init --enable "<selected-traits-as-csv e.g. sdd,beads>"
+"<value from sdd-traits-command>" init --enable "<selected-traits-as-csv e.g. superpowers,beads>"
 "<value from sdd-traits-command>" permissions <none|standard|yolo>
 ```
 

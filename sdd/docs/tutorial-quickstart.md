@@ -13,6 +13,15 @@ SDD: Spec first, code validates against spec. Specs evolve with reality. Intent 
 Idea → Spec → Code → Verify → (Drift? → Evolve)
 ```
 
+## What's Inside
+
+SDD combines two foundations:
+
+- **Superpowers** (by Jesse Vincent) provides process discipline: TDD, verification gates, anti-rationalization patterns, and skills like systematic debugging and parallel agent dispatch.
+- **Spec-Kit** (by GitHub) provides the specification workflow: templates, structured artifacts, and the `specify` CLI for project setup.
+
+SDD adds the glue: specs as single source of truth, spec-first enforcement, compliance scoring, spec/code drift detection, and the evolution workflow. Several upstream superpowers skills are extended with spec-awareness (verification, code review, brainstorming), while others are used unchanged (TDD, debugging, git worktrees).
+
 ## The Three Phases
 
 ### 1. Specification Phase
@@ -22,7 +31,7 @@ Idea → Spec → Code → Verify → (Drift? → Evolve)
 | Starting Point | Command | What Happens |
 |----------------|---------|--------------|
 | Rough idea | `/sdd:brainstorm` | Collaborative dialogue refines idea into formal spec |
-| Clear requirements | `/sdd:spec` | Create spec directly using spec-kit |
+| Clear requirements | `/speckit.specify` | Create spec directly using spec-kit |
 
 **Output:** A specification file in `specs/features/[name]/spec.md`
 
@@ -32,7 +41,7 @@ Idea → Spec → Code → Verify → (Drift? → Evolve)
 
 | Command | What Happens |
 |---------|--------------|
-| `/sdd:implement` | Generates plan from spec, uses TDD, validates compliance |
+| `/speckit.implement` | Generates plan from spec, uses TDD, validates compliance |
 
 **Output:** Working code that matches the spec
 
@@ -53,8 +62,8 @@ Use this to pick the right command:
 | You Have | You Want | Use |
 |----------|----------|-----|
 | Vague idea | Clear spec | `/sdd:brainstorm` |
-| Clear requirements | Formal spec | `/sdd:spec` |
-| Validated spec | Working code | `/sdd:implement` |
+| Clear requirements | Formal spec | `/speckit.specify` |
+| Validated spec | Working code | `/speckit.implement` |
 | Spec + code mismatch | Alignment | `/sdd:evolve` |
 | Draft spec | Validation | `/sdd:review-spec` |
 | Code changes | Compliance check | `/sdd:review-code` |
@@ -65,7 +74,7 @@ Use this to pick the right command:
 ```
 SPEC CREATION
   /sdd:brainstorm    Rough idea → spec (interactive)
-  /sdd:spec          Clear reqs → spec (direct)
+  /speckit.specify          Clear reqs → spec (direct)
   /sdd:constitution  Project-wide principles
 
 VALIDATION
@@ -73,7 +82,7 @@ VALIDATION
   /sdd:review-code   Check code-to-spec compliance
 
 IMPLEMENTATION
-  /sdd:implement     Spec → code with TDD
+  /speckit.implement     Spec → code with TDD
 
 EVOLUTION
   /sdd:evolve        Fix spec/code drift
@@ -85,6 +94,41 @@ EVOLUTION
 2. **WHAT, not HOW** - Specs define requirements, not implementation details
 3. **Evolution is normal** - Specs change as you learn. That's healthy.
 4. **Quality gates** - Verification checks both tests AND spec compliance
+
+## Enabling Traits
+
+Traits are quality gates that automate reviews and validation at each workflow step. They inject checks into spec-kit commands so you don't have to remember to run them manually.
+
+**Two traits are available:**
+
+| Trait | Purpose |
+|-------|---------|
+| `superpowers` | Automated spec reviews, plan reviews, spec PR creation |
+| `beads` | Persistent task memory via `bd` CLI, dependency-aware scheduling |
+
+**How to enable:**
+
+```
+/sdd:traits enable superpowers       # Enable quality gates
+/sdd:traits enable beads     # Enable persistent task memory
+```
+
+You can also enable traits during `/sdd:init`.
+
+**What changes with traits enabled:**
+
+Without traits, you run each step manually:
+```
+/speckit.specify  →  /sdd:review-spec  →  /speckit.plan  →  /sdd:review-plan
+```
+
+With the superpowers trait, reviews happen automatically:
+```
+/speckit.specify  →  (review runs automatically)
+/speckit.plan     →  (spec review before, plan review + tasks + spec PR after)
+```
+
+Traits are optional. Start without them to learn the workflow, then enable them when you want automated discipline.
 
 ## Common Mistakes to Avoid
 
@@ -106,7 +150,7 @@ Best way to learn: try it on a real feature.
 
 1. Think of a feature you want to build
 2. Run `/sdd:brainstorm` to turn it into a spec
-3. Run `/sdd:implement` to build it
+3. Run `/speckit.implement` to build it
 4. See how the workflow feels
 
 That's it. Specs first, code validates, evolve when needed.

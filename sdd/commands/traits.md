@@ -1,14 +1,14 @@
 ---
 name: sdd:traits
 description: Manage SDD trait overlays - enable, disable, or list active traits
-argument-hint: "[list | enable <sdd|beads> | disable <sdd|beads>]"
+argument-hint: "[list | enable <superpowers|beads> | disable <superpowers|beads>]"
 ---
 
 # SDD Traits Management
 
 Manage which SDD traits are active. Traits inject discipline overlays into spec-kit command and template files.
 
-**Valid traits**: `sdd`, `beads`
+**Valid traits**: `superpowers`, `beads`
 
 ### Step 0: Resolve Script Path
 

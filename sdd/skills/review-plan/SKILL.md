@@ -170,7 +170,7 @@ Report to the user:
 ## Integration
 
 **This skill is invoked by:**
-- The SDD trait overlay for `/speckit.plan` (after task generation)
+- The superpowers trait overlay for `/speckit.plan` (after task generation)
 - Users directly via `/sdd:review-plan`
 
 **This skill invokes:**

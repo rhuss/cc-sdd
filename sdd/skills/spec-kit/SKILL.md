@@ -307,7 +307,7 @@ Run: specify init --force
 - sdd:constitution (at start)
 - sdd:review-spec (at start)
 - sdd:review-plan (at start)
-- `/speckit.implement` via sdd trait overlay (at start)
+- `/speckit.implement` via superpowers trait overlay (at start)
 - All workflow skills that need spec-kit
 
 **Calls:**

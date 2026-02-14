@@ -51,7 +51,7 @@ Skip any step = lying, not verifying
 - After implementation and code review
 - Before claiming work is complete
 - Before committing/merging/deploying
-- As final gate in `/speckit.implement` (via sdd trait overlay)
+- As final gate in `/speckit.implement` (via superpowers trait overlay)
 
 ## Spec Selection
 
