@@ -8,6 +8,20 @@
 
 **SDD = Specifications that stay current, enforced by process discipline.**
 
+### Building Blocks
+
+SDD is built on two upstream projects:
+
+- **Superpowers** (by Jesse Vincent): Process discipline, quality gates, TDD enforcement, anti-rationalization patterns, and foundational skills for debugging, git worktrees, and parallel agents.
+- **Spec-Kit** (by GitHub): Specification templates, structured artifact management, and the `specify` CLI for project scaffolding.
+
+SDD extends these foundations with:
+- Specs as the single source of truth for all development
+- Spec-first enforcement across the entire workflow
+- Compliance scoring that validates code against spec requirements
+- Spec/code drift detection with deliberate evolution
+- Modified upstream skills (verification, code review, brainstorming) enhanced with spec-awareness
+
 ## The SDD Workflow
 
 ```
@@ -30,7 +44,7 @@ Every feature starts as an idea. Before writing code, turn that idea into a form
 | Path | When to Use | Command |
 |------|-------------|---------|
 | Brainstorm | Rough idea, needs exploration | `/sdd:brainstorm` |
-| Direct spec | Clear requirements, no ambiguity | `/sdd:spec` |
+| Direct spec | Clear requirements, no ambiguity | `/speckit.specify` |
 
 **Brainstorm workflow:**
 1. You describe your rough idea
@@ -93,7 +107,7 @@ Before implementing, validate your spec.
 
 Build from your validated spec using TDD.
 
-**Command:** `/sdd:implement`
+**Command:** `/speckit.implement`
 
 **What happens:**
 1. Generates implementation plan FROM spec
@@ -170,13 +184,75 @@ For projects with multiple features or team members, create a constitution.
 - Existing projects: When patterns emerge
 - Team projects: Always (defines shared understanding)
 
+## Traits: Quality Gates and Extensions
+
+Traits are overlay modules that inject automated behavior into spec-kit commands. They add quality gates, reviews, and integrations without changing the core workflow.
+
+### Managing Traits
+
+```
+/sdd:traits list              # Show which traits are active
+/sdd:traits enable superpowers        # Enable sdd quality gates
+/sdd:traits enable beads      # Enable beads task memory
+/sdd:traits disable superpowers       # Remove sdd quality gates
+```
+
+You can also enable traits during `/sdd:init`.
+
+### The Superpowers Trait
+
+Named after the upstream Superpowers plugin whose process discipline it draws from, this trait adds automated quality gates at each workflow step:
+
+| Command | What the superpowers trait adds |
+|---------|------------------------|
+| `/speckit.specify` | Auto-runs spec review + constitution check after spec creation |
+| `/speckit.plan` | Runs spec review before planning. After planning: generates tasks, runs plan review, commits spec artifacts, offers a spec PR |
+| `/speckit.implement` | Verifies the spec package before starting. Runs code review + verification after completion |
+
+The spec PR flow is particularly useful for teams. After `/speckit.plan` completes, the trait commits all spec artifacts (spec.md, plan.md, tasks.md, review-summary.md) and offers to create a PR targeting `upstream` if configured, otherwise `origin`.
+
+### The Beads Trait
+
+The beads trait provides persistent task memory through the `bd` CLI. It tracks tasks as issues with dependency awareness, so progress survives across sessions.
+
+| Command | What the beads trait adds |
+|---------|--------------------------|
+| `/speckit.plan` | After task generation, syncs tasks.md to `bd` issues automatically |
+| `/speckit.implement` | Delegates to beads for execution: `bd ready` for scheduling, `bd close` for completion tracking, reverse sync updates tasks.md |
+| `tasks.md` | Includes beads usage instructions in the template |
+
+If `bd` is not installed, beads sync steps are skipped silently without blocking the workflow.
+
+### How Traits Compose
+
+Traits are independent. You can enable one, both, or neither. Each trait uses sentinel markers (HTML comments like `<!-- SDD-TRAIT:superpowers -->`) in overlay files to prevent double-application. Enabling both traits gives you quality gates from superpowers and persistent task memory from beads, with each trait's additions stacking on top of the base commands.
+
+## Skill Lineage
+
+Understanding where each skill comes from helps when troubleshooting or customizing:
+
+**Modified from upstream Superpowers** (spec-awareness added):
+
+| Skill | Upstream Origin | What SDD Adds |
+|-------|----------------|---------------|
+| `verification-before-completion` | Verification gates, anti-rationalization | Spec compliance validation, drift checking |
+| `review-code` | Code review patterns | Compliance scoring against spec requirements |
+| `brainstorm` | Design document generation | Output targets formal spec (WHAT/WHY), not design doc |
+| `review-plan` | Plan writing patterns | Coverage matrix, red flag scanning, task quality enforcement |
+
+**Used unchanged from upstream Superpowers:**
+- `test-driven-development`, `systematic-debugging`, `using-git-worktrees`, `dispatching-parallel-agents`
+
+**SDD-only skills** (no upstream equivalent):
+- `using-superpowers`, `evolve`, `review-spec`, `spec-refactoring`, `spec-kit`, `constitution`
+
 ## Command Reference
 
 ### Spec Creation
 | Command | Purpose |
 |---------|---------|
 | `/sdd:brainstorm` | Rough idea to spec through dialogue |
-| `/sdd:spec` | Clear requirements to spec directly |
+| `/speckit.specify` | Clear requirements to spec directly |
 | `/sdd:constitution` | Project-wide principles |
 
 ### Validation
@@ -188,7 +264,7 @@ For projects with multiple features or team members, create a constitution.
 ### Implementation
 | Command | Purpose |
 |---------|---------|
-| `/sdd:implement` | Spec to code with TDD |
+| `/speckit.implement` | Spec to code with TDD |
 
 ### Evolution
 | Command | Purpose |
@@ -228,7 +304,7 @@ A: Generally no. Each feature should have its own spec. Use the constitution for
 
 1. **First feature:** `/sdd:brainstorm` to create your first spec
 2. **Review it:** `/sdd:review-spec` to validate
-3. **Build it:** `/sdd:implement` with TDD
+3. **Build it:** `/speckit.implement` with TDD
 4. **If drift:** `/sdd:evolve` to reconcile
 5. **For consistency:** `/sdd:constitution` to set project standards
 

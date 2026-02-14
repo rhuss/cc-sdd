@@ -18,7 +18,7 @@ This plugin modifies 4 superpowers skills to add spec-awareness. We need a strat
 ### Files Involved
 
 ```
-cc-superpowers-sdd/
+cc-sdd/
 ├── sdd/                           # Nested plugin directory
 │   ├── .superpowers-sync          # Tracking file (committed to git)
 │   ├── .claude/commands/
@@ -92,7 +92,7 @@ To sync, run: /update-superpowers
 
 ### 2. Run AI-Assisted Sync
 
-**In cc-superpowers-sdd directory**, run:
+**In cc-sdd directory**, run:
 
 ```bash
 /update-superpowers
@@ -349,13 +349,13 @@ Next steps:
 
 ## Troubleshooting
 
-### "This command only works in cc-superpowers-sdd"
+### "This command only works in cc-sdd"
 
 **Cause**: You're not in the plugin directory
 
 **Fix**:
 ```bash
-cd /path/to/cc-superpowers-sdd
+cd /path/to/cc-sdd
 /update-superpowers
 ```
 
@@ -421,7 +421,7 @@ Potential enhancements:
 ## References
 
 - Upstream: https://github.com/obra/superpowers
-- Plugin repo: https://github.com/rhuss/cc-superpowers-sdd
+- Plugin repo: https://github.com/rhuss/cc-sdd
 - Sync command: `sdd/.claude/commands/update-superpowers.md`
 - Check script: `sdd/scripts/check-upstream-changes.sh`
 - Tracking file: `sdd/.superpowers-sync`

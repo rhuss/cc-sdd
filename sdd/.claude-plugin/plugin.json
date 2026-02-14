@@ -7,8 +7,8 @@
     "email": "rhuss@redhat.com"
   },
   "license": "MIT",
-  "repository": "https://github.com/rhuss/cc-superpowers-sdd",
-  "homepage": "https://github.com/rhuss/cc-superpowers-sdd",
+  "repository": "https://github.com/rhuss/cc-sdd",
+  "homepage": "https://github.com/rhuss/cc-sdd",
   "keywords": [
     "claude-code",
     "plugin",

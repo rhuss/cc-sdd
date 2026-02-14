@@ -1,6 +1,6 @@
 # Plugin Schema Extensions
 
-This document describes the schema used in `sdd/.claude-plugin/plugin.json` for the cc-superpowers-sdd plugin.
+This document describes the schema used in `sdd/.claude-plugin/plugin.json` for the cc-sdd plugin.
 
 ## Standard Claude Code Fields
 
@@ -8,7 +8,7 @@ The plugin uses all standard Claude Code plugin.json fields as specified in the 
 
 ### Required Fields
 
-- **name**: `"cc-superpowers-sdd"` - Unique plugin identifier (kebab-case)
+- **name**: `"cc-sdd"` - Unique plugin identifier (kebab-case)
 - **version**: `"1.0.0"` - Semantic version string
 - **description**: Brief description of plugin purpose
 

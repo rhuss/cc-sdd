@@ -42,7 +42,7 @@ gate on every code change. Code can change without documentation.
 Overlay files MUST delegate to skills. They MUST NOT inline
 discipline logic.
 
-- Each overlay file MUST be under 20 lines.
+- Each overlay file MUST be under 30 lines.
 - Overlays MUST contain a sentinel marker (`<!-- SDD-TRAIT:name -->`)
   for idempotent application.
 - Overlays MUST use `{Skill: sdd:skill-name}` references to invoke
@@ -108,7 +108,7 @@ Each skill MUST be self-contained with a clear, single purpose.
 - Infrastructure skills (spec-kit, init) handle setup.
   Workflow skills handle process. Review skills handle validation.
   These roles MUST NOT be mixed.
-- The routing skill (`using-superpowers-sdd`) dispatches to workflow
+- The routing skill (`using-superpowers`) dispatches to workflow
   skills. It MUST NOT contain workflow logic itself.
 - Rationale: Autonomous skills are independently testable, replaceable,
   and comprehensible. Tangled dependencies make the plugin fragile.

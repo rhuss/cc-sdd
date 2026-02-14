@@ -1,4 +1,4 @@
-# Superpowers-SDD Plugin Design
+# SDD Plugin Design
 
 **Date**: 2025-11-10
 **Status**: Design Complete, Ready for Implementation
@@ -13,7 +13,7 @@ A Claude Code plugin that merges superpowers' process discipline with specificat
 - **Process discipline preserved** - All superpowers quality gates and workflow enforcement remain
 - **Evolving specs** - Specs can evolve based on implementation reality with AI guidance
 - **Intent before implementation** - "What" and "why" before "how"
-- **Hybrid tooling** - Spec-kit CLI handles spec operations; superpowers-sdd adds workflow discipline
+- **Hybrid tooling** - Spec-kit CLI handles spec operations; SDD adds workflow discipline
 - **Flexible entry points** - Phase-specific skills for different starting contexts
 
 ## Architecture
@@ -120,7 +120,7 @@ Implementation (with TDD, code review, verification gates)
 - Optional but recommended
 - Referenced during validation
 
-**`sdd:using-superpowers-sdd`** - Entry skill
+**`sdd:using-superpowers`** - Entry skill
 - Mandatory workflow establishment
 - Skill discovery and usage
 - Process enforcement
@@ -174,7 +174,7 @@ These work as-is, referenced by SDD skills:
 ## Repository Structure
 
 ```
-cc-superpowers-sdd/
+cc-sdd/
 ├── README.md                          # In-depth guide with examples
 ├── Makefile                           # Build and install targets
 ├── sdd/                               # Nested plugin directory
@@ -192,7 +192,7 @@ cc-superpowers-sdd/
 │   │   ├── spec-refactoring/
 │   │   ├── spec-kit/
 │   │   ├── constitution/
-│   │   └── using-superpowers-sdd/
+│   │   └── using-superpowers/
 │   ├── commands/                      # Slash command implementations
 │   └── scripts/                       # Maintenance scripts
 ├── .claude-plugin/
@@ -263,7 +263,7 @@ cc-superpowers-sdd/
 
 ## Next Steps
 
-1. Create GitHub repository: `rhuss/cc-superpowers-sdd`
+1. Create GitHub repository: `rhuss/cc-sdd`
 2. Implement all skill files
 3. Create comprehensive README with practical examples
 4. Build example todo-app demonstrating full workflow

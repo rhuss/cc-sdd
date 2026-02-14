@@ -1,4 +1,4 @@
-# Superpowers-SDD
+# cc-sdd
 
 ![Version](https://img.shields.io/badge/version-0.2.0-blue)
 ![License](https://img.shields.io/badge/license-MIT-green)
@@ -40,8 +40,8 @@ graph LR
 **Install the plugin:**
 
 ```bash
-git clone https://github.com/rhuss/cc-superpowers-sdd.git
-cd cc-superpowers-sdd
+git clone https://github.com/rhuss/cc-sdd.git
+cd cc-sdd
 make install
 ```
 
@@ -114,7 +114,7 @@ flowchart TD
 | `/sdd:review-spec` | Review specifications for soundness, completeness, and implementability |
 | `/sdd:review-code` | Review code against spec compliance (checks implementation vs spec) |
 | `/sdd:constitution` | Create and manage project-wide principles that guide all specs |
-| `/sdd:help` | Quick reference for all SDD commands (use --tutorial for interactive guide) |
+| `/sdd:help` | Quick reference for all SDD commands |
 
 **Why use `/sdd:*` commands instead of `/speckit.*`?**
 
@@ -146,7 +146,7 @@ After initialization, these spec-kit commands are available:
 
 | Skill | Description |
 |-------|-------------|
-| `sdd:using-superpowers-sdd` | **Entry point** - Establishes SDD methodology, workflow routing, and skill discovery |
+| `sdd:using-superpowers` | **Entry point** - Establishes SDD methodology, workflow routing, and skill discovery |
 | `sdd:brainstorm` | Refine rough ideas into executable specs through collaborative questioning |
 | `sdd:spec` | Create formal specifications directly from clear requirements using spec-kit |
 | `sdd:plan` | Generate plan.md and tasks.md with spec review and consistency checking |
@@ -292,7 +292,7 @@ The plugin uses a **canonical two-skill design**:
    - CLI command wrappers
    - Called automatically by all workflow skills
 
-2. **`using-superpowers-sdd`** (Methodology Layer)
+2. **`using-superpowers`** (Methodology Layer)
    - Workflow routing and skill discovery
    - Process discipline enforcement
    - Spec-first principle
@@ -300,14 +300,14 @@ The plugin uses a **canonical two-skill design**:
 
 **Every workflow skill calls `spec-kit` first for automatic setup.**
 
-## Why Superpowers-SDD?
+## Why SDD?
 
 **Traditional development:**
 - Code and docs drift apart
 - Specs become outdated documentation
 - Implementation details override design intent
 
-**Superpowers-SDD provides:**
+**SDD provides:**
 - ✅ Specs as source of truth
 - ✅ Process discipline with quality gates
 - ✅ AI-guided spec evolution when reality differs from plan

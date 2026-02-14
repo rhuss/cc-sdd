@@ -1,5 +1,5 @@
 ---
-name: using-superpowers-sdd
+name: using-superpowers
 description: Establishes SDD methodology - workflow routing, process discipline, spec-first principle, and skill discovery. Use when starting any SDD conversation to determine which workflow skill to invoke.
 ---
 
@@ -11,7 +11,7 @@ IF A SKILL APPLIES TO YOUR TASK, YOU DO NOT HAVE A CHOICE. YOU MUST USE IT.
 This is not negotiable. This is not optional. You cannot rationalize your way out of this.
 </EXTREMELY-IMPORTANT>
 
-# Getting Started with Superpowers-SDD
+# Getting Started with SDD
 
 ## What is SDD?
 
@@ -23,10 +23,11 @@ A development methodology where specifications are the single source of truth:
 - Specs evolve with implementation reality
 - Quality gates enforce spec compliance
 
-This plugin combines:
-- **Superpowers** process discipline (TDD, verification, quality gates)
-- **Spec-Driven Development** (specs as source of truth)
-- Result: High-quality software with specs that stay current
+This plugin combines two upstream projects:
+- **Superpowers** (by Jesse Vincent): Process discipline, TDD enforcement, verification gates, anti-rationalization patterns, and foundational skills (debugging, git worktrees, parallel agents)
+- **Spec-Kit** (by GitHub): Specification templates, artifact management, and the `specify` CLI
+
+SDD extends these with spec-first enforcement, compliance scoring, drift detection, and evolution. Several upstream superpowers skills are modified with spec-awareness (verification, code review, brainstorming, plan review), while others are used unchanged.
 
 ## Technical Prerequisites
 
@@ -67,9 +68,9 @@ Before ANY implementation work:
 ## Available SDD Skills
 
 ### Primary Workflow (via spec-kit commands)
-- `/speckit.specify` - Create specifications (SDD trait adds review gate)
-- `/speckit.plan` - Generate plan and tasks (SDD trait adds spec review + plan review)
-- `/speckit.implement` - Execute implementation (SDD trait adds pre/post quality gates)
+- `/speckit.specify` - Create specifications (superpowers trait adds review gate)
+- `/speckit.plan` - Generate plan and tasks (superpowers trait adds spec review + plan review)
+- `/speckit.implement` - Execute implementation (superpowers trait adds pre/post quality gates)
 
 ### SDD Helper Skills
 - **sdd:brainstorm** - Rough idea → spec through collaborative dialogue
@@ -81,7 +82,7 @@ Before ANY implementation work:
 - **sdd:spec-refactoring** - Consolidate and improve evolved specs
 
 ### Configuration
-- **sdd:traits** - Enable/disable SDD discipline overlays (sdd, beads)
+- **sdd:traits** - Enable/disable SDD discipline overlays (superpowers, beads)
 - **sdd:init** - Initialize project with spec-kit and SDD configuration
 - **sdd:constitution** - Create/manage project-wide principles
 
@@ -277,7 +278,7 @@ User: "Add GET /api/stats endpoint returning JSON with user_count and post_count
 2. Create spec using /speckit.specify
 3. Route to: /speckit.implement
 4. Implementation will:
-   - Quality gates from sdd trait overlay
+   - Quality gates from superpowers trait overlay
    - Use TDD
    - Verify spec compliance
 ```

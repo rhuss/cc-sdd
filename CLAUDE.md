@@ -1,4 +1,4 @@
-# cc-superpowers-sdd Development Guidelines
+# cc-sdd Development Guidelines
 
 Auto-generated from all feature plans. Last updated: 2026-02-13
 

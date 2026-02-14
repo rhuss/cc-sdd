@@ -331,7 +331,7 @@ Action: Auto-updating spec...
 
 ## Conclusion
 
-Specification-Driven Development with superpowers-sdd provides:
+Specification-Driven Development with SDD provides:
 - **Clarity** through formal specs
 - **Consistency** through constitution
 - **Quality** through TDD and verification

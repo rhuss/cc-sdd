@@ -1,11 +1,11 @@
 # Changelog
 
-All notable changes to the **sdd** plugin (repository: cc-superpowers-sdd) will be documented in this file.
+All notable changes to the **sdd** plugin (repository: cc-sdd) will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-> **Note**: The plugin name is `sdd` (for slash commands like `/sdd:brainstorm`), while the GitHub repository is `cc-superpowers-sdd`.
+> **Note**: The plugin name is `sdd` (for slash commands like `/sdd:brainstorm`), while the GitHub repository is `cc-sdd`.
 
 ## [Unreleased]
 
@@ -19,7 +19,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Clear error messages** - If spec-kit not installed, provides installation instructions
 - **Canonical two-skill architecture** - Clear separation of concerns:
   - `spec-kit` - Technical integration layer (auto-init, layout validation, CLI wrappers)
-  - `using-superpowers-sdd` - Methodology layer (workflow routing, process discipline)
+  - `using-superpowers` - Methodology layer (workflow routing, process discipline)
   - All workflow skills call `spec-kit` for automatic setup
 
 ### Changed (BREAKING)
@@ -46,7 +46,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 #### Core Skills
-- **using-superpowers-sdd**: Entry skill establishing mandatory SDD workflows
+- **using-superpowers**: Entry skill establishing mandatory SDD workflows
 - **brainstorm**: Refine rough ideas into executable specifications through collaborative dialogue
 - **spec**: Create formal specifications directly from clear requirements
 - **implement**: Implement features from validated specifications using TDD with spec compliance checking
@@ -120,4 +120,4 @@ Each release will include:
 - **Fixed**: Bug fixes
 - **Security**: Security vulnerability fixes
 
-For detailed commit history, see [GitHub Commits](https://github.com/rhuss/cc-superpowers-sdd/commits/main)
+For detailed commit history, see [GitHub Commits](https://github.com/rhuss/cc-sdd/commits/main)

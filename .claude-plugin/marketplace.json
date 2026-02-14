@@ -17,8 +17,8 @@
         "email": "rhuss@redhat.com"
       },
       "source": "./sdd",
-      "homepage": "https://github.com/rhuss/cc-superpowers-sdd",
-      "repository": "https://github.com/rhuss/cc-superpowers-sdd.git"
+      "homepage": "https://github.com/rhuss/cc-sdd",
+      "repository": "https://github.com/rhuss/cc-sdd.git"
     }
   ]
 }

@@ -6,7 +6,7 @@ description: "[Plugin Dev] Sync modified skills with upstream superpowers while 
 
 **Purpose**: Sync modified skills with upstream superpowers while preserving SDD enhancements.
 
-**Context**: This command is for maintaining the cc-superpowers-sdd plugin, not for end users.
+**Context**: This command is for maintaining the cc-sdd plugin, not for end users.
 
 ## Safety Check
 
@@ -15,14 +15,14 @@ Before proceeding, verify we're in the plugin development directory:
 ```bash
 # Check for plugin marker
 if [ ! -f "sdd/.superpowers-sync" ] || [ ! -f "sdd/.claude-plugin/plugin.json" ]; then
-  echo "ERROR: This command only works in cc-superpowers-sdd plugin directory"
+  echo "ERROR: This command only works in cc-sdd plugin directory"
   echo "Current directory: $(pwd)"
   exit 1
 fi
 
 # Verify we're in the right repo
-if ! grep -q "cc-superpowers-sdd" sdd/.claude-plugin/plugin.json 2>/dev/null; then
-  echo "ERROR: This doesn't appear to be the cc-superpowers-sdd repository"
+if ! grep -q "cc-sdd" sdd/.claude-plugin/plugin.json 2>/dev/null; then
+  echo "ERROR: This doesn't appear to be the cc-sdd repository"
   exit 1
 fi
 
@@ -136,7 +136,7 @@ If the skill has `"sync_mode": "reference-only"` in `.superpowers-sync`:
    **Context:**
    - Skill: [skill-name]
    - Upstream repo: https://github.com/obra/superpowers
-   - Local repo: cc-superpowers-sdd (this plugin)
+   - Local repo: cc-sdd (this plugin)
 
    **Your task:**
    1. Read the current local version: sdd/skills/[skill]/SKILL.md
@@ -345,7 +345,7 @@ Please review and resolve before committing.
 ## Usage Example
 
 ```bash
-# User runs in cc-superpowers-sdd directory
+# User runs in cc-sdd directory
 /update-superpowers
 
 # Claude executes:
@@ -365,7 +365,7 @@ Please review and resolve before committing.
 ## Notes
 
 - This command is **only for plugin maintainers**
-- It will fail if run outside cc-superpowers-sdd directory
+- It will fail if run outside cc-sdd directory
 - Always review merged skills before committing
 - SDD enhancements should NEVER be removed
 - Upstream improvements should be integrated when they don't conflict

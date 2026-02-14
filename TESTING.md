@@ -1,11 +1,11 @@
-# Testing Guide for cc-superpowers-sdd
+# Testing Guide for cc-sdd
 
-This document provides a comprehensive testing plan to validate that the cc-superpowers-sdd plugin works as intended.
+This document provides a comprehensive testing plan to validate that the cc-sdd plugin works as intended.
 
 ## Prerequisites
 
 - [ ] Claude Code installed and working
-- [ ] Plugin symlinked to `~/.claude/plugins/cc-superpowers-sdd`
+- [ ] Plugin symlinked to `~/.claude/plugins/cc-sdd`
 - [ ] Fresh Claude Code instance started
 - [ ] Test project available (existing or new)
 
@@ -15,14 +15,14 @@ This document provides a comprehensive testing plan to validate that the cc-supe
 
 **Step 1: Check plugin directory**
 ```bash
-ls -la ~/.claude/plugins/cc-superpowers-sdd
+ls -la ~/.claude/plugins/cc-sdd
 ```
 
 **Expected:** Symlink pointing to development directory
 
 **Step 2: Verify plugin structure**
 ```bash
-ls ~/.claude/plugins/cc-superpowers-sdd/
+ls ~/.claude/plugins/cc-sdd/
 ```
 
 **Expected output:**
@@ -37,7 +37,7 @@ sdd/
 
 **Step 3: Check plugin.json is valid**
 ```bash
-cat ~/.claude/plugins/cc-superpowers-sdd/sdd/.claude-plugin/plugin.json | python3 -m json.tool
+cat ~/.claude/plugins/cc-sdd/sdd/.claude-plugin/plugin.json | python3 -m json.tool
 ```
 
 **Expected:** Valid JSON output with no errors
@@ -56,7 +56,7 @@ What SDD skills are available?
 ```
 
 **Expected:** List of all 12 skills:
-- sdd:using-superpowers-sdd
+- sdd:using-superpowers
 - sdd:brainstorm
 - sdd:spec
 - sdd:implement

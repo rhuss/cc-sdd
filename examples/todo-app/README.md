@@ -1,6 +1,6 @@
 # Todo App Example - Complete SDD Workflow
 
-This example demonstrates the complete Specification-Driven Development workflow using superpowers-sdd.
+This example demonstrates the complete Specification-Driven Development workflow using SDD.
 
 ## What This Example Shows
 
@@ -162,6 +162,6 @@ After understanding this example:
 
 ## Resources
 
-- Full superpowers-sdd documentation: `../../README.md`
+- Full SDD documentation: `../../README.md`
 - Skill reference: `../../sdd/skills/`
 - Design documentation: `../../docs/design.md`
