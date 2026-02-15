@@ -142,9 +142,21 @@ def bd_list_json():
 
 # --- Forward Sync ---
 
+def ensure_db_fresh():
+    """Re-import JSONL into the SQLite database to prevent stale-db errors.
+
+    The bd CLI maintains a SQLite cache that can fall out of sync with the
+    backing JSONL file (e.g. after external edits or partial operations).
+    Running ``bd sync --import-only`` rebuilds the cache from JSONL, which
+    avoids "Database out of sync with JSONL" errors on subsequent commands.
+    """
+    run_bd('sync', '--import-only', check=False)
+
+
 def do_forward_sync(tasks_file, dry_run):
     check_bd()
     ensure_bd_init(dry_run)
+    ensure_db_fresh()
 
     lines = tasks_file.read_text().splitlines()
 
@@ -320,6 +332,7 @@ def do_forward_sync(tasks_file, dry_run):
 
 def do_reverse_sync(tasks_file, dry_run):
     check_bd()
+    ensure_db_fresh()
 
     lines = tasks_file.read_text().splitlines()
     updated_lines = []
@@ -379,6 +392,7 @@ def do_reverse_sync(tasks_file, dry_run):
 
 def do_status(tasks_file):
     check_bd()
+    ensure_db_fresh()
 
     lines = tasks_file.read_text().splitlines()
     total = 0

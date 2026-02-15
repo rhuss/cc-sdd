@@ -83,6 +83,8 @@ ensure_beads_db() {
 
   echo "Initializing beads database..."
   bd init
+  # Refresh SQLite cache from JSONL to prevent stale-db errors
+  bd sync --import-only 2>/dev/null || true
   echo "Beads database initialized."
 }
 

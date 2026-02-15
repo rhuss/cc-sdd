@@ -30,6 +30,9 @@ if ! bd list --json &>/dev/null; then
   bd init
   echo "Initialized beads database."
 fi
+
+# Refresh SQLite cache from JSONL to prevent "Database out of sync" errors
+bd sync --import-only 2>/dev/null || true
 ```
 
 If `bd` is not available, report the error and stop. Do not fall back to non-beads execution within this skill.
