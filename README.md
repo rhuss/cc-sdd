@@ -6,15 +6,13 @@
 [![Builds on Superpowers](https://img.shields.io/badge/builds%20on-Superpowers-orange)](https://github.com/obra/superpowers)
 [![Builds on Spec-Kit](https://img.shields.io/badge/builds%20on-Spec--Kit-blue)](https://github.com/github/spec-kit)
 
-> Specification-Driven Development for Claude Code, powered by traits.
+> Enrich Spec-Kit with composable traits and additional workflow commands for Claude Code.
 
 ## Why cc-sdd?
 
-[Spec-Kit](https://github.com/github/spec-kit) gives you a CLI and templates for specification-driven development. You write specs, generate plans, and implement features with a structured workflow. [Superpowers](https://github.com/obra/superpowers) gives you process discipline: code reviews, verification gates, and quality checks that keep Claude Code on track.
+[Spec-Kit](https://github.com/github/spec-kit) gives you a CLI and templates for specification-driven development. You write specs, generate plans, and implement features with a structured workflow. But Spec-Kit's commands are intentionally generic. If you want spec review after creation, or code verification after implementation, you have to remember to do it yourself every time.
 
-The problem is that these two systems don't talk to each other. Spec-Kit doesn't know about Superpowers' quality gates, and Superpowers doesn't know about your specs. You end up manually bridging the gap, reminding Claude to review specs before planning or to verify compliance after implementation.
-
-cc-sdd connects them through a technique called **traits**. Traits are overlay files that inject quality gates directly into Spec-Kit's commands. When you enable the `superpowers` trait, your `/speckit.specify` command automatically includes spec review. Your `/speckit.implement` command automatically includes code review and verification. No wrappers, no manual reminders. The discipline is built into the commands you already use.
+cc-sdd solves this with **traits**, a mixin-like mechanism that enriches Spec-Kit commands with additional behavior. Each trait appends overlay content to Spec-Kit's command files, so the extra steps become part of the command itself. Enable the `superpowers` trait, and `/speckit.specify` automatically includes spec review. Enable `beads`, and `/speckit.implement` gains persistent task tracking across sessions. You pick the traits you want, and your Spec-Kit workflow adapts accordingly.
 
 ## Workflow
 
@@ -142,7 +140,7 @@ These commands provide functionality beyond what Spec-Kit offers.
 
 cc-sdd builds on two excellent projects:
 
-- **[Superpowers](https://github.com/obra/superpowers)** by Jesse Vincent, which provides process discipline, quality gates, and verification workflows for Claude Code.
+- **[Superpowers](https://github.com/obra/superpowers)** by Jesse Vincent, which provides quality gates and verification workflows for Claude Code.
 - **[Spec-Kit](https://github.com/github/spec-kit)** by GitHub, which provides specification-driven development templates and the `specify` CLI.
 
 ## License
