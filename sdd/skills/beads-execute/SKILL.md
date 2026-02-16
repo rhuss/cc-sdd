@@ -72,8 +72,10 @@ while [ "$NEXT" != "null" ] && [ -n "$NEXT" ]; do
   # Execute the task (implementation work happens here)
   # ... task-specific implementation ...
 
-  # Mark task complete
-  bd close "$TASK_ID"
+  # Mark task complete (optionally add a reason with -r)
+  bd close "$TASK_ID" -r "Completed: brief summary"
+  # To add a detailed comment, use a separate command:
+  # bd comments add "$TASK_ID" "Detailed notes here"
 
   # Sync state to git
   bd sync
@@ -102,7 +104,10 @@ During implementation, new tasks may emerge. Create bd issues for them but do NO
 
 ```bash
 # When implementation reveals new work not in tasks.md
-bd create "DISCOVERED: [description]" --labels "discovered"
+# Keep titles crisp (under 80 chars) and put details in a comment
+bd create "DISCOVERED: [short summary]" --labels "discovered"
+# Then add the detailed description as a comment:
+bd comments add "$ISSUE_ID" "Full detailed description of the discovered work"
 ```
 
 Discovered work should be:

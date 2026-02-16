@@ -270,6 +270,24 @@ def do_forward_sync(tasks_file, dry_run):
             labels_parts.append('parallel')
         labels = ','.join(labels_parts)
 
+        # Split into crisp title and detailed description.
+        # Beads titles have length restrictions, so keep the title short
+        # and put the full description into a comment.
+        title_text = clean_desc
+        detail_text = None
+        # Truncate title at first colon or period that separates a summary
+        # from detail, or hard-cap at 80 chars.
+        max_title_len = 80
+        for sep in (':', '. '):
+            idx = clean_desc.find(sep)
+            if 0 < idx < max_title_len:
+                title_text = clean_desc[:idx].strip()
+                detail_text = clean_desc[idx + len(sep):].strip()
+                break
+        if len(title_text) > max_title_len:
+            title_text = title_text[:max_title_len].rsplit(' ', 1)[0] + '...'
+            detail_text = clean_desc
+
         # Create issue
         create_kwargs = {
             'spec_id': task_id,
@@ -278,7 +296,13 @@ def do_forward_sync(tasks_file, dry_run):
         if phase_id:
             create_kwargs['parent'] = phase_id
 
-        bd_id = bd_create(f"{task_id}: {clean_desc}", dry_run, **create_kwargs)
+        bd_id = bd_create(f"{task_id}: {title_text}", dry_run, **create_kwargs)
+
+        # Add full description as a comment if it was truncated
+        if detail_text and not dry_run:
+            run_bd('comments', 'add', bd_id, detail_text, check=False)
+        elif detail_text and dry_run:
+            print(f'  [dry-run] bd comments add {bd_id} "{detail_text[:60]}..."')
         task_bd_ids[task_id] = bd_id
         tasks_created += 1
 
