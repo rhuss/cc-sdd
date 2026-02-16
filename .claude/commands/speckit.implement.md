@@ -162,3 +162,5 @@ Delegate implementation execution to {Skill: sdd:beads-execute} which handles:
 
 **IMPORTANT**: Do NOT update tasks.md after each task. Task state lives in bd
 during implementation. A single reverse sync at the end updates tasks.md.
+
+**JSON parsing**: Always use `jq` to parse bd JSON output. NEVER use inline Python one-liners (they break on shell escaping). Use bd's built-in `--type`, `--label`, and `--assignee` flags to filter before piping to jq.

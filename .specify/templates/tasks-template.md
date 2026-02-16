@@ -263,3 +263,4 @@ This project uses beads (`bd`) for persistent task tracking across sessions:
 - `bd create "DISCOVERED: [short title]" --labels discovered` tracks new work
   - Keep titles crisp (under 80 chars); add details via `bd comments add <id> "details"`
 - Run `/sdd:beads-task-sync --reverse` to update checkboxes from bd state
+- **Always use `jq` to parse bd JSON output, NEVER inline Python one-liners**
