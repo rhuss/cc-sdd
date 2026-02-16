@@ -138,6 +138,36 @@ Report the beads execution summary:
 - Discovered work items
 - Any blocked tasks remaining
 
+## bd CLI Usage Rules
+
+**IMPORTANT**: When querying beads JSON output, always use `jq` or the bd CLI's
+built-in filtering flags. NEVER use inline Python one-liners to parse JSON, as
+they cause escaping errors in shell contexts.
+
+**Correct patterns:**
+```bash
+# List open tasks (excluding epics)
+bd list --type task --json | jq -r '.[] | "\(.id): \(.title)"'
+
+# Get ready tasks
+bd ready --json | jq -r '.[] | "\(.id): \(.title)"'
+
+# Filter by label
+bd list --label "phase:1" --json | jq -r '.[] | .title'
+
+# Count open issues
+bd list --json | jq length
+
+# Show specific fields
+bd show "$ID" --json | jq '{id, title, status}'
+```
+
+**NEVER do this:**
+```bash
+# WRONG - Python one-liners break on shell escaping
+bd list --json | python3 -c "import json,sys; ..."
+```
+
 ## Integration
 
 **This skill is invoked by:**
@@ -145,4 +175,5 @@ Report the beads execution summary:
 
 **This skill requires:**
 - `bd` CLI installed and available
+- `jq` for JSON parsing (do NOT use inline Python)
 - tasks.md with parseable task structure
