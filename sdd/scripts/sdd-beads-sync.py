@@ -119,22 +119,36 @@ def bd_dep_add(issue_id, blocked_by, dry_run):
 
 
 def bd_show_json(issue_id):
-    """Get issue details as dict."""
+    """Get issue details as dict.
+
+    bd show returns a JSON array (even for a single issue) or an error object
+    like {"error": "..."}. This function extracts the first element from the
+    array, or returns an empty dict on error.
+    """
     try:
         output = run_bd('show', issue_id, '--json', check=False)
         if output:
-            return json.loads(output)
+            data = json.loads(output)
+            if isinstance(data, list) and data:
+                return data[0]
+            if isinstance(data, dict) and 'error' not in data:
+                return data
     except json.JSONDecodeError:
         pass
     return {}
 
 
 def bd_list_json():
-    """Get all issues as list of dicts."""
+    """Get all issues as list of dicts.
+
+    Returns an empty list if bd returns an error object like {"error": "..."}.
+    """
     try:
         output = run_bd('list', '--json', check=False)
         if output:
-            return json.loads(output)
+            data = json.loads(output)
+            if isinstance(data, list):
+                return data
     except json.JSONDecodeError:
         pass
     return []

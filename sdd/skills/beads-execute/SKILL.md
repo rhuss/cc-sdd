@@ -61,9 +61,9 @@ Use `bd ready` to get the next unblocked task:
 
 ```bash
 # Get next ready task (all dependencies resolved)
-NEXT=$(bd ready --json | jq -r '.[0]')
+NEXT=$(bd ready --json 2>/dev/null | jq -r 'if type == "object" and .error then empty else .[0] // empty end')
 
-while [ "$NEXT" != "null" ] && [ -n "$NEXT" ]; do
+while [ -n "$NEXT" ]; do
   TASK_ID=$(echo "$NEXT" | jq -r '.id')
   TASK_TITLE=$(echo "$NEXT" | jq -r '.title')
 
@@ -81,7 +81,7 @@ while [ "$NEXT" != "null" ] && [ -n "$NEXT" ]; do
   bd sync
 
   # Get next ready task
-  NEXT=$(bd ready --json | jq -r '.[0]')
+  NEXT=$(bd ready --json 2>/dev/null | jq -r 'if type == "object" and .error then empty else .[0] // empty end')
 done
 ```
 
@@ -144,28 +144,57 @@ Report the beads execution summary:
 built-in filtering flags. NEVER use inline Python one-liners to parse JSON, as
 they cause escaping errors in shell contexts.
 
-**Correct patterns:**
+### Error handling
+
+`bd` returns a JSON error object `{"error": "..."}` when it fails (e.g., stale
+database). All jq filters MUST check for errors before processing results.
+Also, NEVER use `2>&1` when piping bd output to jq. Stderr noise corrupts the
+JSON stream. Use `2>/dev/null` to discard stderr.
+
+**Error-safe wrapper** (use this pattern for all bd JSON queries):
 ```bash
-# List open tasks (excluding epics)
-bd list --type task --json | jq -r '.[] | "\(.id): \(.title)"'
-
-# Get ready tasks
-bd ready --json | jq -r '.[] | "\(.id): \(.title)"'
-
-# Filter by label
-bd list --label "phase:1" --json | jq -r '.[] | .title'
-
-# Count open issues
-bd list --json | jq length
-
-# Show specific fields
-bd show "$ID" --json | jq '{id, title, status}'
+# Guard: type == "object" and .error  (plain .error crashes on arrays)
+bd show "$ID" --json 2>/dev/null | jq 'if type == "object" and .error then error(.error) else .[0] | {id, title, status} end'
+bd list --json 2>/dev/null | jq 'if type == "object" and .error then error(.error) else . end'
+bd ready --json 2>/dev/null | jq 'if type == "object" and .error then error(.error) else . end'
 ```
 
-**NEVER do this:**
+### Correct patterns
+
+Note: `bd show` and `bd ready` return arrays, not bare objects. Use `.[0]` to
+get the first element, or `.[]` to iterate.
+
+```bash
+# List open tasks (excluding epics)
+bd list --type task --json 2>/dev/null | jq -r 'if type == "object" and .error then error(.error) else .[] | "\(.id): \(.title)" end'
+
+# Get ready tasks
+bd ready --json 2>/dev/null | jq -r 'if type == "object" and .error then error(.error) else .[] | "\(.id): \(.title)" end'
+
+# Filter by label
+bd list --label "phase:1" --json 2>/dev/null | jq -r 'if type == "object" and .error then error(.error) else .[] | .title end'
+
+# Count open issues
+bd list --json 2>/dev/null | jq 'if type == "object" and .error then error(.error) else length end'
+
+# Show specific fields (bd show returns an array, use .[0])
+bd show "$ID" --json 2>/dev/null | jq 'if type == "object" and .error then error(.error) else .[0] | {id, title, status} end'
+```
+
+### NEVER do this
+
 ```bash
 # WRONG - Python one-liners break on shell escaping
 bd list --json | python3 -c "import json,sys; ..."
+
+# WRONG - 2>&1 mixes stderr text into JSON, corrupting it for jq
+bd show "$ID" --json 2>&1 | jq '.[0]'
+
+# WRONG - no error check, crashes on {"error": "..."} response
+bd show "$ID" --json | jq '.[0] | {id, title, status}'
+
+# WRONG - bd show returns an array, not an object
+bd show "$ID" --json | jq '{id, title, status}'
 ```
 
 ## Integration
