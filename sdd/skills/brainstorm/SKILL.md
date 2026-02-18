@@ -34,7 +34,7 @@ You MUST create a task for each of these items and complete them in order:
 3. **Ask clarifying questions** - one at a time, understand purpose/constraints/success criteria
 4. **Propose 2-3 approaches** - with trade-offs and your recommendation
 5. **Present spec sections** - scaled to their complexity, get user approval after each section
-6. **Create specification** - using spec-kit or manually, validate and commit
+6. **Create specification** - invoke `/speckit.specify` (or create manually), validate and commit
 7. **Generate review brief** - synthesize spec into reviewer-friendly summary
 8. **Transition** - offer next steps via `/speckit.plan` or `/speckit.implement`
 
@@ -128,7 +128,7 @@ If `/speckit.*` commands are not available, fall back to creating specs manually
 **Once the user approves the presented spec:**
 
 1. **Announce spec creation:**
-   "Based on our discussion, I'm creating the specification..."
+   "Based on our discussion, I'm creating the specification using `/speckit.specify`..."
 
 2. **Create spec file using /speckit.specify (if available):**
 
