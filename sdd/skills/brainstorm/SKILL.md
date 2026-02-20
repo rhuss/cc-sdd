@@ -31,12 +31,15 @@ You MUST create a task for each of these items and complete them in order:
 
 1. **Initialize spec-kit** - ensure specify CLI and project are set up
 2. **Explore project context** - check files, specs, constitution, recent commits
-3. **Ask clarifying questions** - one at a time, understand purpose/constraints/success criteria
-4. **Propose 2-3 approaches** - with trade-offs and your recommendation
-5. **Present spec sections** - scaled to their complexity, get user approval after each section
-6. **Create specification** - invoke `/speckit.specify` (or create manually), validate and commit
-7. **Generate review brief** - synthesize spec into reviewer-friendly summary
-8. **Transition** - offer next steps via `/speckit.plan` or `/speckit.implement`
+3. **Check for related brainstorms** - scan `brainstorm/` for existing docs on similar topics, offer to update or create new
+4. **Ask clarifying questions** - one at a time, understand purpose/constraints/success criteria
+5. **Propose 2-3 approaches** - with trade-offs and your recommendation
+6. **Present spec sections** - scaled to their complexity, get user approval after each section
+7. **Create specification** - invoke `/speckit.specify` (or create manually), validate and commit
+8. **Generate review brief** - synthesize spec into reviewer-friendly summary
+9. **Transition** - offer next steps via `/speckit.plan` or `/speckit.implement`
+10. **Write brainstorm document** - persist session summary to `brainstorm/NN-topic-slug.md`
+11. **Update overview** - create or refresh `brainstorm/00-overview.md` with index, open threads, parked ideas
 
 ## Process Flow
 
@@ -44,16 +47,22 @@ You MUST create a task for each of these items and complete them in order:
 digraph brainstorming {
     "Initialize spec-kit" [shape=box];
     "Explore project context" [shape=box];
+    "Related brainstorm exists?" [shape=diamond];
     "Ask clarifying questions" [shape=box];
     "Propose 2-3 approaches" [shape=box];
     "Present spec sections" [shape=box];
     "User approves spec?" [shape=diamond];
     "Create specification file" [shape=box];
     "Validate & commit spec" [shape=box];
-    "Offer /speckit.plan or /speckit.implement" [shape=doublecircle];
+    "Offer /speckit.plan or /speckit.implement" [shape=box];
+    "Write brainstorm document" [shape=box];
+    "Update overview" [shape=box];
+    "Done" [shape=doublecircle];
 
     "Initialize spec-kit" -> "Explore project context";
-    "Explore project context" -> "Ask clarifying questions";
+    "Explore project context" -> "Related brainstorm exists?";
+    "Related brainstorm exists?" -> "Ask clarifying questions" [label="no, or user chooses new"];
+    "Related brainstorm exists?" -> "Ask clarifying questions" [label="yes, user chooses update"];
     "Ask clarifying questions" -> "Propose 2-3 approaches";
     "Propose 2-3 approaches" -> "Present spec sections";
     "Present spec sections" -> "User approves spec?";
@@ -61,10 +70,13 @@ digraph brainstorming {
     "User approves spec?" -> "Create specification file" [label="yes"];
     "Create specification file" -> "Validate & commit spec";
     "Validate & commit spec" -> "Offer /speckit.plan or /speckit.implement";
+    "Offer /speckit.plan or /speckit.implement" -> "Write brainstorm document";
+    "Write brainstorm document" -> "Update overview";
+    "Update overview" -> "Done";
 }
 ```
 
-**The terminal state is offering `/speckit.plan` or `/speckit.implement`.** Do NOT invoke any implementation skill directly. After brainstorming, the ONLY next steps are spec-driven: planning or implementing from the approved spec.
+**The terminal state is "Done" (after writing brainstorm document and updating overview).** Do NOT invoke any implementation skill directly. After brainstorming, the ONLY next steps are spec-driven: planning or implementing from the approved spec.
 
 ## Prerequisites
 
@@ -91,6 +103,7 @@ If `/speckit.*` commands are not available, fall back to creating specs manually
 - Check for constitution (`specs/constitution.md`)
 - Review recent commits to understand project state
 - Look for related features or patterns
+- Scan `brainstorm/` directory for existing brainstorm documents (triggers revisit detection, see step 3 in checklist)
 
 **Ask questions to refine:**
 - Ask questions one at a time
@@ -232,6 +245,9 @@ If `/speckit.*` commands are not available, fall back to creating specs manually
 
 ### After spec creation
 
+**Record spec path for brainstorm document:**
+Note the spec path (`specs/[NNNN]-[feature-name]/`) so the brainstorm document (step 10) can reference it with status `spec-created`.
+
 **Validate the spec:**
 - Use `sdd:review-spec` to check soundness
 - Ensure spec is implementable
@@ -338,6 +354,193 @@ Includes:
 
 Assisted-By: 🤖 Claude Code"
 ```
+
+## Brainstorm Document Structure
+
+Each brainstorm session produces a structured summary document. The document uses this format:
+
+```markdown
+# Brainstorm: [Topic]
+
+**Date:** YYYY-MM-DD
+**Status:** active | parked | abandoned | spec-created
+**Spec:** specs/NNNN-feature-name/ (only if status is spec-created)
+
+## Problem Framing
+[What problem is being explored and why it matters]
+
+## Approaches Considered
+
+### A: [Approach Name]
+- Pros: ...
+- Cons: ...
+
+### B: [Approach Name]
+- Pros: ...
+- Cons: ...
+
+## Decision
+[What was chosen and why, or "Parked: [reason]" if no decision was reached]
+
+## Open Threads
+- [Unresolved question or idea that needs further exploration]
+```
+
+**Status values:**
+- `active` - session completed, idea is being pursued
+- `parked` - session stopped intentionally, idea may be revisited
+- `abandoned` - session stopped, idea is not being pursued
+- `spec-created` - session led to a spec (include spec path)
+
+## Overview Document Structure
+
+The `brainstorm/00-overview.md` file provides a navigable index of all brainstorm sessions:
+
+```markdown
+# Brainstorm Overview
+
+Last updated: YYYY-MM-DD
+
+## Sessions
+
+| # | Date | Topic | Status | Spec |
+|---|------|-------|--------|------|
+| 01 | YYYY-MM-DD | topic-slug | spec-created | 0003 |
+| 02 | YYYY-MM-DD | topic-slug | active | - |
+| 03 | YYYY-MM-DD | topic-slug | parked | - |
+
+## Open Threads
+- [Thread description] (from #NN)
+- [Thread description] (from #NN)
+
+## Parked Ideas
+- [Idea description] (#NN)
+  Reason: [why parked]
+```
+
+## Revisit Detection
+
+**When:** During step 3 of the checklist (after exploring project context).
+
+**How:**
+1. Check if `brainstorm/` directory exists. If not, skip (no prior brainstorms).
+2. List all `NN-*.md` files in `brainstorm/` (excluding `00-overview.md`).
+3. Extract topic slugs from filenames (the part after the number prefix).
+4. Compare the current brainstorm topic against existing slugs using keyword overlap.
+5. If a related brainstorm document is found, use AskUserQuestion:
+   - **Option A: "Create new document"** - session produces a new numbered file
+   - **Option B: "Update existing"** - session appends a new dated section to the existing document
+
+**If "Update existing" is chosen:**
+At session end, instead of creating a new file, append a new section to the existing document:
+
+```markdown
+
+---
+
+## Revisit: YYYY-MM-DD
+
+### Updated Problem Framing
+[How understanding has evolved]
+
+### New Approaches Considered
+...
+
+### Updated Decision
+...
+
+### Open Threads
+- [New or updated threads]
+```
+
+Then update the overview to reflect any status or thread changes.
+
+## Writing the Brainstorm Document
+
+**When:** Step 10 of the checklist (after transition, at session end).
+
+You MUST write the brainstorm document at session end. This step is NOT optional.
+
+**Procedure:**
+
+1. **Create directory** if it does not exist:
+   ```bash
+   mkdir -p brainstorm/
+   ```
+
+2. **Detect next number** by scanning existing files:
+   ```bash
+   # List existing brainstorm docs, extract numbers, find max
+   ls brainstorm/[0-9][0-9]-*.md 2>/dev/null
+   ```
+   Use `max_existing_number + 1`. If no files exist, start at 01. Do NOT gap-fill (if 01 and 03 exist, next is 04).
+
+3. **Generate topic slug**: Derive from the brainstorm topic. Lowercase, hyphens, 2-4 words.
+   Example: "user authentication system" becomes `auth-system`
+
+4. **Determine status**:
+   - If a spec was created during this session: `spec-created` (include spec path)
+   - If the user chose to park the idea: `parked`
+   - If the user abandoned early: `abandoned`
+   - Otherwise: `active`
+
+5. **Write the document** using the Brainstorm Document Structure defined above.
+
+6. **Commit the brainstorm document**:
+   ```bash
+   git add brainstorm/NN-topic-slug.md
+   git commit -m "Add brainstorm: [topic]
+
+   Assisted-By: 🤖 Claude Code"
+   ```
+
+## Updating the Overview
+
+**When:** Step 11 of the checklist (immediately after writing the brainstorm document).
+
+You MUST update the overview after every brainstorm document write or update. This step is NOT optional.
+
+**Procedure:**
+
+1. **If `brainstorm/00-overview.md` does not exist**, create it.
+   If `brainstorm/` exists but `00-overview.md` is missing, regenerate it from all existing documents.
+
+2. **Always regenerate by scanning all documents** (idempotent full rebuild):
+   - List all `NN-*.md` files in `brainstorm/` (excluding `00-overview.md`)
+   - For each file, extract: number, date, status, spec reference (from frontmatter)
+   - For each file, extract all items under `## Open Threads`
+   - For each file with status `parked`, collect the idea and reason
+
+3. **Build the overview** using the Overview Document Structure defined above:
+   - Sessions table: one row per document, sorted by number
+   - Open Threads: aggregated from all documents, tagged with source `(from #NN)`
+   - Parked Ideas: collected from all `parked` documents
+
+4. **Write `brainstorm/00-overview.md`** with the rebuilt content.
+
+5. **Commit the overview update**:
+   ```bash
+   git add brainstorm/00-overview.md
+   git commit -m "Update brainstorm overview
+
+   Assisted-By: 🤖 Claude Code"
+   ```
+
+## Incomplete Session Handling
+
+**When:** The user stops the brainstorm before creating a spec.
+
+**Zero-interaction guard:** If the session had no meaningful interaction (no approaches explored, no clarifying questions answered beyond the initial topic), do NOT prompt to save. Simply end the session without creating any artifacts.
+
+**For sessions with meaningful interaction** (approaches were discussed, questions were answered):
+
+Use AskUserQuestion to ask: **"Save this brainstorm session?"**
+
+- **Option A: "Save as parked"** - Write the document with status `parked`, update overview
+- **Option B: "Save as abandoned"** - Write the document with status `abandoned`, update overview
+- **Option C: "Discard"** - Do not create any brainstorm document, do not update overview
+
+If the user chooses to save, follow the "Writing the Brainstorm Document" and "Updating the Overview" procedures above.
 
 ## Key Principles
 
