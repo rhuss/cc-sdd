@@ -27,12 +27,12 @@ flowchart TD
 
     Specify --> Review["/sdd:review-spec\nValidate spec"]
     Review --> Plan["/speckit.plan\nGenerate plan + tasks"]
-    Plan --> Implement["/speckit.implement\nBuild with TDD"]
+    Plan --> Implement["/speckit.implement<br>Build with TDD"]
 
     Implement --> Verify{Tests pass?\nSpec compliant?}
 
     Verify -->|Yes| Done([Complete])
-    Verify -->|Drift detected| Evolve["/sdd:evolve\nReconcile"]
+    Verify -->|Drift detected| Evolve["/sdd:evolve<br>Reconcile"]
 
     Evolve -->|Update spec| Review
     Evolve -->|Fix code| Implement
