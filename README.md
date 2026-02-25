@@ -18,18 +18,18 @@ cc-sdd solves this with **traits**, a mixin-like mechanism that enriches Spec-Ki
 
 ```mermaid
 flowchart TD
-    Start([Idea]) --> HasClarity{Clear\nrequirements?}
+    Start([Idea]) --> HasClarity{Clear<br>requirements?}
 
-    HasClarity -->|Not yet| Brainstorm["/sdd:brainstorm\nRefine idea"]
-    HasClarity -->|Yes| Specify["/speckit.specify\nCreate spec"]
+    HasClarity -->|Not yet| Brainstorm["/sdd:brainstorm<br>Refine idea"]
+    HasClarity -->|Yes| Specify["/speckit.specify<br>Create spec"]
 
     Brainstorm --> Specify
 
-    Specify --> Review["/sdd:review-spec\nValidate spec"]
-    Review --> Plan["/speckit.plan\nGenerate plan + tasks"]
+    Specify --> Review["/sdd:review-spec<br>Validate spec"]
+    Review --> Plan["/speckit.plan<br>Generate plan + tasks"]
     Plan --> Implement["/speckit.implement<br>Build with TDD"]
 
-    Implement --> Verify{Tests pass?\nSpec compliant?}
+    Implement --> Verify{Tests pass?<br>Spec compliant?}
 
     Verify -->|Yes| Done([Complete])
     Verify -->|Drift detected| Evolve["/sdd:evolve<br>Reconcile"]
