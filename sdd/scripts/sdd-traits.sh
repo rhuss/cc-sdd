@@ -28,7 +28,7 @@ set -euo pipefail
 
 PLUGIN_ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 TRAITS_CONFIG=".specify/sdd-traits.json"
-VALID_TRAITS="superpowers beads"
+VALID_TRAITS="superpowers beads teams-vanilla teams-spec"
 
 # --- Helpers ---
 
@@ -44,6 +44,61 @@ is_valid_trait() {
   return 1
 }
 
+get_trait_deps() {
+  # Returns space-separated list of required traits (bash 3.2 compatible)
+  case "$1" in
+    teams-spec) echo "teams-vanilla superpowers beads" ;;
+    *) echo "" ;;
+  esac
+}
+
+check_deps_for_enable() {
+  local trait="$1"
+  local deps
+  deps=$(get_trait_deps "$trait")
+  [ -z "$deps" ] && return 0
+
+  local missing=""
+  for dep in $deps; do
+    local val
+    val=$(jq -r ".traits[\"$dep\"] // false" "$TRAITS_CONFIG")
+    if [ "$val" != "true" ]; then
+      missing="$missing $dep"
+    fi
+  done
+
+  if [ -n "$missing" ]; then
+    echo "ERROR: Trait '$trait' requires these traits to be enabled first:$missing" >&2
+    return 1
+  fi
+  return 0
+}
+
+check_dependents_for_disable() {
+  local trait="$1"
+  local dependents=""
+
+  for t in $VALID_TRAITS; do
+    local val
+    val=$(jq -r ".traits[\"$t\"] // false" "$TRAITS_CONFIG")
+    [ "$val" != "true" ] && continue
+
+    local deps
+    deps=$(get_trait_deps "$t")
+    for dep in $deps; do
+      if [ "$dep" = "$trait" ]; then
+        dependents="$dependents $t"
+      fi
+    done
+  done
+
+  if [ -n "$dependents" ]; then
+    echo "ERROR: Cannot disable '$trait'. These enabled traits depend on it:$dependents" >&2
+    return 1
+  fi
+  return 0
+}
+
 ensure_config() {
   # Create config with all traits disabled if it doesn't exist
   if [ ! -f "$TRAITS_CONFIG" ]; then
@@ -53,7 +108,9 @@ ensure_config() {
   "version": 1,
   "traits": {
     "superpowers": false,
-    "beads": false
+    "beads": false,
+    "teams-vanilla": false,
+    "teams-spec": false
   },
   "applied_at": "$(now_iso)"
 }
@@ -115,6 +172,11 @@ do_enable() {
 
   ensure_config
 
+  # Check dependencies before enabling
+  if ! check_deps_for_enable "$trait"; then
+    exit 1
+  fi
+
   # Check if already enabled
   current=$(jq -r ".traits[\"$trait\"] // false" "$TRAITS_CONFIG")
   if [ "$current" = "true" ]; then
@@ -149,6 +211,11 @@ do_disable() {
   fi
 
   ensure_config
+
+  # Check that no enabled trait depends on this one
+  if ! check_dependents_for_disable "$trait"; then
+    exit 1
+  fi
 
   # Check if already disabled
   current=$(jq -r ".traits[\"$trait\"] // false" "$TRAITS_CONFIG")
@@ -192,6 +259,7 @@ do_init() {
 
   # Build the traits JSON object
   local superpowers_val="false" beads_val="false"
+  local teams_vanilla_val="false" teams_spec_val="false"
 
   if [ -n "$enable_list" ]; then
     IFS=',' read -ra traits_arr <<< "$enable_list"
@@ -204,8 +272,27 @@ do_init() {
       case "$t" in
         superpowers) superpowers_val="true" ;;
         beads) beads_val="true" ;;
+        teams-vanilla) teams_vanilla_val="true" ;;
+        teams-spec) teams_spec_val="true" ;;
       esac
     done
+
+    # Auto-resolve: teams-spec requires teams-vanilla
+    if [ "$teams_spec_val" = "true" ] && [ "$teams_vanilla_val" = "false" ]; then
+      teams_vanilla_val="true"
+      echo "NOTE: Auto-enabling teams-vanilla (required by teams-spec)."
+    fi
+
+    # Check non-auto-resolvable deps for teams-spec
+    if [ "$teams_spec_val" = "true" ]; then
+      local missing_deps=""
+      [ "$superpowers_val" = "false" ] && missing_deps="$missing_deps superpowers"
+      [ "$beads_val" = "false" ] && missing_deps="$missing_deps beads"
+      if [ -n "$missing_deps" ]; then
+        echo "ERROR: teams-spec requires these traits to also be enabled:$missing_deps" >&2
+        exit 2
+      fi
+    fi
   fi
 
   mkdir -p "$(dirname "$TRAITS_CONFIG")"
@@ -214,7 +301,9 @@ do_init() {
   "version": 1,
   "traits": {
     "superpowers": $superpowers_val,
-    "beads": $beads_val
+    "beads": $beads_val,
+    "teams-vanilla": $teams_vanilla_val,
+    "teams-spec": $teams_spec_val
   },
   "applied_at": "$(now_iso)"
 }
