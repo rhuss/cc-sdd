@@ -1,5 +1,5 @@
 {
-  "description": "SDD plugin hooks for context injection",
+  "description": "SDD plugin hooks for context injection and skill invocation enforcement",
   "hooks": {
     "UserPromptSubmit": [
       {
@@ -8,6 +8,17 @@
           {
             "type": "command",
             "command": "python3 ${CLAUDE_PLUGIN_ROOT}/scripts/hooks/context-hook.py"
+          }
+        ]
+      }
+    ],
+    "PreToolUse": [
+      {
+        "matcher": ".*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 ${CLAUDE_PLUGIN_ROOT}/scripts/hooks/skill-gate-hook.py"
           }
         ]
       }

@@ -1,6 +1,6 @@
 ---
 name: init
-description: Run the sdd-init.sh script. Do not check for CLI tools or explore the filesystem.
+description: Initialize or update the project using the `specify` CLI (--refresh for templates, --update to upgrade CLI). Do NOT search for speckit or spec-kit binaries.
 ---
 
 # SDD Init

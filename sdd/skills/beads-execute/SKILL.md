@@ -179,6 +179,9 @@ bd list --json 2>/dev/null | jq 'if type == "object" and .error then error(.erro
 
 # Show specific fields (bd show returns an array, use .[0])
 bd show "$ID" --json 2>/dev/null | jq 'if type == "object" and .error then error(.error) else .[0] | {id, title, status} end'
+
+# Bulk create issues from a markdown file (use -f or --file, NOT --from-file)
+bd create -f tasks.md --dry-run
 ```
 
 ### NEVER do this

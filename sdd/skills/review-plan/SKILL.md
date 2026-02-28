@@ -112,56 +112,81 @@ After validation passes, generate `specs/[feature-name]/review-summary.md`:
 **Spec:** specs/[feature-name]/spec.md | **Plan:** specs/[feature-name]/plan.md
 **Generated:** YYYY-MM-DD
 
-> Distilled decision points for reviewers. See full spec/plan for details.
-
 ---
 
-## Feature Overview
-[3-5 sentences on purpose and scope]
+## Executive Summary
+
+[0.5 to 1 page (roughly 200-400 words) written in plain, accessible language that a
+non-specialist can follow. Cover: what problem this feature solves, how it works at a
+high level, what changes it introduces, and why it matters. Avoid jargon where possible;
+where technical terms are necessary, explain them briefly. This section should give a
+reviewer enough context to understand the feature without reading the full spec.]
+
+## PR Contents
+
+This spec PR includes the following artifacts:
+
+| Artifact | Description |
+|----------|-------------|
+| `spec.md` | [One-line summary of what the spec defines] |
+| `plan.md` | [One-line summary of the implementation approach] |
+| `tasks.md` | [Number of tasks across N phases] |
+| `review-summary.md` | This file |
+| [Other artifacts if any, e.g. checklist.md, diagrams] | [Description] |
+
+## Technical Decisions
+
+> Key technical choices made during design, including alternatives that were considered and why they were rejected.
+
+### [Decision Title]
+- **Chosen approach:** [What was decided]
+- **Alternatives considered:**
+  - [Alternative 1]: [Why rejected, e.g. "adds unnecessary complexity", "poor scaling characteristics"]
+  - [Alternative 2]: [Why rejected]
+- **Trade-off:** [What we gain and what we give up]
+- **Reviewer question:** [Specific question for the reviewer, if any]
+
+[Repeat for each significant decision]
+
+## Critical References
+
+> Specific sections in the spec or plan that need elevated human attention. Reviewers should prioritize reading these sections and discuss them on the PR.
+
+| Reference | Why it needs attention |
+|-----------|----------------------|
+| `spec.md` Section [X.Y]: [Section title] | [Why this is critical, e.g. "defines the public API contract", "contains security-sensitive logic"] |
+| `plan.md` Phase [N]: [Phase title] | [Why this needs review, e.g. "complex migration strategy", "touches shared infrastructure"] |
+| `spec.md` [NFR-N]: [NFR title] | [Why, e.g. "performance threshold may be too aggressive"] |
+| ... | ... |
+
+## Reviewer Checklist
+
+> Things the reviewer should actively verify, question, or potentially reject.
+
+### Verify
+- [ ] [Concrete thing to check, e.g. "Schema fields cover all use cases listed in FR-003"]
+- [ ] [Another verification item]
+
+### Question
+- [ ] [Area where reviewer input is needed, e.g. "Is the flat directory structure sufficient as the project grows?"]
+- [ ] [Another open question needing stakeholder input]
+
+### Watch out for
+- [ ] [Potential issue, e.g. "Skill file may become too large with added sections"]
+- [ ] [Risk or concern, e.g. "No backward compatibility path if naming convention changes"]
 
 ## Scope Boundaries
 - **In scope:** [What this includes]
 - **Out of scope:** [What this explicitly excludes]
 - **Why these boundaries:** [Brief justification]
 
-## Critical Decisions
-
-### [Decision Title]
-- **Choice:** [What was decided]
-- **Alternatives:** [What else was considered]
-- **Trade-off:** [Key trade-off made]
-- **Feedback:** [Specific question for reviewer]
-
-## Areas of Potential Disagreement
-
-> Decisions or approaches where reasonable reviewers might push back.
-
-### [Topic]
-- **Decision:** [What was decided]
-- **Why this might be controversial:** [Reason]
-- **Alternative view:** [What someone might prefer]
-- **Seeking input on:** [Specific question]
-
-## Naming Decisions
+## Naming & Schema Decisions
 
 | Item | Name | Context |
 |------|------|---------|
 | ... | ... | ... |
 
-## Schema Definitions
-
-### [Schema Name]
-[Condensed structure - key fields only]
-
-## Architecture Choices
-
-- **Pattern:** [Brief description]
-- **Components:** [Key components]
-- **Integration:** [What it touches]
-
-## Open Questions
-
-- [ ] [Question needing stakeholder input]
+[If schemas are defined, include condensed key-fields-only summaries here]
 
 ## Risk Areas
 
@@ -174,9 +199,12 @@ After validation passes, generate `specs/[feature-name]/review-summary.md`:
 ```
 
 **Constraints:**
-- Maximum ~800-1000 words
-- Prioritize: Disagreement Areas > Decisions > Scope > Overview
-- Be explicit about potential pushback points
+- Target length: ~1000-1500 words (the executive summary alone should be 200-400 words)
+- Prioritize: Executive Summary > Technical Decisions > Critical References > Reviewer Checklist > Scope
+- The executive summary MUST be understandable by someone who has not read the spec
+- Technical Decisions MUST include rejected alternatives with reasoning
+- Critical References MUST point to specific sections (with section numbers or anchors) in spec.md and plan.md
+- Reviewer Checklist items should be concrete and actionable, not vague
 - Summarize, don't transcribe
 
 ## 6. Present Results

@@ -49,11 +49,11 @@ This skill is the **single source of truth** for all spec-kit technical integrat
 
 **IMPORTANT: This runs automatically when called by any workflow skill.**
 
-{Skill: sdd:init}
+Check `<sdd-initialized>` in the `<sdd-context>` system reminder:
+- If `true`: Skip initialization entirely. The project is already set up.
+- If `false` or missing: Run `{Skill: sdd:init}` to initialize. If init prompts for restart, pause this workflow and resume after restart.
 
-If init prompts for restart, pause this workflow and resume after restart.
-
-After initialization succeeds, this skill provides reference material below.
+After initialization succeeds (or was skipped), this skill provides reference material below.
 
 ## Available Slash Commands
 

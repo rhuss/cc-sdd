@@ -125,6 +125,27 @@ EOF
   fi
 }
 
+ensure_agent_teams_env() {
+  # Set or remove CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS in settings.local.json
+  # based on whether any teams trait is currently enabled.
+  ensure_settings
+
+  local teams_vanilla teams_spec
+  teams_vanilla=$(jq -r '.traits["teams-vanilla"] // false' "$TRAITS_CONFIG" 2>/dev/null)
+  teams_spec=$(jq -r '.traits["teams-spec"] // false' "$TRAITS_CONFIG" 2>/dev/null)
+
+  local tmp
+  tmp=$(mktemp)
+  if [ "$teams_vanilla" = "true" ] || [ "$teams_spec" = "true" ]; then
+    jq '.env //= {} | .env.CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS = "1"' "$SETTINGS_FILE" > "$tmp"
+    mv "$tmp" "$SETTINGS_FILE"
+    echo "Set CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS=1 in $SETTINGS_FILE"
+  else
+    jq 'if .env then .env |= del(.CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS) | if .env == {} then del(.env) else . end else . end' "$SETTINGS_FILE" > "$tmp"
+    mv "$tmp" "$SETTINGS_FILE"
+  fi
+}
+
 ensure_beads_db() {
   # Initialize bd database if bd is installed but no database exists
   if ! command -v bd &>/dev/null; then
@@ -198,6 +219,11 @@ do_enable() {
     ensure_beads_db
   fi
 
+  # Set agent teams env var if a teams trait was enabled
+  if [ "$trait" = "teams-vanilla" ] || [ "$trait" = "teams-spec" ]; then
+    ensure_agent_teams_env
+  fi
+
   # Apply overlays
   do_apply
 }
@@ -231,6 +257,12 @@ do_disable() {
     '.traits[$t] = false | .applied_at = $ts' "$TRAITS_CONFIG" > "$tmp"
   mv "$tmp" "$TRAITS_CONFIG"
   echo "Trait '$trait' disabled in config."
+
+  # Remove agent teams env var if no teams traits remain enabled
+  if [ "$trait" = "teams-vanilla" ] || [ "$trait" = "teams-spec" ]; then
+    ensure_agent_teams_env
+  fi
+
   echo "NOTE: Run 'specify init --here --ai claude --force' then '$0 apply' to regenerate files."
 }
 
@@ -314,6 +346,11 @@ EOF
   # Initialize beads database if beads trait was enabled
   if [ "$beads_val" = "true" ]; then
     ensure_beads_db
+  fi
+
+  # Set agent teams env var if any teams trait was enabled
+  if [ "$teams_vanilla_val" = "true" ] || [ "$teams_spec_val" = "true" ]; then
+    ensure_agent_teams_env
   fi
 
   do_list
