@@ -21,6 +21,13 @@ Start by understanding the current project context, then ask questions one at a 
 Do NOT invoke any implementation skill, write any code, scaffold any project, or take any implementation action until you have presented a specification and the user has approved it. This applies to EVERY project regardless of perceived simplicity.
 </HARD-GATE>
 
+## Command Namespace Reference
+
+- To create specs: `/speckit.specify` (NOT `/sdd:specify`, which does not exist)
+- To plan: `/speckit.plan` (NOT `/sdd:plan`)
+- To implement: `/speckit.implement` (NOT `/sdd:implement`)
+- SDD commands are only: brainstorm, review-*, evolve, traits, init, help, constitution, beads-task-sync
+
 ## Anti-Pattern: "This Is Too Simple To Need A Spec"
 
 Every project goes through this process. A todo list, a single-function utility, a config change: all of them. "Simple" projects are where unexamined assumptions cause the most wasted work. The spec can be short (a few sentences for truly simple projects), but you MUST present it and get approval.
@@ -88,11 +95,13 @@ If spec-kit prompts for restart, pause this workflow and resume after restart.
 
 ## CRITICAL: Use /speckit.* Slash Commands
 
-This skill should use `/speckit.*` slash commands when available. Claude MUST NOT:
-- Generate specs internally (use `/speckit.specify` instead)
-- Create spec markdown directly (spec-kit handles this)
+Claude MUST use `/speckit.specify` to create specs. Claude MUST NOT:
+- Generate specs internally and write them with Write/Edit tools
+- Create spec directories with mkdir
+- Create spec.md files directly
+- Bypass `/speckit.specify` for any reason
 
-If `/speckit.*` commands are not available, fall back to creating specs manually using the template at `.specify/templates/spec-template.md`.
+If `/speckit.*` commands are not available, tell the user to run `/sdd:init` first. Do NOT fall back to manual spec creation.
 
 ## The Process
 
@@ -140,16 +149,24 @@ If `/speckit.*` commands are not available, fall back to creating specs manually
 
 **Once the user approves the presented spec:**
 
+<HARD-GATE>
+You MUST invoke `/speckit.specify` to create the spec file. Do NOT create spec files manually
+using Write or Edit tools. Do NOT create the spec directory with mkdir. Do NOT write spec.md
+directly. The `/speckit.specify` command handles file creation, directory structure, numbering,
+and template formatting. Bypassing it is a process violation.
+</HARD-GATE>
+
 1. **Announce spec creation:**
    "Based on our discussion, I'm creating the specification using `/speckit.specify`..."
 
-2. **Create spec file using /speckit.specify (if available):**
-
-   Invoke `/speckit.specify` to create the spec interactively.
+2. **Create spec file by invoking `/speckit.specify`:**
 
    This creates the spec at `specs/[NNNN]-[feature-name]/spec.md` using the spec-kit template.
 
-   **If `/speckit.specify` is not available:** Create the spec manually following `.specify/templates/spec-template.md`.
+   Pass the approved spec content to `/speckit.specify` so it populates the template correctly.
+
+   **If `/speckit.specify` is not available** (commands not installed): Stop and tell the user
+   to run `/sdd:init` first. Do NOT fall back to manual file creation.
 
 3. **Run clarification check (RECOMMENDED):**
 

@@ -95,3 +95,14 @@ SDD COMMANDS (helpers and configuration)
   /sdd:constitution   Define project-wide principles and standards
   /sdd:beads-task-sync  Sync tasks.md with beads issues (forward/reverse)
   /sdd:help           This quick reference
+
+
+COMMON MISTAKES (do NOT use these)
+
+  /sdd:specify   ✗  Does not exist → use /speckit.specify
+  /sdd:plan      ✗  Does not exist → use /speckit.plan
+  /sdd:tasks     ✗  Does not exist → use /speckit.tasks
+  /sdd:implement ✗  Does not exist → use /speckit.implement
+
+  Rule: SDD commands are helpers (brainstorm, review, evolve).
+        Spec-kit commands are the workflow (specify, plan, implement).
