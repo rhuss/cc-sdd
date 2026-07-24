@@ -71,6 +71,14 @@ steps:
       fi
       printf "%s" "$SOURCE"
 
+  - id: resolve-python
+    type: shell
+    run: |
+      SOURCE="${SPEX_SOURCE:-$SPECKIT_WORKFLOW_DIR}"
+      RESOLVER="$SOURCE/scripts/spex-python.sh"
+      [ -x "$RESOLVER" ] || { echo "ERROR: Python resolver is unavailable: $RESOLVER" >&2; exit 1; }
+      "$RESOLVER"
+
   - id: detect-agent
     type: shell
     run: |
@@ -95,7 +103,8 @@ steps:
       PROFILE=".specify/spex-profile.yml"
       # Keeping the default on refresh preserves the user's prior request.
       if [ "$SECURITY" = "safe" ] && [ -f "$PROFILE" ]; then
-        SAVED_SECURITY=$(python3 -c 'import json,sys; print(json.load(open(sys.argv[1])).get("requested_security", ""))' "$PROFILE" 2>/dev/null || true)
+        PYTHON="{{ steps.resolve-python.output.stdout }}"
+        SAVED_SECURITY=$("$PYTHON" -c 'import json,sys; print(json.load(open(sys.argv[1])).get("requested_security", ""))' "$PROFILE" 2>/dev/null || true)
         [ -z "$SAVED_SECURITY" ] || SECURITY="$SAVED_SECURITY"
       fi
       case "$SECURITY" in
@@ -308,26 +317,25 @@ steps:
         - id: ext-interactive-prompt
           type: prompt
           prompt: >-
-            The following optional spex extensions are available. Reply with a
-            comma-separated list of the extensions you want to KEEP enabled.
-            Extensions not listed will be disabled.
+            Select the Spex extensions to enable. The default selection is 1,2,3;
+            extensions not selected will be disabled.
 
-            - spex-gates: Quality gates (spec, plan, code review)
-            - spex-worktrees: Git worktree isolation for feature branches
-            - spex-deep-review: Multi-perspective code review with 5 agents
-            - spex-teams: Experimental parallel implementation via agent teams (explicit opt-in)
-            - spex-collab: Collaborative PR workflows (reviewers, phases, triage)
-            - spex-detach: Strip spec artifacts for upstream PRs
+            1. spex-gates [default] - Spec, plan, and code quality gates
+            2. spex-deep-review [default; requires 1] - Five-perspective code review
+            3. spex-worktrees [default] - Isolated Git feature worktrees
+            4. spex-teams [optional; experimental; requires 1] - Parallel agent implementation
+            5. spex-collab [optional; requires 1] - PR reviewers, phases, and triage
+            6. spex-detach [optional] - Remove or archive spec artifacts for upstream PRs
 
-            Reply with extension names separated by commas (e.g. "spex-gates,spex-worktrees"),
-            or "all" to keep everything enabled.
+            Reply with numbers or names separated by commas (for example "1,2,3,5"),
+            "default" for 1,2,3, or "all" for every extension.
           integration: "{{ steps.detect-agent.output.stdout }}"
         - id: ext-interactive-fallback
           type: shell
           run: |
             # spex-teams is experimental and remains an explicit opt-in.
             RESPONSE="{{ steps.ext-interactive-prompt.output.stdout | default('') }}"
-            if [ -z "$RESPONSE" ]; then
+            if [ -z "$RESPONSE" ] || [ "$RESPONSE" = "default" ] || [ "$RESPONSE" = "recommended" ]; then
               RESPONSE="spex-gates,spex-deep-review,spex-worktrees"
               echo "No selection received; keeping recommended extensions." >&2
             elif [ "$RESPONSE" = "all" ]; then
@@ -338,7 +346,20 @@ steps:
             fi
             OPTIONAL_EXTS="spex-gates spex-worktrees spex-deep-review spex-teams spex-collab spex-detach"
             GATES_DEPENDENTS="spex-teams spex-deep-review spex-collab"
-            ENABLED_LIST=$(echo "$RESPONSE" | tr ',' ' ' | tr -d '"')
+            ENABLED_LIST=""
+            for selection in $(echo "$RESPONSE" | tr ',' ' ' | tr -d '"'); do
+              case "$selection" in
+                1) selection="spex-gates" ;;
+                2) selection="spex-deep-review" ;;
+                3) selection="spex-worktrees" ;;
+                4) selection="spex-teams" ;;
+                5) selection="spex-collab" ;;
+                6) selection="spex-detach" ;;
+                spex-gates|spex-deep-review|spex-worktrees|spex-teams|spex-collab|spex-detach) ;;
+                *) echo "ERROR: Unknown extension selection '$selection'. Use 1-6 or an extension name." >&2; exit 1 ;;
+              esac
+              ENABLED_LIST="$ENABLED_LIST $selection"
+            done
             # Enforce gates dependency
             gates_needed=false
             for dep in $GATES_DEPENDENTS; do
@@ -541,6 +562,7 @@ steps:
           run: |
             SOURCE="${SPEX_SOURCE:-$SPECKIT_WORKFLOW_DIR}"
             ROOT=$(pwd -P)
+            PYTHON="{{ steps.resolve-python.output.stdout }}"
             REQUESTED="{{ steps.validate-security.output.stdout }}"
             CONFIRMATION="{{ inputs.fallback_confirmation }}"
             CONFIGURATOR="$SOURCE/scripts/adapters/codex/configure-project.py"
@@ -548,8 +570,8 @@ steps:
 
             # A persisted safer fallback was already explicitly accepted.
             if [ "$CONFIRMATION" != "accept" ] && [ -f .specify/spex-profile.yml ]; then
-              SAVED=$(python3 -c 'import json; print(json.load(open(".specify/spex-profile.yml")).get("effective_security", ""))' 2>/dev/null || true)
-              SAVED_REQUESTED=$(python3 -c 'import json; print(json.load(open(".specify/spex-profile.yml")).get("requested_security", ""))' 2>/dev/null || true)
+              SAVED=$("$PYTHON" -c 'import json; print(json.load(open(".specify/spex-profile.yml")).get("effective_security", ""))' 2>/dev/null || true)
+              SAVED_REQUESTED=$("$PYTHON" -c 'import json; print(json.load(open(".specify/spex-profile.yml")).get("requested_security", ""))' 2>/dev/null || true)
               if [ "$SAVED_REQUESTED" = "$REQUESTED" ] && [ -n "$SAVED" ] && [ "$SAVED" != "$REQUESTED" ]; then
                 CONFIRMATION="accept"
               fi
@@ -558,7 +580,7 @@ steps:
             CONFIRM_ARGS=""
             [ "$CONFIRMATION" != "accept" ] || CONFIRM_ARGS="--confirm-fallback safe"
             set +e
-            RESULT=$(python3 "$CONFIGURATOR" configure --root "$ROOT" --security "$REQUESTED" $CONFIRM_ARGS)
+            RESULT=$("$PYTHON" "$CONFIGURATOR" configure --root "$ROOT" --security "$REQUESTED" $CONFIRM_ARGS)
             STATUS=$?
             set -e
             if [ "$STATUS" -eq 3 ]; then
@@ -624,6 +646,7 @@ steps:
       ROOT=$(pwd -P)
       trap 'rm -f .specify/.spex-security-result.json .specify/.spex-extension-selection' EXIT
       PROFILE_TOOL="$SOURCE/scripts/spex-init-profile.py"
+      PYTHON="{{ steps.resolve-python.output.stdout }}"
       HARNESS="{{ steps.detect-agent.output.stdout }}"
       REQUESTED="{{ steps.validate-security.output.stdout }}"
       SECURITY_RESULT=$(cat .specify/.spex-security-result.json)
@@ -632,28 +655,29 @@ steps:
       EXTENSIONS=$(cat .specify/.spex-extension-selection)
       EXPECTED=0
       if [ -f .specify/spex-profile.yml ]; then
-        EXPECTED=$(python3 "$PROFILE_TOOL" load --root "$ROOT" | jq -r '.config_revision')
+        EXPECTED=$("$PYTHON" "$PROFILE_TOOL" load --root "$ROOT" | jq -r '.config_revision')
       fi
 
       set --
       for extension in $EXTENSIONS; do
         set -- "$@" --extension "$extension"
       done
-      PROPOSAL=$(python3 "$PROFILE_TOOL" propose --root "$ROOT" --harness "$HARNESS" \
+      PROPOSAL=$("$PYTHON" "$PROFILE_TOOL" propose --root "$ROOT" --harness "$HARNESS" \
         "$@" --requested-security "$REQUESTED" --effective-security "$EFFECTIVE" \
         --capabilities-json "$CAPABILITIES") || exit 1
-      printf "%s" "$PROPOSAL" | python3 "$PROFILE_TOOL" validate --root "$ROOT" >/dev/null || exit 1
+      printf "%s" "$PROPOSAL" | "$PYTHON" "$PROFILE_TOOL" validate --root "$ROOT" >/dev/null || exit 1
 
       FALLBACK="decline"
       [ "$REQUESTED" = "$EFFECTIVE" ] || FALLBACK="accept"
-      printf "%s" "$PROPOSAL" | python3 "$PROFILE_TOOL" persist --root "$ROOT" \
+      printf "%s" "$PROPOSAL" | "$PYTHON" "$PROFILE_TOOL" persist --root "$ROOT" \
         --expected-revision "$EXPECTED" --fallback-confirmation "$FALLBACK"
 
   - id: setup-summary
     type: shell
     run: |
       PROFILE=.specify/spex-profile.yml
-      python3 - "$PROFILE" <<'PY'
+      PYTHON="{{ steps.resolve-python.output.stdout }}"
+      "$PYTHON" - "$PROFILE" <<'PY'
       import json, sys
       profile = json.load(open(sys.argv[1]))
       print("Spex initialization complete")

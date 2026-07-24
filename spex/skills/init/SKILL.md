@@ -5,9 +5,13 @@ description: Initialize or refresh Spex with harness-neutral extension and secur
 
 # Spex initialization
 
-After initialization, use `speckit.spex.ship` for the continuous validated
-workflow. Codex receives native hooks and project security configuration here;
-foreign presentation integrations are not installed for Codex.
+After initialization, do not assume that the full ship pipeline is the user's
+next action. In Codex, recommend `$speckit-spex-using-superpowers` to choose a
+workflow, or name the relevant concrete skill such as `$speckit-specify`,
+`$speckit-spex-brainstorm`, or `$speckit-spex-ship`. Never present internal
+dotted identifiers or slash-command syntax as Codex skill invocations. Codex
+receives native hooks and project security configuration here; foreign
+presentation integrations are not installed for Codex.
 
 Complete the workflow through its final report. A successful bootstrap alone is
 not completion.
@@ -31,8 +35,21 @@ When this is not a no-change refresh, use the active harness's supported choice
 surface, or a concise text prompt when no native choice surface exists, to ask
 for:
 
-1. Extensions to enable.
-2. Exactly one security profile: Safe, Autonomous, or YOLO.
+1. Extensions to enable. Always present the complete numbered menu and mark
+   defaults, optional entries, dependencies, and experimental entries:
+   - `1. spex-gates` — default
+   - `2. spex-deep-review` — default; requires gates
+   - `3. spex-worktrees` — default
+   - `4. spex-teams` — optional and experimental; requires gates
+   - `5. spex-collab` — optional; requires gates
+   - `6. spex-detach` — optional
+   Accept either numbers or extension names. Make `1,2,3` the clearly stated
+   default and offer `all` explicitly.
+2. Exactly one security profile. Present all choices before asking:
+   - `1. Safe` — default; preserves host approvals and sandbox policy
+   - `2. Autonomous` — enumerated non-destructive Spex operations in scope
+   - `3. YOLO` — non-destructive workspace operations in scope
+   Accept either the number or profile name.
 
 Explain the security boundary before applying it:
 
@@ -89,5 +106,8 @@ Read the persisted profile and report:
 - any confirmed fallback and unavailable/degraded capabilities
 - profile revision
 - whether the harness requires trust review, refresh, or a new session
+
+For Codex, finish with actual `$skill-name` examples and let the user choose
+the next workflow. Do not state that ship is automatically next.
 
 Do not advertise integrations that the active harness does not support.

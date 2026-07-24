@@ -54,6 +54,8 @@ assert_json_file "Codex bundled hooks" "$CODEX_HOOKS" && hooks_ready=true
 assert_json_file "Codex personal marketplace" "$CODEX_MARKETPLACE" && marketplace_ready=true
 
 if $manifest_ready; then
+  assert_jq "manifest uses the public cc-spex identity" \
+    '.name == "cc-spex"' "$CODEX_MANIFEST"
   assert_jq "manifest has a stable kebab-case identity" \
     '.name | type == "string" and test("^[a-z0-9]+(?:-[a-z0-9]+)*$")' "$CODEX_MANIFEST"
   assert_jq "manifest declares a semantic version" \

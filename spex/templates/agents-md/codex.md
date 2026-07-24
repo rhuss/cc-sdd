@@ -45,14 +45,15 @@ When done, clean up with:
 git worktree remove ../<feature-name>
 ```
 
-## Commands
+## Skills
 
-- `/spex:ship` - Full autonomous workflow (specify through verify)
-- `/spex:brainstorm` - Refine ideas into specifications
-- `/spex:help` - Quick reference for all commands
-- `/speckit-specify` - Create feature specification
-- `/speckit-plan` - Create implementation plan
-- `/speckit-tasks` - Generate task breakdown
-- `/speckit-implement` - Execute implementation
+- `$speckit-spex-using-superpowers` - Choose the appropriate Spex workflow
+- `$speckit-spex-ship` - Full autonomous workflow (specify through verify)
+- `$speckit-spex-brainstorm` - Refine ideas into specifications
+- `$speckit-spex-help` - Quick reference for all skills
+- `$speckit-specify` - Create feature specification
+- `$speckit-plan` - Create implementation plan
+- `$speckit-tasks` - Generate task breakdown
+- `$speckit-implement` - Execute implementation
 
 <!-- <<< spex managed Codex guidance <<< -->

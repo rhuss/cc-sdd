@@ -78,9 +78,15 @@ else
   fail "recommended profile disables unselected optional extensions"
 fi
 
-interactive_policy="$(yq -r '[.steps[] | select(.id == "select-extensions") | .cases.interactive[]? | (.run // ""), (.prompt // "")] | join("\n")' "$SETUP")"
+interactive_policy="$(yq -r '[.steps[] | select(.id == "select-extensions") | .cases.interactive[]? | .. | select(tag == "!!str")] | join("\n")' "$SETUP")"
 for extension in spex-teams spex-collab spex-detach; do
   assert_contains "$extension can be explicitly selected" "$interactive_policy" "$extension"
+done
+for marker in "[default]" "[optional" "1,2,3" "numbers or names"; do
+  assert_contains "interactive menu exposes $marker" "$interactive_policy" "$marker"
+done
+for number in 1 2 3 4 5 6; do
+  assert_contains "interactive menu accepts numeric option $number" "$interactive_policy" "$number)"
 done
 if grep -qi 'experimental' <<< "$interactive_policy" && grep -qF 'spex-teams' <<< "$interactive_policy"; then
   pass "Teams opt-in is described as experimental"
@@ -117,6 +123,7 @@ assert_not_contains "security choices omit legacy none profile" "$security_input
 # preserving both prior extension choices and requested security unless the
 # user explicitly changes them.
 setup_text="$(< "$SETUP")"
+assert_contains "setup resolves a tomllib-capable Python" "$setup_text" "steps.resolve-python.output.stdout"
 assert_contains "refresh reads the persisted initialization profile" "$setup_text" ".specify/spex-profile.yml"
 assert_contains "refresh preserves enabled extension selections" "$setup_text" "enabled_extensions"
 assert_contains "refresh preserves requested security" "$setup_text" "requested_security"
