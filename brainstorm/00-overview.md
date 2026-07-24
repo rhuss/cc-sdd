@@ -1,6 +1,6 @@
 # Brainstorm Overview
 
-Last updated: 2026-07-24
+Last updated: 2026-07-25
 
 ## Sessions
 
@@ -17,6 +17,7 @@ Last updated: 2026-07-24
 | 40 | 2026-07-15 | brainstorm-sync | active | 044 | - |
 | 41 | 2026-07-23 | smart-phase-splitting | active | - | - |
 | 42 | 2026-07-24 | first-class-codex-plugin | active | - | - |
+| 43 | 2026-07-25 | harness-aware-skill-syntax | active | - | - |
 
 ## Open Threads
 
@@ -60,6 +61,10 @@ Last updated: 2026-07-24
 - Should recovery spikes remain in the feature worktree or use disposable experimental worktrees? (from #42)
 - Which harness adaptations should be generation-time transforms versus adapter-owned files? (from #42)
 - What evidence should be required before Codex Teams graduates from experimental to recommended? (from #42)
+- What neutral source notation should represent skill references while keeping Markdown readable? (from #43)
+- Which packaged files should receive harness rendering versus retain literal cross-harness examples? (from #43)
+- Should Codex leakage validation allowlist genuine slash commands or reject only known Spex patterns? (from #43)
+- How should intentional Claude/Codex syntax comparisons be marked for validation? (from #43)
 
 ## Parked Ideas
 
