@@ -226,7 +226,11 @@ same harness preference, extension selection, and requested security:
 Explicit workflow inputs override stored values and update the declaration only
 after validation. Without explicit inputs, setup reuses it. Safe is recommended;
 Autonomous and YOLO request progressively broader project-local autonomy. The
-active harness adapter remains responsible for applying or safely degrading that
+Codex mapping merges `$skill` guidance into `AGENTS.md`. Its bounded YOLO profile
+allows workspace, temporary-directory, and shared Git metadata writes without
+prompts while command network access remains disabled. Safe leaves user Codex
+permission policy untouched.
+The active harness adapter remains responsible for applying or safely degrading that
 request.
 
 The former `permissions` workflow input remains available as a deprecated alias:
