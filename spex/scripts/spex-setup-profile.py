@@ -35,14 +35,20 @@ FIELDS = set(DEFAULT)
 
 
 class ProfileError(Exception):
+    """Report invalid or inaccessible setup profile data."""
+
     pass
 
 
 def fail(message: str) -> None:
+    """Raise a setup-profile validation error."""
+
     raise ProfileError(message)
 
 
 def root_path(raw: str) -> Path:
+    """Return a validated absolute project root."""
+
     root = Path(raw)
     if not root.is_absolute() or not root.is_dir():
         fail("--root must be an existing absolute directory")
@@ -50,6 +56,8 @@ def root_path(raw: str) -> Path:
 
 
 def normalize_extensions(value: Any) -> list[str]:
+    """Validate extensions, add dependencies, and return canonical order."""
+
     if not isinstance(value, list) or not value:
         fail("extensions must be a nonempty array")
     if any(not isinstance(item, str) or item not in EXTENSIONS for item in value):
@@ -60,13 +68,13 @@ def normalize_extensions(value: Any) -> list[str]:
     for extension, required in DEPENDENCIES.items():
         if extension in enabled:
             enabled.update(required)
-    order = list(DEFAULT["extensions"]) + [
-        "spex-teams", "spex-collab", "spex-detach"
-    ]
+    order = [*DEFAULT["extensions"], "spex-teams", "spex-collab", "spex-detach"]
     return [extension for extension in order if extension in enabled]
 
 
 def validate(value: Any) -> dict[str, Any]:
+    """Validate and canonicalize a complete setup declaration."""
+
     if not isinstance(value, dict):
         fail("configuration must be a JSON object")
     missing = FIELDS - set(value)
@@ -90,6 +98,8 @@ def validate(value: Any) -> dict[str, Any]:
 
 
 def read_json(stream) -> dict[str, Any]:
+    """Read a JSON object from a text stream with a stable error message."""
+
     try:
         return json.load(stream)
     except json.JSONDecodeError as error:
@@ -97,6 +107,8 @@ def read_json(stream) -> dict[str, Any]:
 
 
 def load(root: Path) -> dict[str, Any] | None:
+    """Load a stored declaration, or return None when it is absent."""
+
     path = root / PROFILE
     if not path.exists():
         return None
@@ -108,15 +120,21 @@ def load(root: Path) -> dict[str, Any] | None:
 
 
 def emit(value: dict[str, Any]) -> None:
+    """Write a canonical declaration to standard output."""
+
     json.dump(value, sys.stdout, indent=2)
     sys.stdout.write("\n")
 
 
 def parse_extension_argument(raw: str) -> list[str]:
+    """Parse a comma-separated workflow extension input."""
+
     return [item.strip() for item in raw.split(",") if item.strip()]
 
 
 def resolve(args: argparse.Namespace) -> None:
+    """Resolve explicit inputs over stored values and defaults."""
+
     root = root_path(args.root)
     stored = load(root) or DEFAULT
     security = args.security
@@ -135,6 +153,8 @@ def resolve(args: argparse.Namespace) -> None:
 
 
 def persist(args: argparse.Namespace) -> None:
+    """Atomically persist a validated declaration below the project root."""
+
     root = root_path(args.root)
     value = validate(read_json(sys.stdin))
     destination = root / PROFILE
@@ -157,11 +177,15 @@ def persist(args: argparse.Namespace) -> None:
 
 
 def validate_command(args: argparse.Namespace) -> None:
+    """Validate a declaration received on standard input."""
+
     root_path(args.root)
     emit(validate(read_json(sys.stdin)))
 
 
 def parser() -> argparse.ArgumentParser:
+    """Build the command-line parser."""
+
     result = argparse.ArgumentParser(description=__doc__)
     commands = result.add_subparsers(required=True)
     resolve_parser = commands.add_parser("resolve")
@@ -183,6 +207,8 @@ def parser() -> argparse.ArgumentParser:
 
 
 def main() -> int:
+    """Run the requested setup-profile operation."""
+
     args = parser().parse_args()
     args.handler(args)
     return 0
@@ -193,4 +219,4 @@ if __name__ == "__main__":
         raise SystemExit(main())
     except ProfileError as error:
         print(f"ERROR: {error}", file=sys.stderr)
-        raise SystemExit(1)
+        raise SystemExit(1) from error
