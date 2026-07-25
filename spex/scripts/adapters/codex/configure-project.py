@@ -136,7 +136,41 @@ def parse_unmanaged_toml(content: str) -> dict[str, Any]:
     return parsed
 
 
-def yolo_block() -> str:
+def git_common_dir(root: Path) -> Path:
+    try:
+        result = subprocess.run(
+            [
+                "git",
+                "-C",
+                str(root),
+                "rev-parse",
+                "--path-format=absolute",
+                "--git-common-dir",
+            ],
+            capture_output=True,
+            text=True,
+            timeout=5,
+            check=False,
+        )
+    except (OSError, subprocess.TimeoutExpired) as exc:
+        raise ConfigurationError(f"cannot resolve Git metadata for YOLO: {exc}") from exc
+    if result.returncode != 0 or not result.stdout.strip():
+        reason = result.stderr.strip() or "not a Git repository"
+        raise ConfigurationError(f"cannot resolve Git metadata for YOLO: {reason}")
+    common_dir = Path(result.stdout.strip())
+    if not common_dir.is_absolute():
+        common_dir = root / common_dir
+    try:
+        resolved = common_dir.resolve(strict=True)
+    except OSError as exc:
+        raise ConfigurationError(f"Git common directory is unavailable: {exc}") from exc
+    if not resolved.is_dir():
+        raise ConfigurationError("Git common directory is not a directory")
+    return resolved
+
+
+def yolo_block(common_dir: Path) -> str:
+    common_dir_toml = json.dumps(str(common_dir))
     return "\n".join(
         [
             BEGIN_MARKER,
@@ -147,13 +181,14 @@ def yolo_block() -> str:
             "",
             "[sandbox_workspace_write]",
             "network_access = false",
+            f"writable_roots = [{common_dir_toml}]",
             END_MARKER,
             "",
         ]
     )
 
 
-def desired_content(existing: str, effective: str) -> str:
+def desired_content(existing: str, effective: str, root: Path) -> str:
     unmanaged, had_managed_block = strip_managed_block(existing)
     if effective == "safe":
         if not had_managed_block:
@@ -165,7 +200,7 @@ def desired_content(existing: str, effective: str) -> str:
         separator = "" if not unmanaged else "\n"
         # Root-level security keys must precede any user-owned TOML tables;
         # TOML has no syntax for returning to the root after a table header.
-        return f"{yolo_block()}{separator}{unmanaged}"
+        return f"{yolo_block(git_common_dir(root))}{separator}{unmanaged}"
     raise ConfigurationError(f"unsupported effective security level: {effective}")
 
 
@@ -298,7 +333,7 @@ def configure(args: argparse.Namespace) -> int:
 
     agents_path = args.root / "AGENTS.md"
     existing_guidance = agents_path.read_text(encoding="utf-8") if agents_path.exists() else ""
-    updated = desired_content(existing, effective)
+    updated = desired_content(existing, effective, args.root)
     updated_guidance = desired_guidance(existing_guidance, load_guidance_template())
     changed = updated != existing
     guidance_changed = updated_guidance != existing_guidance
