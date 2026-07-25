@@ -230,6 +230,7 @@ Codex mapping merges `$skill` guidance into `AGENTS.md`. Its bounded YOLO profil
 allows workspace, temporary-directory, and shared Git metadata writes without
 prompts while command network access remains disabled. Safe leaves user Codex
 permission policy untouched.
+
 The active harness adapter remains responsible for applying or safely degrading that
 request.
 
