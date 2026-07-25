@@ -1,0 +1,18 @@
+{
+  "name": "cc-spex",
+  "version": "0.1.0",
+  "description": "Discover and initialize Spex specification-driven workflows for Codex.",
+  "author": {
+    "name": "cc-spex maintainers"
+  },
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "cc-spex",
+    "shortDescription": "Initialize Spex workflows from Codex.",
+    "longDescription": "Adds an explicit initialization skill that delegates project setup to the canonical Spex workflow.",
+    "developerName": "cc-spex maintainers",
+    "category": "Productivity",
+    "capabilities": ["skills"],
+    "defaultPrompt": "Initialize Spex in this project with the recommended Codex defaults."
+  }
+}

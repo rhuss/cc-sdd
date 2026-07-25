@@ -1,0 +1,20 @@
+{
+  "name": "cc-spex",
+  "interface": {
+    "displayName": "cc-spex"
+  },
+  "plugins": [
+    {
+      "name": "cc-spex",
+      "source": {
+        "source": "local",
+        "path": "./plugins/cc-spex"
+      },
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_INSTALL"
+      },
+      "category": "Productivity"
+    }
+  ]
+}

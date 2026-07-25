@@ -166,6 +166,10 @@ flowchart TD
 
 ## Quick Start
 
+Codex users can add this repository as a marketplace, install `cc-spex` from
+`/plugins`, start a new session, and invoke `$cc-spex-init`. This thin plugin
+only provides discovery; initialization delegates to the canonical setup workflow.
+
 **Prerequisites:**
 1. [Claude Code](https://docs.anthropic.com/en/docs/claude-code) installed
 2. [Spec-Kit](https://github.com/github/spec-kit) installed (`uv tool install specify-cli --from git+https://github.com/github/spec-kit.git` or see their docs)

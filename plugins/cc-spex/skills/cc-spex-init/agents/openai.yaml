@@ -1,0 +1,4 @@
+interface:
+  display_name: "Initialize Spex"
+  short_description: "Install or refresh Spex workflows in this project"
+  default_prompt: "Initialize Spex in this project using the recommended Codex defaults."

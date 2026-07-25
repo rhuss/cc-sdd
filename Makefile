@@ -17,6 +17,9 @@ test-setup-profile:
 test-codex-project:
 	python3 -m unittest tests/test_codex_project.py
 
+test-cc-spex-plugin:
+	bash tests/test_cc_spex_plugin.sh
+
 test-workflow-setup:
 	@tests/test_workflow_setup.sh
 
