@@ -20,6 +20,10 @@ inputs:
     type: string
     default: ""
     prompt: "Requested security (safe, autonomous, yolo, or interactive)"
+  permissions:
+    type: string
+    default: ""
+    prompt: "Deprecated security alias (none, standard, or yolo)"
 
 steps:
   - id: check-version
@@ -88,9 +92,13 @@ steps:
       INTEGRATION="{{ inputs.integration }}"
       EXTENSIONS="{{ inputs.extensions }}"
       SECURITY="{{ inputs.security }}"
+      LEGACY_PERMISSIONS="{{ inputs.permissions }}"
       [ -z "$INTEGRATION" ] || set -- "$@" --harness "$INTEGRATION"
       case "$EXTENSIONS" in ""|interactive|recommended|all) ;; *) set -- "$@" --extensions "$EXTENSIONS" ;; esac
       case "$SECURITY" in ""|interactive) ;; *) set -- "$@" --security "$SECURITY" ;; esac
+      if [ -z "$SECURITY" ] && [ -n "$LEGACY_PERMISSIONS" ]; then
+        set -- "$@" --legacy-permissions "$LEGACY_PERMISSIONS"
+      fi
       "$TOOL" "$@"
 
   - id: detect-agent
@@ -386,8 +394,16 @@ steps:
     type: shell
     run: |
       INPUT="{{ inputs.security }}"
+      LEGACY="{{ inputs.permissions }}"
       if [ -n "$INPUT" ]; then
         printf "%s" "$INPUT"
+      elif [ -n "$LEGACY" ]; then
+        case "$LEGACY" in
+          none) printf "safe" ;;
+          standard) printf "autonomous" ;;
+          yolo) printf "yolo" ;;
+          *) echo "ERROR: Unknown deprecated permissions '$LEGACY'. Use none, standard, or yolo" >&2; exit 1 ;;
+        esac
       elif [ -f .specify/spex.json ]; then
         printf '%s' '{{ steps.resolve-request.output.stdout }}' | jq -r '.security'
       else

@@ -6,6 +6,10 @@
 
 **Rationale**: `jq` is already a setup dependency, JSON has an unambiguous standard parser, and Python 3.9 can read and write it without additional modules. This avoids adding `yq`, PyYAML, or a partial YAML implementation.
 
+**Plan deviation**: Early discussion used `.specify/spex.yml` as an illustrative
+name. The implementation deliberately standardizes on JSON for the portability
+reason above; this is a conscious contract choice rather than an oversight.
+
 **Alternatives considered**: YAML requires another parser; TOML is not readable through Python's standard library on macOS Python 3.9; `.specify/init-options.json` is owned by Spec-Kit.
 
 ## Ownership and persistence

@@ -72,6 +72,9 @@ A Claude plugin maintainer can install and debug the plugin directly from the so
 ### Edge Cases
 
 - Existing repositories may contain legacy setup inputs but no durable Spex project configuration.
+- Existing automation may still pass the deprecated `permissions` input. Setup
+  must map `none`, `standard`, and `yolo` to the new security vocabulary, with
+  an explicit `security` input taking precedence.
 - A configuration may name an unknown extension, omit the mandatory core extension, or contain an unsupported security value.
 - Setup may be interrupted after extensions change but before harness configuration is generated.
 - A repository may intentionally track a root `AGENTS.md` while ignoring generated `.agents/` contents.

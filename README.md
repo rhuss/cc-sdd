@@ -229,6 +229,10 @@ Autonomous and YOLO request progressively broader project-local autonomy. The
 active harness adapter remains responsible for applying or safely degrading that
 request.
 
+The former `permissions` workflow input remains available as a deprecated alias:
+`none` maps to `safe`, `standard` maps to `autonomous`, and `yolo` remains
+`yolo`. When both inputs are supplied, `security` takes precedence.
+
 Claude plugin development remains source-transparent: `make install` installs
 directly from the checkout without a materialization step.
 
