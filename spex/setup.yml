@@ -74,7 +74,7 @@ steps:
   - id: resolve-request
     type: shell
     run: |
-      SOURCE="{{ steps.locate-source.output.stdout }}"
+      SOURCE="{{ steps.validate-source.output.stdout }}"
       TOOL="$SOURCE/scripts/spex-setup-profile.py"
       [ -x "$TOOL" ] || { echo "ERROR: setup profile utility unavailable: $TOOL" >&2; exit 1; }
       set -- resolve --root "$(pwd)"
@@ -375,7 +375,7 @@ steps:
         all) SELECTION="spex-gates,spex-worktrees,spex-deep-review,spex-teams,spex-collab,spex-detach" ;;
         *) SELECTION="$MODE" ;;
       esac
-      SOURCE="{{ steps.locate-source.output.stdout }}"
+      SOURCE="{{ steps.validate-source.output.stdout }}"
       "$SOURCE/scripts/spex-setup-profile.py" resolve --root "$(pwd)" \
         --extensions "spex,$SELECTION" | jq -r '.extensions | join(",")'
 
@@ -436,7 +436,7 @@ steps:
   - id: persist-request
     type: shell
     run: |
-      SOURCE="{{ steps.locate-source.output.stdout }}"
+      SOURCE="{{ steps.validate-source.output.stdout }}"
       TOOL="$SOURCE/scripts/spex-setup-profile.py"
       HARNESS=$(printf '%s' '{{ steps.resolve-request.output.stdout }}' | jq -r '.harness')
       "$TOOL" resolve --root "$(pwd)" --harness "$HARNESS" \
@@ -693,4 +693,3 @@ steps:
       LATEST="${LATEST_TAG#v}"
       echo "Latest spex release: $LATEST" >&2
       printf "%s" "$LATEST"
-
