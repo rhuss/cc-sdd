@@ -1,0 +1,21 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cc-spex.dev/contracts/spex-project-config.schema.json",
+  "title": "Spex Project Configuration",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "harness", "extensions", "security"],
+  "properties": {
+    "schema_version": { "const": 1 },
+    "harness": { "enum": ["auto", "claude", "codex", "opencode"] },
+    "extensions": {
+      "type": "array",
+      "uniqueItems": true,
+      "contains": { "const": "spex" },
+      "items": {
+        "enum": ["spex", "spex-gates", "spex-worktrees", "spex-deep-review", "spex-teams", "spex-collab", "spex-detach"]
+      }
+    },
+    "security": { "enum": ["safe", "autonomous", "yolo"] }
+  }
+}
