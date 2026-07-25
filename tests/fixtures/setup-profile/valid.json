@@ -1,0 +1,6 @@
+{
+  "schema_version": 1,
+  "harness": "codex",
+  "extensions": ["spex", "spex-gates", "spex-worktrees"],
+  "security": "autonomous"
+}
