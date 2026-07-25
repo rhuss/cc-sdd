@@ -245,8 +245,10 @@ def main():
     ship_type, ship_content = parse_result(ship_result)
     if ship_type == 'deny':
         denies.append(ship_content)
-    elif ship_type == 'context':
-        contexts.append(ship_content)
+    # Codex renders successful PreToolUse systemMessage responses in the tool
+    # transcript. The ship reminder is advisory and fires before every
+    # non-Skill tool, so forwarding it creates repetitive user-visible noise.
+    # Stage ordering remains enforced by the deny response above.
 
     # Gate 4: Verification reminder
     command = tool_input.get('command', '')
