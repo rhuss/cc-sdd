@@ -1,4 +1,4 @@
-.PHONY: validate install uninstall reinstall check-upstream test-hook test-install test-install-remote release migrate sync-scripts sync-scripts-check help
+.PHONY: validate install uninstall reinstall check-upstream test-hook test-install test-install-remote test-setup-profile test-workflow-setup test-generated-trees release migrate sync-scripts sync-scripts-check help
 
 MARKETPLACE := spex-plugin-development
 PLUGIN := spex@$(MARKETPLACE)
@@ -10,6 +10,15 @@ OLD_PLUGIN := sdd@$(OLD_MARKETPLACE)
 validate:
 	claude plugin validate ./
 	claude plugin validate ./spex/
+
+test-setup-profile:
+	python3 -m unittest tests/test_setup_profile.py
+
+test-workflow-setup:
+	@tests/test_workflow_setup.sh
+
+test-generated-trees:
+	@tests/test_generated_trees.sh
 
 migrate:
 	@# Remove old sdd plugin and marketplace from pre-3.0.0 installations

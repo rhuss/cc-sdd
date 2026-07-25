@@ -10,16 +10,16 @@ workflow:
 inputs:
   integration:
     type: string
-    default: "auto"
+    default: ""
     prompt: "Agent harness (auto, claude, codex, opencode)"
   extensions:
     type: string
-    default: "all"
-    prompt: "Extensions to enable (all, interactive, or comma-separated list)"
-  permissions:
+    default: ""
+    prompt: "Extensions to enable (recommended, all, interactive, or comma-separated list)"
+  security:
     type: string
-    default: "standard"
-    prompt: "Permission level (standard, yolo, none)"
+    default: ""
+    prompt: "Requested security (safe, autonomous, yolo, or interactive)"
 
 steps:
   - id: check-version
@@ -78,10 +78,27 @@ steps:
       echo "or ensure network access to github.com is available." >&2
       exit 1
 
+  - id: resolve-request
+    type: shell
+    run: |
+      SOURCE="{{ steps.locate-source.output.stdout }}"
+      TOOL="$SOURCE/scripts/spex-setup-profile.py"
+      [ -x "$TOOL" ] || { echo "ERROR: setup profile utility unavailable: $TOOL" >&2; exit 1; }
+      set -- resolve --root "$(pwd)"
+      INTEGRATION="{{ inputs.integration }}"
+      EXTENSIONS="{{ inputs.extensions }}"
+      SECURITY="{{ inputs.security }}"
+      [ -z "$INTEGRATION" ] || set -- "$@" --harness "$INTEGRATION"
+      case "$EXTENSIONS" in ""|interactive|recommended|all) ;; *) set -- "$@" --extensions "$EXTENSIONS" ;; esac
+      case "$SECURITY" in ""|interactive) ;; *) set -- "$@" --security "$SECURITY" ;; esac
+      "$TOOL" "$@"
+
   - id: detect-agent
     type: shell
     run: |
+      REQUEST='{{ steps.resolve-request.output.stdout }}'
       INPUT="{{ inputs.integration }}"
+      [ -n "$INPUT" ] || INPUT=$(printf '%s' "$REQUEST" | jq -r '.harness')
       case "$INPUT" in
         auto) ;;
         claude|codex|opencode) printf "%s" "$INPUT"; exit 0 ;;
@@ -218,10 +235,26 @@ steps:
       specify extension add "$EXT_PATH" $DEV_FLAG
       specify extension disable "$EXT" 2>/dev/null || true
 
+  - id: extension-mode
+    type: shell
+    run: |
+      INPUT="{{ inputs.extensions }}"
+      if [ -n "$INPUT" ]; then
+        printf "%s" "$INPUT"
+      elif [ -f .specify/spex.json ]; then
+        printf '%s' '{{ steps.resolve-request.output.stdout }}' | jq -r '.extensions | join(",")'
+      else
+        printf "interactive"
+      fi
+
   - id: select-extensions
     type: switch
-    expression: "{{ inputs.extensions }}"
+    expression: "{{ steps.extension-mode.output.stdout }}"
     cases:
+      recommended:
+        - id: ext-recommended-noop
+          type: shell
+          run: printf "recommended"
       all:
         - id: ext-all-noop
           type: shell
@@ -288,7 +321,7 @@ steps:
       - id: ext-filter
         type: shell
         run: |
-          SELECTION="{{ inputs.extensions }}"
+          SELECTION="{{ steps.extension-mode.output.stdout }}"
           OPTIONAL_EXTS="spex-gates spex-worktrees spex-deep-review spex-teams spex-collab spex-detach"
           GATES_DEPENDENTS="spex-teams spex-deep-review spex-collab"
           ENABLED_LIST=$(echo "$SELECTION" | tr ',' ' ')
@@ -329,6 +362,84 @@ steps:
             fi
           done
           printf "ok"
+
+  - id: selected-extensions
+    type: shell
+    run: |
+      MODE="{{ steps.extension-mode.output.stdout }}"
+      case "$MODE" in
+        interactive)
+          SELECTION="{{ steps.ext-interactive-prompt.output.stdout | default('') }}"
+          SELECTION=$(printf '%s' "$SELECTION" | tr -d '"')
+          [ -n "$SELECTION" ] || SELECTION="spex-gates,spex-worktrees,spex-deep-review"
+          [ "$SELECTION" != "all" ] || SELECTION="spex-gates,spex-worktrees,spex-deep-review,spex-teams,spex-collab,spex-detach"
+          ;;
+        recommended) SELECTION="spex-gates,spex-worktrees,spex-deep-review" ;;
+        all) SELECTION="spex-gates,spex-worktrees,spex-deep-review,spex-teams,spex-collab,spex-detach" ;;
+        *) SELECTION="$MODE" ;;
+      esac
+      SOURCE="{{ steps.locate-source.output.stdout }}"
+      "$SOURCE/scripts/spex-setup-profile.py" resolve --root "$(pwd)" \
+        --extensions "spex,$SELECTION" | jq -r '.extensions | join(",")'
+
+  - id: security-mode
+    type: shell
+    run: |
+      INPUT="{{ inputs.security }}"
+      if [ -n "$INPUT" ]; then
+        printf "%s" "$INPUT"
+      elif [ -f .specify/spex.json ]; then
+        printf '%s' '{{ steps.resolve-request.output.stdout }}' | jq -r '.security'
+      else
+        printf "interactive"
+      fi
+
+  - id: select-security
+    type: switch
+    expression: "{{ steps.security-mode.output.stdout }}"
+    cases:
+      interactive:
+        - id: security-interactive-prompt
+          type: prompt
+          prompt: >-
+            Select requested project security. Safe (recommended) preserves the
+            host policy. Autonomous reduces prompts for enumerated Spex project
+            operations. YOLO requests the broadest project-local autonomy the
+            active harness can safely express. Reply: safe, autonomous, or yolo.
+          integration: "{{ steps.detect-agent.output.stdout }}"
+    default:
+      - id: security-noop
+        type: shell
+        run: printf "ok"
+
+  - id: selected-security
+    type: shell
+    run: |
+      MODE="{{ steps.security-mode.output.stdout }}"
+      if [ "$MODE" = "interactive" ]; then
+        SELECTED="{{ steps.security-interactive-prompt.output.stdout | default('safe') }}"
+        SELECTED=$(printf '%s' "$SELECTED" | tr -d '"[:space:]')
+        [ -n "$SELECTED" ] || SELECTED="safe"
+      else
+        SELECTED="$MODE"
+      fi
+      SELECTED=$(printf '%s' "$SELECTED" | tr -d '"[:space:]')
+      case "$SELECTED" in safe|autonomous|yolo) printf "%s" "$SELECTED" ;;
+        *) echo "ERROR: Unknown security '$SELECTED'. Use safe, autonomous, or yolo" >&2; exit 1 ;;
+      esac
+
+  - id: persist-request
+    type: shell
+    run: |
+      SOURCE="{{ steps.locate-source.output.stdout }}"
+      TOOL="$SOURCE/scripts/spex-setup-profile.py"
+      HARNESS=$(printf '%s' '{{ steps.resolve-request.output.stdout }}' | jq -r '.harness')
+      "$TOOL" resolve --root "$(pwd)" --harness "$HARNESS" \
+        --extensions "{{ steps.selected-extensions.output.stdout }}" \
+        --security "{{ steps.selected-security.output.stdout }}" |
+        "$TOOL" persist --root "$(pwd)" >/dev/null
+      echo "Saved requested setup to .specify/spex.json" >&2
+      printf "ok"
 
   - id: adapt-commands
     type: shell
@@ -457,7 +568,7 @@ steps:
 
   - id: configure-permissions
     type: if
-    condition: "{{ inputs.permissions }} != 'none'"
+    condition: "{{ steps.selected-security.output.stdout }} != 'safe'"
     then:
       - id: permissions-dispatch
         type: switch
@@ -467,7 +578,7 @@ steps:
             - id: claude-permissions
               type: shell
               run: |
-                LEVEL="{{ inputs.permissions }}"
+                LEVEL="{{ steps.selected-security.output.stdout }}"
                 SETTINGS=".claude/settings.json"
                 mkdir -p .claude
 
@@ -526,12 +637,22 @@ steps:
           sed -i.bak '/.specify\/.spex-phase/d;/.specify\/.spex-state/d;/.claude\/skills\//d;/.claude\/settings\.local\.json/d' "$GITIGNORE" && rm -f "$GITIGNORE.bak"
         fi
       fi
-      [ -f "$GITIGNORE" ] && grep -qF "$SENTINEL" "$GITIGNORE" 2>/dev/null && exit 0
+      if [ -f "$GITIGNORE" ] && grep -qF "$SENTINEL" "$GITIGNORE" 2>/dev/null; then
+        for pattern in '**/.claude/' '**/.agents/' '**/.codex/' '**/.specify/**' \
+          '!**/.specify/spex.json' '!**/.specify/memory/' \
+          '!**/.specify/memory/constitution.md'; do
+          grep -qxF -- "$pattern" "$GITIGNORE" 2>/dev/null || printf '%s\n' "$pattern" >> "$GITIGNORE"
+        done
+        exit 0
+      fi
       cat >> "$GITIGNORE" << 'GIEOF'
 
       # spex: generated/local files (only constitution is committed)
       **/.claude/
+      **/.agents/
+      **/.codex/
       **/.specify/**
+      !**/.specify/spex.json
       !**/.specify/memory/
       !**/.specify/memory/constitution.md
       GIEOF

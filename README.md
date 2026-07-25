@@ -204,11 +204,33 @@ specify workflow run https://github.com/rhuss/cc-spex/releases/latest/download/s
 
 # Customize with inputs
 specify workflow run spex/setup.yml -i "extensions=spex-gates,spex-worktrees"
-specify workflow run spex/setup.yml -i "permissions=yolo"
+specify workflow run spex/setup.yml -i "security=autonomous"
 specify workflow run spex/setup.yml -i "integration=codex"
 ```
 
 The workflow auto-detects the agent harness, installs extensions, and applies per-agent configuration (including command adaptation, see below). Prerequisites: `specify` CLI (>= 0.7.4), `git`, and `jq`. The existing Claude Code plugin will delegate to this workflow when available, falling back to direct init otherwise.
+
+The first successful setup records requested project intent in
+`.specify/spex.json`. Commit this file so teammates and later refreshes use the
+same harness preference, extension selection, and requested security:
+
+```json
+{
+  "schema_version": 1,
+  "harness": "auto",
+  "extensions": ["spex", "spex-gates", "spex-worktrees", "spex-deep-review"],
+  "security": "safe"
+}
+```
+
+Explicit workflow inputs override stored values and update the declaration only
+after validation. Without explicit inputs, setup reuses it. Safe is recommended;
+Autonomous and YOLO request progressively broader project-local autonomy. The
+active harness adapter remains responsible for applying or safely degrading that
+request.
+
+Claude plugin development remains source-transparent: `make install` installs
+directly from the checkout without a materialization step.
 
 ### Neutral Command Vocabulary
 
