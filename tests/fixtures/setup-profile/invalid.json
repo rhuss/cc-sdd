@@ -1,0 +1,6 @@
+{
+  "schema_version": 1,
+  "harness": "unknown",
+  "extensions": ["spex-teams"],
+  "security": "unsafe"
+}
