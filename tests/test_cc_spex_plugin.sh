@@ -21,4 +21,18 @@ if grep -Eq '`/[^` ]+' "$SKILL/SKILL.md"; then
   echo "FAIL: Codex skill advertises slash invocation" >&2
   exit 1
 fi
+
+help="$($SKILL/scripts/bootstrap.sh --help)"
+grep -q 'codex (default)' <<<"$help"
+grep -q 'recommended (default)' <<<"$help"
+grep -q 'safe (default)' <<<"$help"
+
+if "$SKILL/scripts/bootstrap.sh" --unknown >/dev/null 2>&1; then
+  echo "FAIL: unknown option was accepted" >&2
+  exit 1
+fi
+if "$SKILL/scripts/bootstrap.sh" --extensions spex-unknown >/dev/null 2>&1; then
+  echo "FAIL: unknown extension was accepted" >&2
+  exit 1
+fi
 echo "PASS: cc-spex delegates to workflow with Codex syntax and options"

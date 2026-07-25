@@ -37,6 +37,22 @@ done
 
 case "$integration" in codex|claude|opencode|auto) ;; *) echo "ERROR: invalid integration" >&2; exit 2 ;; esac
 case "$security" in safe|autonomous|yolo|interactive) ;; *) echo "ERROR: invalid security" >&2; exit 2 ;; esac
+case "$extensions" in
+  recommended|all|interactive) ;;
+  *)
+    old_ifs=$IFS
+    IFS=,
+    set -- $extensions
+    IFS=$old_ifs
+    [ "$#" -gt 0 ] || { echo "ERROR: invalid extensions" >&2; exit 2; }
+    for extension in "$@"; do
+      case "$extension" in
+        spex|spex-gates|spex-worktrees|spex-deep-review|spex-teams|spex-collab|spex-detach) ;;
+        *) echo "ERROR: invalid extension: $extension" >&2; exit 2 ;;
+      esac
+    done
+    ;;
+esac
 
 command -v specify >/dev/null 2>&1 || {
   echo "ERROR: specify CLI is required." >&2
