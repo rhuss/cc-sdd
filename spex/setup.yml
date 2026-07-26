@@ -409,8 +409,8 @@ steps:
           prompt: >-
             Select requested project security. Safe (recommended) preserves the
             host policy. Autonomous reduces prompts for enumerated Spex project
-            operations. YOLO requests the broadest project-local autonomy the
-            active harness can safely express. Reply: safe, autonomous, or yolo.
+            operations. YOLO requests unrestricted filesystem and network access
+            without approval prompts. Reply: safe, autonomous, or yolo.
           integration: "{{ steps.detect-agent.output.stdout }}"
     default:
       - id: security-noop

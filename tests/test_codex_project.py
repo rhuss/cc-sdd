@@ -13,7 +13,7 @@ TOOL = ROOT / "spex/scripts/configure-codex-project.py"
 
 
 class CodexProjectTests(unittest.TestCase):
-    """Verify prompt-free bounded configuration and ownership behavior."""
+    """Verify security-mode configuration and ownership behavior."""
 
     def run_tool(self, root, security="yolo"):
         """Run the configurator and require a successful JSON response."""
@@ -24,8 +24,21 @@ class CodexProjectTests(unittest.TestCase):
         self.assertEqual(result.returncode, 0, result.stderr or result.stdout)
         return json.loads(result.stdout)
 
-    def test_yolo_covers_linked_worktree_git_without_network_or_prompts(self):
-        """YOLO writes workspace and shared Git metadata but fails closed beyond them."""
+    def test_yolo_is_unrestricted_without_prompts(self):
+        """YOLO uses Codex's unrestricted sandbox and never asks for approval."""
+        with tempfile.TemporaryDirectory() as raw:
+            root = Path(raw)
+            payload = self.run_tool(root)
+            config = (root / ".codex/config.toml").read_text()
+            self.assertEqual(payload["security"], "yolo")
+            self.assertEqual(payload["permissions"], "danger-full-access")
+            self.assertIn('sandbox_mode = "danger-full-access"', config)
+            self.assertIn('approval_policy = "never"', config)
+            self.assertNotIn("[permissions.spex-project", config)
+            self.assertNotIn("enabled = false", config)
+
+    def test_autonomous_covers_linked_worktree_git_with_bounded_permissions(self):
+        """Autonomous bounds writes while auto-reviewing requests beyond them."""
         with tempfile.TemporaryDirectory() as raw:
             repository = Path(raw) / "repository"
             worktree = Path(raw) / "feature"
@@ -34,10 +47,12 @@ class CodexProjectTests(unittest.TestCase):
             subprocess.run(["git", "-C", str(repository), "config", "user.email", "test@example.invalid"], check=True)
             subprocess.run(["git", "-C", str(repository), "commit", "--allow-empty", "-q", "-m", "initial"], check=True)
             subprocess.run(["git", "-C", str(repository), "worktree", "add", "-q", "-b", "feature", str(worktree)], check=True)
-            payload = self.run_tool(worktree)
+            payload = self.run_tool(worktree, "autonomous")
             config = (worktree / ".codex/config.toml").read_text()
-            self.assertEqual(payload["security"], "yolo")
-            self.assertIn('approval_policy = "never"', config)
+            self.assertEqual(payload["security"], "autonomous")
+            self.assertEqual(payload["permissions"], "spex-project")
+            self.assertIn('approval_policy = "on-request"', config)
+            self.assertIn('approvals_reviewer = "auto_review"', config)
             self.assertIn(json.dumps(str((repository / ".git").resolve())) + ' = "write"', config)
             self.assertIn("enabled = false", config)
 
