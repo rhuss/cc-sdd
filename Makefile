@@ -14,6 +14,9 @@ validate:
 test-setup-profile:
 	python3 -m unittest tests/test_setup_profile.py
 
+test-codex-project:
+	python3 -m unittest tests/test_codex_project.py
+
 test-workflow-setup:
 	@tests/test_workflow_setup.sh
 
