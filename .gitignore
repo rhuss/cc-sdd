@@ -72,6 +72,11 @@ build/
 # spex: generated/local files (only constitution is committed)
 **/.claude/
 **/.agents/
+!/.agents/
+/.agents/*
+!/.agents/plugins/
+/.agents/plugins/*
+!/.agents/plugins/marketplace.json
 **/.codex/
 **/.specify/**
 !**/.specify/spex.json
