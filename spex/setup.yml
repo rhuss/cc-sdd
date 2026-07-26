@@ -504,8 +504,12 @@ steps:
           type: shell
           run: |
             SOURCE="${SPEX_SOURCE:-$SPECKIT_WORKFLOW_DIR}"
-            "$SOURCE/scripts/configure-codex-project.py" --root "$(pwd)" \
-              --security "{{ steps.selected-security.output.stdout }}" >/dev/null
+            if ! RESULT=$("$SOURCE/scripts/configure-codex-project.py" --root "$(pwd)" \
+              --security "{{ steps.selected-security.output.stdout }}"); then
+              printf '%s\n' "$RESULT" >&2
+              echo "ERROR: Codex project configuration was refused." >&2
+              exit 1
+            fi
             echo "Codex project guidance and permissions configured" >&2
       opencode:
         - id: opencode-plugin
