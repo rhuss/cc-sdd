@@ -67,7 +67,13 @@ cleanup() {
 }
 trap cleanup EXIT HUP INT TERM
 
-if [ -f "spex/setup.yml" ] && [ -d "spex/extensions/spex" ]; then
+if [ -n "${SPEX_SOURCE:-}" ]; then
+  [ -f "$SPEX_SOURCE/setup.yml" ] && [ -d "$SPEX_SOURCE/extensions/spex" ] || {
+    echo "ERROR: SPEX_SOURCE does not contain a Spex source tree: $SPEX_SOURCE" >&2
+    exit 1
+  }
+  source_dir=$(cd "$SPEX_SOURCE" && pwd -P)
+elif [ -f "spex/setup.yml" ] && [ -d "spex/extensions/spex" ]; then
   source_dir=$(cd spex && pwd -P)
 else
   temporary=$(mktemp -d "${TMPDIR:-/tmp}/cc-spex-init-XXXXXX")
