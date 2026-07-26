@@ -5,8 +5,10 @@ description: Install or refresh Spex specification-driven workflows in the curre
 
 # Initialize Spex
 
-Run the bundled `scripts/bootstrap.sh` from this skill directory. Pass through
-any arguments supplied after `$cc-spex-init`.
+Resolve the bundled `scripts/bootstrap.sh` path from this skill directory, but
+execute it while keeping the working directory at the project root where the
+user invoked `$cc-spex-init`. Do not `cd` into the skill or plugin directory.
+Pass through any arguments supplied after `$cc-spex-init`.
 
 With no arguments, use these non-interactive defaults:
 

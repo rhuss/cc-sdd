@@ -5,7 +5,8 @@ REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd -P)"
 
 tracked_generated() {
   git -C "$1" ls-files | awk '
-    /^\.agents\// || /^\.codex\// || /^\.claude\/skills\// { print }
+    /^\.agents\// && $0 != ".agents/plugins/marketplace.json" { print }
+    /^\.codex\// || /^\.claude\/skills\// { print }
   '
 }
 

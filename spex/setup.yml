@@ -143,9 +143,7 @@ steps:
       if [ -d ".specify/extensions/$EXT" ]; then
         echo "y" | specify extension remove "$EXT" >/dev/null 2>&1 || true
       fi
-      DEV_FLAG=""
-      case "$SOURCE" in /tmp/*|"${TMPDIR:-/tmp}"/*) ;; *) DEV_FLAG="--dev" ;; esac
-      specify extension add "$EXT_PATH" $DEV_FLAG
+      specify extension add "$EXT_PATH" --dev
 
   - id: install-ext-spex-gates
     type: shell
@@ -157,9 +155,7 @@ steps:
       if [ -d ".specify/extensions/$EXT" ]; then
         echo "y" | specify extension remove "$EXT" >/dev/null 2>&1 || true
       fi
-      DEV_FLAG=""
-      case "$SOURCE" in /tmp/*|"${TMPDIR:-/tmp}"/*) ;; *) DEV_FLAG="--dev" ;; esac
-      specify extension add "$EXT_PATH" $DEV_FLAG
+      specify extension add "$EXT_PATH" --dev
 
   - id: install-ext-spex-worktrees
     type: shell
@@ -171,9 +167,7 @@ steps:
       if [ -d ".specify/extensions/$EXT" ]; then
         echo "y" | specify extension remove "$EXT" >/dev/null 2>&1 || true
       fi
-      DEV_FLAG=""
-      case "$SOURCE" in /tmp/*|"${TMPDIR:-/tmp}"/*) ;; *) DEV_FLAG="--dev" ;; esac
-      specify extension add "$EXT_PATH" $DEV_FLAG
+      specify extension add "$EXT_PATH" --dev
 
   - id: install-ext-spex-deep-review
     type: shell
@@ -185,9 +179,7 @@ steps:
       if [ -d ".specify/extensions/$EXT" ]; then
         echo "y" | specify extension remove "$EXT" >/dev/null 2>&1 || true
       fi
-      DEV_FLAG=""
-      case "$SOURCE" in /tmp/*|"${TMPDIR:-/tmp}"/*) ;; *) DEV_FLAG="--dev" ;; esac
-      specify extension add "$EXT_PATH" $DEV_FLAG
+      specify extension add "$EXT_PATH" --dev
 
   - id: install-ext-spex-teams
     type: shell
@@ -199,9 +191,7 @@ steps:
       if [ -d ".specify/extensions/$EXT" ]; then
         echo "y" | specify extension remove "$EXT" >/dev/null 2>&1 || true
       fi
-      DEV_FLAG=""
-      case "$SOURCE" in /tmp/*|"${TMPDIR:-/tmp}"/*) ;; *) DEV_FLAG="--dev" ;; esac
-      specify extension add "$EXT_PATH" $DEV_FLAG
+      specify extension add "$EXT_PATH" --dev
 
   - id: install-ext-spex-collab
     type: shell
@@ -213,9 +203,7 @@ steps:
       if [ -d ".specify/extensions/$EXT" ]; then
         echo "y" | specify extension remove "$EXT" >/dev/null 2>&1 || true
       fi
-      DEV_FLAG=""
-      case "$SOURCE" in /tmp/*|"${TMPDIR:-/tmp}"/*) ;; *) DEV_FLAG="--dev" ;; esac
-      specify extension add "$EXT_PATH" $DEV_FLAG
+      specify extension add "$EXT_PATH" --dev
 
   - id: install-ext-spex-detach
     type: shell
@@ -227,9 +215,7 @@ steps:
       if [ -d ".specify/extensions/$EXT" ]; then
         echo "y" | specify extension remove "$EXT" >/dev/null 2>&1 || true
       fi
-      DEV_FLAG=""
-      case "$SOURCE" in /tmp/*|"${TMPDIR:-/tmp}"/*) ;; *) DEV_FLAG="--dev" ;; esac
-      specify extension add "$EXT_PATH" $DEV_FLAG
+      specify extension add "$EXT_PATH" --dev
       specify extension disable "$EXT" 2>/dev/null || true
 
   - id: extension-mode
