@@ -54,7 +54,7 @@ codex_refusal="$({
 jq -e '.status == "failed" and .current_step_id == "codex-project"' \
   <<<"$codex_refusal" >/dev/null
 
-if find "$TEST_REPO" -maxdepth 2 -type d -name '*materializ*' | grep -q .; then
+if find "$TEST_REPO" "$CODEX_REPO" -maxdepth 2 -type d -name '*materializ*' | grep -q .; then
   echo "FAIL: workflow setup created a staged distribution" >&2
   exit 1
 fi
