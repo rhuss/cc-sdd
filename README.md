@@ -227,23 +227,25 @@ same harness preference, extension selection, and requested security:
 
 Explicit workflow inputs override stored values and update the declaration only
 after validation. Without explicit inputs, setup reuses it. Safe is recommended;
-Autonomous and YOLO request progressively broader project-local autonomy. The
-Codex mapping merges `$skill` guidance into `AGENTS.md`. Its bounded YOLO profile
-allows workspace, temporary-directory, and shared Git metadata writes without
-prompts while command network access remains disabled. Safe leaves user Codex
-permission policy untouched.
+Autonomous requests bounded project autonomy, while YOLO is explicitly
+unrestricted. The Codex mapping merges `$skill` guidance into `AGENTS.md`. YOLO
+uses the `danger-full-access` sandbox with approvals disabled, including
+unrestricted filesystem and network access. Safe leaves user Codex permission
+policy untouched.
 
 The active harness adapter remains responsible for applying or safely degrading that
 request.
 
 Codex setup writes only sentinel-owned sections. It merges `$`-prefixed Spex
-skill guidance into `AGENTS.md` and, for Autonomous or YOLO, a named
-`spex-project` permission profile into `.codex/config.toml`. Safe removes no
-user policy. Autonomous routes boundary requests to auto-review. Bounded YOLO
-uses `approval_policy = "never"`, permits the workspace, temporary directories,
-and linked-worktree Git metadata, and keeps command network access disabled.
-Setup refuses conflicting user-owned permission selectors rather than replacing
-them.
+skill guidance into `AGENTS.md`. Safe removes no user policy. Autonomous writes
+a named `spex-project` permission profile to `.codex/config.toml`, explicitly
+uses `approval_policy = "on-request"`, and routes boundary requests to
+`approvals_reviewer = "auto_review"`; its bounded profile permits the workspace,
+temporary directories, and linked-worktree Git metadata while disabling command
+network access. YOLO instead writes `sandbox_mode = "danger-full-access"` with
+`approval_policy = "never"`, allowing unrestricted filesystem and network access
+without prompts. Setup refuses conflicting user-owned permission selectors
+rather than replacing them.
 
 The former `permissions` workflow input remains available as a deprecated alias:
 `none` maps to `safe`, `standard` maps to `autonomous`, and `yolo` remains

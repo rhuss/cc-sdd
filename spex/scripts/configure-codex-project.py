@@ -85,7 +85,7 @@ def merge_permissions(existing, block):
         return replace_block(existing, CONFIG_BEGIN, CONFIG_END, block)
     root_region = existing.split("\n[", 1)[0]
     conflicts = []
-    for key in ("default_permissions", "approval_policy", "approvals_reviewer"):
+    for key in ("sandbox_mode", "default_permissions", "approval_policy", "approvals_reviewer"):
         if re.search(r"^\s*" + key + r"\s*=", root_region, re.MULTILINE):
             conflicts.append(key)
     if re.search(r"^\s*\[permissions\.spex-project(?:\.|\])", existing, re.MULTILINE):
@@ -101,14 +101,24 @@ def permission_block(root, security):
     """Render current Codex permission-profile configuration."""
     if security == "safe":
         return ""
+    if security == "yolo":
+        return "\n".join(
+            [
+                CONFIG_BEGIN,
+                '# Generated from .specify/spex.json; edit that declaration, not this block.',
+                'sandbox_mode = "danger-full-access"',
+                'approval_policy = "never"',
+                CONFIG_END,
+            ]
+        )
     common = json.dumps(str(git_common_dir(root)))
-    reviewer = 'approvals_reviewer = "auto_review"' if security == "autonomous" else 'approval_policy = "never"'
     return "\n".join(
         [
             CONFIG_BEGIN,
             '# Generated from .specify/spex.json; edit that declaration, not this block.',
             'default_permissions = "spex-project"',
-            reviewer,
+            'approval_policy = "on-request"',
+            'approvals_reviewer = "auto_review"',
             "",
             '[permissions.spex-project.filesystem]',
             '":minimal" = "read"',
@@ -165,7 +175,11 @@ def configure(args):
     return {
         "status": "configured",
         "security": args.security,
-        "permissions": "unchanged" if args.security == "safe" else "spex-project",
+        "permissions": {
+            "safe": "unchanged",
+            "autonomous": "spex-project",
+            "yolo": "danger-full-access",
+        }[args.security],
         "config_changed": updated_config != config,
         "guidance_changed": updated_guidance != guidance,
     }
