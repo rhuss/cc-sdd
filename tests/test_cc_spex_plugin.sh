@@ -9,8 +9,14 @@ mkdir -p "$TMP/bin"
 cat > "$TMP/bin/specify" <<'EOF'
 #!/usr/bin/env sh
 printf '%s\n' "$@" > "$CC_SPEX_CAPTURE"
+[ -z "${CC_SPEX_CWD_CAPTURE:-}" ] || pwd -P > "$CC_SPEX_CWD_CAPTURE"
 EOF
 chmod +x "$TMP/bin/specify"
+cat > "$TMP/bin/git" <<'EOF'
+#!/usr/bin/env sh
+exit 99
+EOF
+chmod +x "$TMP/bin/git"
 CC_SPEX_CAPTURE="$TMP/arguments" PATH="$TMP/bin:$PATH" \
   "$SKILL/scripts/bootstrap.sh" --security yolo --extensions spex-gates >/dev/null
 grep -qx 'workflow' "$TMP/arguments"
@@ -18,6 +24,16 @@ grep -qx -- '--json' "$TMP/arguments"
 grep -qx 'integration=codex' "$TMP/arguments"
 grep -qx 'extensions=spex-gates' "$TMP/arguments"
 grep -qx 'security=yolo' "$TMP/arguments"
+mkdir "$TMP/project"
+PROJECT_DIR="$(cd "$TMP/project" && pwd -P)"
+(
+  cd "$PROJECT_DIR"
+  CC_SPEX_CAPTURE="$TMP/project-arguments" \
+    CC_SPEX_CWD_CAPTURE="$TMP/project-cwd" \
+    SPEX_SOURCE="$ROOT/spex" PATH="$TMP/bin:$PATH" \
+    "$SKILL/scripts/bootstrap.sh" >/dev/null
+)
+grep -qx "$PROJECT_DIR" "$TMP/project-cwd"
 grep -q '\$speckit-spex-help' "$SKILL/SKILL.md"
 grep -q 'working directory at the project root' "$SKILL/SKILL.md"
 grep -q 'Do not.*cd.*skill' "$SKILL/SKILL.md"
