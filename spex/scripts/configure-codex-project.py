@@ -86,9 +86,16 @@ def merge_permissions(existing, block):
     root_region = existing.split("\n[", 1)[0]
     conflicts = []
     for key in ("sandbox_mode", "default_permissions", "approval_policy", "approvals_reviewer"):
-        if re.search(r"^\s*" + key + r"\s*=", root_region, re.MULTILINE):
+        key_pattern = r'(?:' + re.escape(key) + r'|"' + re.escape(key) + r'"|\'' + re.escape(key) + r"\')"
+        if re.search(r"^\s*" + key_pattern + r"\s*=", root_region, re.MULTILINE):
             conflicts.append(key)
-    if re.search(r"^\s*\[permissions\.spex-project(?:\.|\])", existing, re.MULTILINE):
+    permissions = r'''(?:permissions|"permissions"|'permissions')'''
+    profile = r'''(?:spex-project|"spex-project"|'spex-project')'''
+    if re.search(
+        r"^\s*\[\s*" + permissions + r"\s*\.\s*" + profile + r"(?:\s*\.|\s*\])",
+        existing,
+        re.MULTILINE,
+    ):
         conflicts.append("permissions.spex-project")
     if conflicts:
         raise ConfigurationError(

@@ -97,6 +97,26 @@ class CodexProjectTests(unittest.TestCase):
             self.assertIn("refusing to override", result.stdout)
             self.assertEqual(path.read_text(), 'approval_policy = "on-request"\n')
 
+    def test_refuses_quoted_user_owned_permission_selectors(self):
+        """Quoted TOML keys and table segments retain user ownership."""
+        configurations = (
+            '"sandbox_mode" = "workspace-write"\n',
+            '[permissions."spex-project"]\n',
+        )
+        for configuration in configurations:
+            with self.subTest(configuration=configuration), tempfile.TemporaryDirectory() as raw:
+                root = Path(raw)
+                path = root / ".codex/config.toml"
+                path.parent.mkdir()
+                path.write_text(configuration)
+                result = subprocess.run(
+                    ["python3", str(TOOL), "--root", str(root), "--security", "yolo"],
+                    capture_output=True, text=True, check=False,
+                )
+                self.assertEqual(result.returncode, 1)
+                self.assertIn("refusing to override", result.stdout)
+                self.assertEqual(path.read_text(), configuration)
+
 
 if __name__ == "__main__":
     unittest.main()
