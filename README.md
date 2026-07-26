@@ -13,7 +13,7 @@
 
 ## Why cc-spex?
 
-[Spec-Kit](https://github.com/github/spec-kit) is a great foundation for specification-driven development. cc-spex is a Claude Code plugin that extends Spec-Kit through **extensions**, self-contained bundles that provide additional commands and lifecycle hooks.
+[Spec-Kit](https://github.com/github/spec-kit) is a great foundation for specification-driven development. cc-spex extends Spec-Kit across Claude Code and Codex through **extensions**, self-contained bundles that provide additional skills, commands, and lifecycle hooks where the harness supports them.
 
 Six bundled extensions add quality gates, git worktree isolation, parallel agent execution, multi-perspective code review, and collaborative PR workflows. Each extension registers hooks that fire automatically at spec-kit lifecycle boundaries. You enable or disable them independently via `specify extension enable/disable`.
 
@@ -128,6 +128,8 @@ For smaller features or solo work where intermediate review is not needed, `/spe
 
 ```mermaid
 flowchart TD
+    Setup["specify workflow run spex/setup.yml"] --> Harness["Detect harness + install extensions<br>apply project guidance and security"]
+    Harness --> Start
     Start([Idea]) --> HasClarity{Clear<br>requirements?}
 
     HasClarity -->|Not yet| Brainstorm["/speckit-spex-brainstorm<br>Refine idea"]
@@ -225,9 +227,25 @@ same harness preference, extension selection, and requested security:
 
 Explicit workflow inputs override stored values and update the declaration only
 after validation. Without explicit inputs, setup reuses it. Safe is recommended;
-Autonomous and YOLO request progressively broader project-local autonomy. The
-active harness adapter remains responsible for applying or safely degrading that
+Autonomous requests bounded project autonomy, while YOLO is explicitly
+unrestricted. The Codex mapping merges `$skill` guidance into `AGENTS.md`. YOLO
+uses the `danger-full-access` sandbox with approvals disabled, including
+unrestricted filesystem and network access. Safe leaves user Codex permission
+policy untouched.
+
+The active harness adapter remains responsible for applying or safely degrading that
 request.
+
+Codex setup writes only sentinel-owned sections. It merges `$`-prefixed Spex
+skill guidance into `AGENTS.md`. Safe removes no user policy. Autonomous writes
+a named `spex-project` permission profile to `.codex/config.toml`, explicitly
+uses `approval_policy = "on-request"`, and routes boundary requests to
+`approvals_reviewer = "auto_review"`; its bounded profile permits the workspace,
+temporary directories, and linked-worktree Git metadata while disabling command
+network access. YOLO instead writes `sandbox_mode = "danger-full-access"` with
+`approval_policy = "never"`, allowing unrestricted filesystem and network access
+without prompts. Setup refuses conflicting user-owned permission selectors
+rather than replacing them.
 
 The former `permissions` workflow input remains available as a deprecated alias:
 `none` maps to `safe`, `standard` maps to `autonomous`, and `yolo` remains
@@ -250,7 +268,7 @@ cc-spex uses spec-kit's native extension system. Each extension lives in `spex/e
 
 ### Bundled Extensions
 
-**`spex`** (core, always active): Brainstorming, ship pipeline, help, evolve, spec refactoring, flow state tracking, focused interactive smoke test (curated scenarios from spec's `## Smoke Test` section), submit (PR creation + watch mode), finish (smoke test gate + squash + merge), and lifecycle hooks (flow state cleanup via `after_finish`).
+**`spex`** (core, always active): Brainstorming, ship pipeline, help, evolve, spec refactoring, flow state tracking, focused interactive smoke test (curated scenarios from spec's `## Smoke Test` section), submit (PR creation + watch mode), finish (smoke test gate + squash + merge), and lifecycle hooks where supported (flow state cleanup via `after_finish`). Codex setup also installs concise `$skill` guidance without overwriting team-owned `AGENTS.md` content.
 
 **`spex-gates`**: Quality gates that fire automatically via lifecycle hooks:
 - `after_specify`: runs spec review
@@ -287,10 +305,12 @@ Extension state is tracked in `.specify/extensions/.registry`.
 
 ### Workflow Commands
 
-These are the commands you'll use day-to-day. The `/speckit-*` commands come from Spec-Kit. Extension commands use the `/speckit-spex-*` prefix and are registered after `/spex:init`.
+These are the commands you'll use day-to-day. Claude Code invokes them with `/`;
+Codex invokes generated skills with `$` (for example, `$speckit-plan`).
 
 | Command | Purpose |
 |---------|---------|
+| `specify workflow run spex/setup.yml` | Install or refresh Spex for the selected harness |
 | `/speckit-specify` | Define requirements and create a formal spec |
 | `/speckit-plan` | Generate an implementation plan from a spec |
 | `/speckit-tasks` | Create actionable tasks from a plan |
@@ -472,7 +492,7 @@ spex supports multiple AI coding agents beyond Claude Code. The enforcement mode
 | Agent | Tool Gating | Prompt Interception | Interactive Prompts | Parallel Dispatch |
 |-------|------------|--------------------|--------------------|------------------|
 | **Claude Code** | PreToolUse hooks | UserPromptSubmit hooks | AskUserQuestion | Agent tool (teams) |
-| **Codex CLI** | PreToolUse hooks | UserPromptSubmit hooks | Inline numbered list | Subagents |
+| **Codex CLI** | Not installed by project setup | Not installed by project setup | Inline numbered list | Subagents |
 | **OpenCode** | TypeScript plugin | Skill preambles | question tool | Task tool |
 
 ### Architecture
@@ -487,7 +507,7 @@ Extensions degrade gracefully on agents with fewer capabilities:
 
 | Extension | Claude Code | Codex / OpenCode |
 |-----------|------------|-----------------|
-| spex-gates | Full enforcement | Full enforcement |
+| spex-gates | Full enforcement | Skills available; project hooks deferred |
 | spex-collab | Full functionality | Full functionality |
 | spex-teams | Parallel via Agent Teams | Sequential fallback |
 | spex-worktrees | EnterWorktree tool | Manual git worktree commands |
@@ -596,6 +616,7 @@ All `/speckit-*` commands remain unchanged.
 
 ```bash
 make validate          # Validate plugin and marketplace schemas
+make test-codex-project  # Test Codex guidance, security profiles, and linked worktrees
 make test-install      # Integration test: install from local marketplace
 make test-install-remote  # Integration test: install from GitHub marketplace
 make release           # Full release: validate, update marketplace.json, tag, push, bump to dev
