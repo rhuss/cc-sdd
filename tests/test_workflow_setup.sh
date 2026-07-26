@@ -5,10 +5,13 @@ REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd -P)"
 TEST_REPO="$(mktemp -d "${TMPDIR:-/tmp}/spex-workflow-setup.XXXXXX")"
 LEGACY_REPO="$(mktemp -d "${TMPDIR:-/tmp}/spex-workflow-legacy.XXXXXX")"
 CODEX_REPO="$(mktemp -d "${TMPDIR:-/tmp}/spex-workflow-codex.XXXXXX")"
-trap 'rm -rf -- "$TEST_REPO" "$LEGACY_REPO" "$CODEX_REPO"' EXIT
+DOWNLOADED_REPO="$(mktemp -d "${TMPDIR:-/tmp}/spex-workflow-downloaded.XXXXXX")"
+DOWNLOADED_SOURCE="$(mktemp -d "${TMPDIR:-/tmp}/cc-spex-downloaded.XXXXXX")"
+trap 'rm -rf -- "$TEST_REPO" "$LEGACY_REPO" "$CODEX_REPO" "$DOWNLOADED_REPO" "$DOWNLOADED_SOURCE"' EXIT
 git -C "$TEST_REPO" init -q
 git -C "$LEGACY_REPO" init -q
 git -C "$CODEX_REPO" init -q
+git -C "$DOWNLOADED_REPO" init -q
 
 run_setup() {
   (
@@ -54,7 +57,17 @@ codex_refusal="$({
 jq -e '.status == "failed" and .current_step_id == "codex-project"' \
   <<<"$codex_refusal" >/dev/null
 
-if find "$TEST_REPO" "$CODEX_REPO" -maxdepth 2 -type d -name '*materializ*' | grep -q .; then
+cp -R "$REPO_ROOT/spex" "$DOWNLOADED_SOURCE/spex"
+downloaded="$({
+  cd "$DOWNLOADED_REPO"
+  SPEX_SOURCE="$DOWNLOADED_SOURCE/spex" \
+    specify workflow run "$DOWNLOADED_SOURCE/spex/setup.yml" --json \
+      -i integration=codex -i extensions=recommended -i security=safe
+})"
+jq -e '.status == "completed"' <<<"$downloaded" >/dev/null
+test -f "$DOWNLOADED_REPO/.specify/extensions/spex/extension.yml"
+
+if find "$TEST_REPO" "$CODEX_REPO" "$DOWNLOADED_REPO" -maxdepth 2 -type d -name '*materializ*' | grep -q .; then
   echo "FAIL: workflow setup created a staged distribution" >&2
   exit 1
 fi

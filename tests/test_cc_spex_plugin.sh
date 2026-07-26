@@ -14,10 +14,13 @@ chmod +x "$TMP/bin/specify"
 CC_SPEX_CAPTURE="$TMP/arguments" PATH="$TMP/bin:$PATH" \
   "$SKILL/scripts/bootstrap.sh" --security yolo --extensions spex-gates >/dev/null
 grep -qx 'workflow' "$TMP/arguments"
+grep -qx -- '--json' "$TMP/arguments"
 grep -qx 'integration=codex' "$TMP/arguments"
 grep -qx 'extensions=spex-gates' "$TMP/arguments"
 grep -qx 'security=yolo' "$TMP/arguments"
 grep -q '\$speckit-spex-help' "$SKILL/SKILL.md"
+grep -q 'working directory at the project root' "$SKILL/SKILL.md"
+grep -q 'Do not.*cd.*skill' "$SKILL/SKILL.md"
 test -f "$MARKETPLACE"
 jq -e '.name == "cc-spex" and any(.plugins[]; .name == "cc-spex" and .source.path == "./plugins/cc-spex")' \
   "$MARKETPLACE" >/dev/null

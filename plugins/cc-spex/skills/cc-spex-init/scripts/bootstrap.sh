@@ -77,6 +77,7 @@ fi
 
 echo "Initializing Spex: integration=$integration extensions=$extensions security=$security" >&2
 SPEX_SOURCE="$source_dir" specify workflow run "$source_dir/setup.yml" \
+  --json \
   -i "integration=$integration" \
   -i "extensions=$extensions" \
   -i "security=$security"
