@@ -102,6 +102,8 @@ class CodexProjectTests(unittest.TestCase):
         configurations = (
             '"sandbox_mode" = "workspace-write"\n',
             '[permissions."spex-project"]\n',
+            '"approval\\u005fpolicy" = "on-request"\n',
+            '[permissions."spex\\u002dproject"]\n',
         )
         for configuration in configurations:
             with self.subTest(configuration=configuration), tempfile.TemporaryDirectory() as raw:

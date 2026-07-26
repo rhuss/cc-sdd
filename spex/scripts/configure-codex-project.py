@@ -17,6 +17,12 @@ CONFIG_BEGIN = "# >>> spex managed Codex permissions >>>"
 CONFIG_END = "# <<< spex managed Codex permissions <<<"
 GUIDANCE_BEGIN = "<!-- >>> spex managed Codex guidance >>>"
 GUIDANCE_END = "<!-- <<< spex managed Codex guidance <<< -->"
+TOML_KEY_TOKEN = r'''(?:[A-Za-z0-9_-]+|"(?:\\["\\btnfr]|\\u[0-9A-Fa-f]{4}|\\U[0-9A-Fa-f]{8}|[^"\\])*"|'[^']*')'''
+ROOT_ASSIGNMENT = re.compile(r"^\s*(" + TOML_KEY_TOKEN + r")\s*=", re.MULTILINE)
+PROFILE_TABLE = re.compile(
+    r"^\s*\[\s*(" + TOML_KEY_TOKEN + r")\s*\.\s*(" + TOML_KEY_TOKEN + r")(?:\s*\.|\s*\])",
+    re.MULTILINE,
+)
 
 
 class ConfigurationError(Exception):
@@ -79,22 +85,50 @@ def remove_block(existing, begin, end):
     return updated.lstrip("\n")
 
 
+def decode_toml_key(token):
+    """Decode a bare, literal, or basic TOML key segment without third parties."""
+    if not token.startswith(('"', "'")):
+        return token
+    if token.startswith("'"):
+        return token[1:-1]
+    escapes = {'"': '"', "\\": "\\", "b": "\b", "t": "\t", "n": "\n", "f": "\f", "r": "\r"}
+    content = token[1:-1]
+    decoded = []
+    index = 0
+    while index < len(content):
+        if content[index] != "\\":
+            decoded.append(content[index])
+            index += 1
+            continue
+        marker = content[index + 1]
+        if marker in escapes:
+            decoded.append(escapes[marker])
+            index += 2
+            continue
+        digits = 4 if marker == "u" else 8
+        try:
+            decoded.append(chr(int(content[index + 2:index + 2 + digits], 16)))
+        except (ValueError, OverflowError):
+            return None
+        index += 2 + digits
+    return "".join(decoded)
+
+
 def merge_permissions(existing, block):
     """Prepend managed root keys or refresh their existing owned block."""
     if CONFIG_BEGIN in existing:
         return replace_block(existing, CONFIG_BEGIN, CONFIG_END, block)
-    root_region = existing.split("\n[", 1)[0]
+    root_region = re.split(r"^\s*\[", existing, maxsplit=1, flags=re.MULTILINE)[0]
     conflicts = []
-    for key in ("sandbox_mode", "default_permissions", "approval_policy", "approvals_reviewer"):
-        key_pattern = r'(?:' + re.escape(key) + r'|"' + re.escape(key) + r'"|\'' + re.escape(key) + r"\')"
-        if re.search(r"^\s*" + key_pattern + r"\s*=", root_region, re.MULTILINE):
+    managed_keys = {"sandbox_mode", "default_permissions", "approval_policy", "approvals_reviewer"}
+    for match in ROOT_ASSIGNMENT.finditer(root_region):
+        key = decode_toml_key(match.group(1))
+        if key in managed_keys:
             conflicts.append(key)
-    permissions = r'''(?:permissions|"permissions"|'permissions')'''
-    profile = r'''(?:spex-project|"spex-project"|'spex-project')'''
-    if re.search(
-        r"^\s*\[\s*" + permissions + r"\s*\.\s*" + profile + r"(?:\s*\.|\s*\])",
-        existing,
-        re.MULTILINE,
+    if any(
+        decode_toml_key(match.group(1)) == "permissions"
+        and decode_toml_key(match.group(2)) == "spex-project"
+        for match in PROFILE_TABLE.finditer(existing)
     ):
         conflicts.append("permissions.spex-project")
     if conflicts:
