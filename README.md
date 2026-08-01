@@ -268,14 +268,14 @@ cc-spex uses spec-kit's native extension system. Each extension lives in `spex/e
 
 ### Bundled Extensions
 
-**`spex`** (core, always active): Brainstorming, ship pipeline, help, evolve, spec refactoring, flow state tracking, focused interactive smoke test (curated scenarios from spec's `## Smoke Test` section), submit (PR creation + watch mode), finish (smoke test gate + squash + merge), and lifecycle hooks where supported (flow state cleanup via `after_finish`). Codex setup also installs concise `$skill` guidance without overwriting team-owned `AGENTS.md` content.
+**`spex`** (core, always active): Brainstorming, ship pipeline, help, evolve, spec refactoring, flow state tracking, guided demo (synthesizes user-observable flows from spec FRs with infrastructure triage), submit (PR creation + watch mode), finish (guided demo gate + squash + merge), and lifecycle hooks (flow state cleanup via `after_finish`).
 
 **`spex-gates`**: Quality gates that fire automatically via lifecycle hooks:
 - `after_specify`: runs spec review
 - `after_tasks`: runs plan review
 - `after_implement`: runs code review and verification
 
-**`spex-deep-review`** (requires `spex-gates`): Multi-perspective code review with five specialized agents (correctness, architecture, security, production readiness, test quality). Critical and Important findings trigger an autonomous fix loop (up to 3 rounds). Integrates with CodeRabbit and Codex CLIs when available.
+**`spex-deep-review`** (requires `spex-gates`): Multi-perspective code review with six specialized agents (correctness, architecture, security, production readiness, test quality, goal alignment). Critical and Important findings trigger an autonomous fix loop (up to 3 rounds). Integrates with CodeRabbit and Codex CLIs when available.
 
 **`spex-teams`** (experimental, requires `spex-gates`): Parallel implementation via Claude Code Agent Teams. When combined with `spex-deep-review`, review agents run in parallel.
 
@@ -336,7 +336,7 @@ These commands are provided by spex extensions and available after `/spex:init`.
 | `/speckit-spex-gates-review-spec` | spex-gates | Validate spec (fires automatically via hook) |
 | `/speckit-spex-gates-review-plan` | spex-gates | Review plan (fires automatically via hook) |
 | `/speckit-spex-gates-review-code` | spex-gates | Review code compliance (fires automatically via hook) |
-| `/speckit-spex-smoke-test` | spex | Focused interactive smoke test from spec's `## Smoke Test` section. Claude automates setup/execution, human provides pass/fail judgment. Auto-skips when section absent. Writes SMOKE-TEST.md report. Always interactive, even in ship pipeline |
+| `/speckit-spex-smoke-test` | spex | Guided Demo: synthesizes user-observable flows from spec FRs, triages infrastructure (full/partial/setup offered/manual), presents evidence humans can evaluate. Uses `## Smoke Test` as priority hints. Auto-skips when all FRs are internal-only. Writes SMOKE-TEST.md with FR coverage mapping. Always interactive |
 | `/speckit-spex-submit` | spex | Push and create PR for team review. Runs verification, commits outstanding changes, creates PR with spec-linked body and REVIEWERS.md. `--watch`: monitor CI, auto-fix failures, triage review comments |
 | `/speckit-spex-finish` | spex | Smoke test + squash + merge/keep (land the code). Runs smoke test gate, squashes commits with conventional commit message, merges or keeps. When spex-detach enabled: archives specs to sibling repo. `--no-smoke-test`: skip smoke test gate |
 | `/speckit-spex-gates-stamp` | spex-gates | Verification only (use finish for full flow) |
