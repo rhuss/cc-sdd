@@ -27,3 +27,6 @@ triage:
   overrides: {}
     # coderabbitai[bot]:
     #   auto-resolve: true
+  codecov:
+    patch_threshold: 80    # minimum patch coverage %; files below this are flagged as actionable
+    auto_remediate: true   # when true + below threshold: run Step 12c automatically; when false: flag only

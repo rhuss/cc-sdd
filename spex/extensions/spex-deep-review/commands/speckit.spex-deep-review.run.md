@@ -1,13 +1,13 @@
 ---
 name: speckit.spex-deep-review.run
-description: Multi-perspective code review with autonomous fix loop - dispatches 5 specialized review agents, merges findings, auto-fixes Critical/Important issues
+description: Multi-perspective code review with autonomous fix loop - dispatches 6 specialized review agents, merges findings, auto-fixes Critical/Important issues
 ---
 
 # Deep Review: Multi-Perspective Code Review
 
 ## Overview
 
-This command orchestrates a multi-perspective code review using five specialized review agents. Each agent analyzes code from a distinct angle (correctness, architecture, security, production readiness, test quality). Findings are merged, deduplicated, and classified by severity. Critical and Important findings trigger an autonomous fix loop (up to 3 rounds). Results are documented in `review-findings.md`.
+This command orchestrates a multi-perspective code review using six specialized review agents. Each agent analyzes code from a distinct angle (correctness, architecture, security, production readiness, test quality, goal alignment). Findings are merged, deduplicated, and classified by severity. Critical and Important findings trigger an autonomous fix loop (up to 3 rounds). Results are documented in `review-findings.md`.
 
 **This command is invoked by `speckit-spex-gates-review-code` when the deep-review extension is enabled, or via the `after_implement` hook.**
 
@@ -181,6 +181,56 @@ fi
 
 If `REVIEW_HINTS` is non-empty, the content will be injected into every review agent's preamble (see Common Preamble item 10). If the file does not exist or is empty, agents run with their standard prompts (no error, no warning, silent skip).
 
+**PR metadata and goal extraction (for Goal Alignment agent):**
+
+Fetch PR metadata for the goal alignment agent. If no PR exists for the current branch, the goal alignment agent will be skipped.
+
+```bash
+GOALS_AVAILABLE=false
+PR_BODY=$(gh pr view --json body -q '.body' 2>/dev/null || echo "")
+
+if [ -n "$PR_BODY" ]; then
+  GOALS_AVAILABLE=true
+
+  # Extract linked issue numbers from Fixes/Closes/Resolves patterns
+  PR_ISSUES=$(echo "$PR_BODY" | grep -oE '(Fixes|Closes|Resolves)\s+#[0-9]+' | grep -oE '[0-9]+' || echo "")
+fi
+```
+
+For each linked issue number, fetch its title and body:
+```bash
+for ISSUE_NUM in $PR_ISSUES; do
+  gh issue view "$ISSUE_NUM" --json title,body 2>/dev/null
+done
+```
+
+Build the `DECLARED_GOALS` block from three sources:
+
+1. **Spec requirements** (authoritative, optional): If a spec is available (resolved in Prerequisites), extract FR-NNN requirement items from spec.md. The spec is the authoritative source when present, but many PRs have no spec and the agent works without one.
+2. **PR description**: Extract goals from the PR body text (bullet points, numbered lists, sections labeled "Goals", "Changes", "What this PR does").
+3. **Linked issues**: Issue titles and key points from issue descriptions.
+
+Format as a structured block for the agent prompt:
+
+```
+## Declared Goals
+
+### From spec (authoritative):
+- FR-001: <requirement text>
+- FR-002: <requirement text>
+(omit this section if no spec is available)
+
+### From PR description:
+- <goal extracted from PR body>
+- <goal extracted from PR body>
+
+### From linked issues:
+- #<N>: <issue title> - <key points from issue body>
+(omit this section if no linked issues)
+```
+
+If `GOALS_AVAILABLE` is false (no PR found), log: `Goal alignment: skipped (no PR found)` and skip Agent 6 dispatch in Step 3.
+
 ### Step 3: Dispatch Review Agents
 
 **Check for teams extension:**
@@ -190,17 +240,19 @@ Read `.specify/extensions/.registry` and check if `spex-teams` extension is enab
 **Sequential mode** (teams NOT enabled, or agent lacks subagent support):
 - Dispatch each review agent one at a time using {harness:subagent-mechanism}
 - Each agent gets a fresh, isolated context (no session history)
+- If `GOALS_AVAILABLE` is false, skip Agent 6 (Goal Alignment) and report "Goal Alignment: skipped (no PR found)"
 - Report progress after each agent completes:
   ```
-  Agent 1/5: Correctness... done, N findings
-  Agent 2/5: Architecture & Idioms... done, N findings
+  Agent 1/6: Correctness... done, N findings
+  Agent 2/6: Architecture & Idioms... done, N findings
   ...
+  Agent 6/6: Goal Alignment... done, N findings
   ```
-- **Single-agent fallback**: If the current agent has no subagent mechanism at all, execute all 5 review perspectives sequentially in the current session. Run each perspective's prompt as a separate analysis pass, collecting findings between passes.
+- **Single-agent fallback**: If the current agent has no subagent mechanism at all, execute all 6 review perspectives sequentially in the current session. Run each perspective's prompt as a separate analysis pass, collecting findings between passes.
 
 **Parallel mode** (teams IS enabled and agent supports parallel dispatch):
 {harness:parallel-dispatch}
-Dispatch all review agents using multiple subagent calls in a single message.
+Dispatch all review agents (including Agent 6 if `GOALS_AVAILABLE` is true) using multiple subagent calls in a single message.
 Each agent runs in isolated context.
 {/harness:parallel-dispatch}
 - Report progress as each agent completes:
@@ -217,6 +269,7 @@ Each agent runs in isolated context.
 - **Include the spec text** (spec.md content, if available). Agents need the spec to check code behavior against requirements. Without it, they can only find code-level issues, not spec compliance gaps.
 - Include the hint text (if provided) as additional review focus
 - **Include review hints** (if detected in Step 2): When `REVIEW_HINTS` is non-empty, include item 10 (PROJECT REVIEW HINTS) in the Common Preamble for every agent. Read the file `.specify/review-hints.md` and substitute its content into the preamble template between the `--- BEGIN PROJECT REVIEW HINTS ---` and `--- END PROJECT REVIEW HINTS ---` delimiters. If `REVIEW_HINTS` is empty, omit item 10 entirely from the preamble (do not include empty delimiters).
+- **For Agent 6 (Goal Alignment) only**: Include the `DECLARED_GOALS` block built in Step 2. This block is NOT sent to agents 1-5 (they don't need goal context).
 
 ### Step 4: Dispatch External Tools (if available)
 
@@ -317,7 +370,7 @@ If a tool times out, crashes, or returns an error:
      file: "relative/path",
      line_start: N,
      line_end: N,
-     category: correctness|architecture|security|production-readiness|test-quality|external|regression,
+     category: correctness|architecture|security|production-readiness|test-quality|goal-alignment|external|regression,
      description: "what is wrong",
      rationale: "why it matters",
      fix: "how to fix it",
@@ -334,6 +387,7 @@ If a tool times out, crashes, or returns an error:
    - Overlapping line ranges (A.line_start <= B.line_end AND B.line_start <= A.line_end) AND
    - Same category
    Then: keep the finding with the longer description, add the other's source_agent to `also_reported_by`, use the higher severity and confidence
+   **Exception**: `goal-alignment` findings do NOT dedup against findings from other categories. They answer a different question (is this change declared?) vs (is this change correct?). Two findings on the same file/line from correctness and goal-alignment are distinct.
 5. Assign sequential IDs to merged findings
 
 ### Step 6: Gate Check
@@ -476,7 +530,7 @@ Write `specs/<feature>/review-findings.md` (overwrite if exists):
 | Notable | N | - | N |
 | **Total** | **N** | **N** | **N** |
 
-**Agents completed:** 5/5 (+ N external tools)
+**Agents completed:** 6/6 (+ N external tools)
 **Agents failed:** [list if any]
 
 ## Findings
@@ -534,6 +588,32 @@ brainstorming.]
 ...
 
 [If no Notable findings: omit this section entirely.]
+
+## Goal Alignment
+
+[If the Goal Alignment agent ran, include its results. Omit this section
+entirely if the agent was skipped (no PR found).]
+
+### Goal Delivery
+
+| # | Goal | Status | Source |
+|---|------|--------|--------|
+| 1 | <goal description> | DELIVERED | FR-001 |
+| 2 | <goal description> | PARTIAL (missing: ...) | PR body |
+| 3 | <goal description> | NOT DELIVERED | Issue #N |
+
+### Undeclared Changes
+
+| Tier | File | Description |
+|------|------|-------------|
+| Breaking | <file path> | <1-line description> |
+| Substantive | <file path> | <1-line description> |
+| Minor | <file path> | <1-line description> |
+
+[If all goals delivered and no undeclared changes: "All declared goals
+delivered. No undeclared changes detected."]
+[If no goals could be extracted: "No declared goals found; only breaking
+change detection was active."]
 
 ## Post-Fix Spec Coverage
 
@@ -627,12 +707,27 @@ Review Agents:
 | Security                |     N |     N |         N | completed |
 | Production Readiness    |     N |     N |         N | completed |
 | Test Quality            |     N |     N |         N | completed |
+| Goal Alignment          |     N |     N |         N | completed/skipped |
 | CodeRabbit (external)   |     N |     N |         N | completed/skipped/failed |
 | Copilot (external)      |     N |     N |         N | completed/skipped/failed |
 | Codex (external)        |     N |     N |         N | completed/skipped/failed |
 | Test Suite (regression) |     N |     N |         N | passed/N failures/skipped |
 |-------------------------|-------|-------|-----------|-----------|
 | Total                   |     N |     N |         N |           |
+
+Goal Alignment:
+
+| # | Goal | Status | Source |
+|---|------|--------|--------|
+| 1 | <goal description> | DELIVERED | FR-001 |
+| 2 | <goal description> | NOT DELIVERED | PR body |
+
+Undeclared Changes:
+| Tier | File | Description |
+|------|------|-------------|
+| Breaking | <file> | <description> |
+| Substantive | <file> | <description> |
+(omit Goal Alignment section entirely if agent was skipped or found nothing)
 
 Agent Leaderboard MVP: [agent name] ([N] findings)
   (or: "Clean review: no findings across [N] agents" if all agents found 0)
@@ -665,7 +760,7 @@ Details: review-findings.md
 **Agent Leaderboard MVP designation:**
 - After the agent table output, identify the agent with the highest "Found" count (excluding external tools and test-suite rows). If multiple agents tie, pick the first alphabetically.
 - Output: `MVP: {agent name} ({count} findings)`
-- If ALL internal review agents (the 5 core agents) found 0 findings, output instead: `Clean review: no findings across {N} agents` (where N is the count of internal review agents that ran, typically 5). Do not designate an MVP in this case.
+- If ALL internal review agents (the 6 core agents, or 5 if goal alignment was skipped) found 0 findings, output instead: `Clean review: no findings across {N} agents` (where N is the count of internal review agents that ran). Do not designate an MVP in this case.
 - The MVP line appears between the agent table and the "Key fixes applied" section.
 
 **Layer Comparison (ship mode with checkpoints):**
@@ -1175,6 +1270,78 @@ If no spec is available for the review, skip spec-anchored validation entirely
 and perform the standard checklist review only.
 ```
 
+### Agent 6: Goal Alignment
+
+```
+You are the GOAL ALIGNMENT REVIEW AGENT.
+
+YOUR ROLE: You ARE responsible for verifying whether the PR's changes match
+its declared goals, and for detecting undeclared changes that are not covered
+by any stated goal.
+YOUR SCOPE: Goal delivery verification, undeclared change detection,
+breaking change identification.
+
+YOU ARE NOT RESPONSIBLE FOR: Code correctness, security, performance,
+architecture, test quality, or code style. Those belong to other agents.
+Do NOT judge whether an undeclared change is good or bad. Only flag that
+it exists and is not covered by declared goals.
+
+TWO-PASS ANALYSIS:
+
+PASS 1 - GOAL DELIVERY CHECK:
+For each goal in the DECLARED_GOALS block, verify whether the diff
+delivers it. Assign a verdict:
+
+- DELIVERED: The diff contains code that implements this goal.
+- PARTIAL: Some aspects implemented, others missing. Cite what is missing.
+- NOT DELIVERED: No evidence of this goal in the diff.
+
+For NOT DELIVERED goals, produce a finding with severity = Important.
+For PARTIAL goals, produce a finding with severity = Important describing
+what is missing.
+DELIVERED goals are informational only (no finding produced).
+
+PASS 2 - UNDECLARED CHANGE DETECTION:
+Walk the diff file-by-file. For each substantive change (not whitespace,
+formatting, import reordering, or comment-only changes), check whether it
+maps to any declared goal. Changes that do not map to a goal are classified
+by tier:
+
+| Tier | Criteria | Severity |
+|------|----------|----------|
+| Breaking | Changes API surface, renames public symbols, alters serialization format, bumps protocol versions, changes default behavior that consumers depend on | Critical |
+| Substantive | Adds new logic, new validation, new error paths, bug fixes unrelated to declared goals, new security hardening | Important |
+| Minor | Cleanup, typo fixes, comment updates, internal-only renames, import sorting | Notable |
+
+For each undeclared change, produce a finding with the appropriate severity.
+The "fix" field should suggest adding the change to the PR description or
+splitting it into a separate PR, not changing the code itself.
+
+NO-GOALS FALLBACK:
+If the DECLARED_GOALS block is empty or contains no extractable goals,
+skip Pass 1 entirely. For Pass 2, only report Breaking tier changes
+(skip Substantive and Minor to avoid noise). Note in your output:
+"No declared goals found; only breaking change detection active."
+
+OUTPUT - SUMMARY TABLES:
+In addition to individual findings, produce two summary tables at the
+end of your output:
+
+Goal Delivery:
+| # | Goal | Status | Source |
+|---|------|--------|--------|
+| 1 | <goal description> | DELIVERED/PARTIAL/NOT DELIVERED | FR-NNN/PR body/Issue #N |
+
+Undeclared Changes:
+| Tier | File | Description |
+|------|------|-------------|
+| Breaking | <file path> | <1-line description> |
+| Substantive | <file path> | <1-line description> |
+| Minor | <file path> | <1-line description> |
+
+All findings use category = "goal-alignment" in the finding schema.
+```
+
 ---
 
 ## Reference: Hint Injection
@@ -1200,11 +1367,12 @@ Throughout the review, output progress updates to keep the user informed:
 ```
 Stage 1: Spec compliance... [score]% [PASS|FAIL]
 Stage 2: Multi-perspective review (N changed files)
-  Agent 1/5: Correctness... done, N findings
-  Agent 2/5: Architecture & Idioms... done, N findings
-  Agent 3/5: Security... done, N findings
-  Agent 4/5: Production Readiness... done, N findings
-  Agent 5/5: Test Quality... done, N findings
+  Agent 1/6: Correctness... done, N findings
+  Agent 2/6: Architecture & Idioms... done, N findings
+  Agent 3/6: Security... done, N findings
+  Agent 4/6: Production Readiness... done, N findings
+  Agent 5/6: Test Quality... done, N findings
+  Agent 6/6: Goal Alignment... done, N findings
   [CodeRabbit... done, N findings] (if available)
   [Copilot... done, N findings] (if available)
   [Codex... done, N findings] (if available)

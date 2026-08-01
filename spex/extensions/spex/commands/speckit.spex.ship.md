@@ -34,9 +34,10 @@ This skill chains the entire spex workflow autonomously: specify, clarify, revie
 Check that required extensions are enabled:
 
 ```bash
-# Check for enabled extensions
-GATES=$(specify extension list 2>/dev/null | grep -c 'spex-gates.*enabled' || echo 0)
-DEEP_REVIEW=$(specify extension list 2>/dev/null | grep -c 'spex-deep-review.*enabled' || echo 0)
+# Check for enabled extensions (slug and "Status: Enabled" are on separate lines)
+EXT_LIST=$(specify extension list 2>/dev/null)
+GATES=$(echo "$EXT_LIST" | grep -A3 '^\s*spex-gates$' | grep -c 'Status: Enabled' || echo 0)
+DEEP_REVIEW=$(echo "$EXT_LIST" | grep -A3 '^\s*spex-deep-review$' | grep -c 'Status: Enabled' || echo 0)
 
 if [ "$GATES" = "0" ] || [ "$DEEP_REVIEW" = "0" ]; then
   echo "ERROR: speckit-spex-ship requires both spex-gates and spex-deep-review extensions."

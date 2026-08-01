@@ -117,35 +117,6 @@
 - **SC-003**: [User satisfaction metric, e.g., "90% of users successfully complete primary task on first attempt"]
 - **SC-004**: [Business metric, e.g., "Reduce support tickets related to [X] by 50%"]
 
-## Smoke Test
-
-<!--
-  OPTIONAL: Include this section only for features that produce a runnable
-  artifact (CLI tool, server, UI component, API endpoint). Omit entirely
-  for libraries, internal modules, or features with no user-observable behavior.
-
-  List the 3-5 most important user-observable behaviors you want to verify.
-  Focus on what the USER should SEE, not what the code does internally.
-
-  BAD (implementation details - a human cannot validate these):
-    1. Policy object is nil after workspace creation
-    2. ResolveProfiles returns ["anthropic", "claude-agent"]
-    3. Database row has status="active"
-
-  GOOD (user-observable behaviors - a human can look and judge):
-    1. Start a workspace, verify the sandbox has internet access
-    2. Run the CLI with --help, verify all commands are listed
-    3. Submit the form, verify the confirmation page shows submitted data
-    4. Start the server, curl /health, verify HTTP 200 with status field
-
-  The guided demo skill uses these as priority hints when synthesizing
-  demo flows from the spec's functional requirements.
--->
-
-1. [User-observable behavior to verify]
-2. [User-observable behavior to verify]
-3. [User-observable behavior to verify]
-
 ## Assumptions
 
 <!--

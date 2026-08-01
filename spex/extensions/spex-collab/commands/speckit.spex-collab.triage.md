@@ -175,7 +175,81 @@ fi
 **CodeRabbit**: rate-limited (CLI not available for local fallback)
 ```
 
-**If `CR_RATE_LIMITED` is 0**: No rate limit detected. Proceed normally to Step 4.
+**If `CR_RATE_LIMITED` is 0**: No rate limit detected. Proceed normally to Step 3d.
+
+### 3d: Fetch Issue Comments and Parse Status Bot Data
+
+**Mandatory**: This step MUST run on every triage pass, even when there are zero review threads. Codecov and other status bots post as issue comments (not review threads), so they are invisible to the review thread scan. Skipping this step is the most common cause of missed coverage regressions.
+
+Fetch PR issue comments (these are distinct from review threads fetched in Step 3a):
+
+```bash
+ISSUE_COMMENTS=$(gh api "repos/$OWNER/$REPO/issues/$PR_NUM/comments" 2>/dev/null || echo "[]")
+```
+
+#### Status Bot Detection
+
+Detect status bots from the issue comments:
+
+```bash
+STATUS_BOT_DATA=$(printf '%s' "$ISSUE_COMMENTS" | jq '[.[] | select(.user.type == "Bot" or (.user.login | test("\\[bot\\]$|codecov|coveralls|dependabot|renovate|netlify|vercel|sonarcloud|snyk"; "i")))] | group_by(.user.login) | map({bot: .[0].user.login, count: length, latest: (sort_by(.created_at) | last)})')
+```
+
+**Known status bot profiles:**
+
+| Bot | Type | What to extract |
+|-----|------|-----------------|
+| `codecov-commenter` or `codecov[bot]` | Coverage | Coverage delta (look for "Coverage" and percentage change) |
+| `coveralls` | Coverage | Coverage percentage |
+| `dependabot[bot]` | Dependency | Update type (security/version) |
+| `renovate[bot]` | Dependency | Update type |
+| `netlify[bot]` | Deploy preview | Preview URL |
+| `vercel[bot]` | Deploy preview | Preview URL |
+| `sonarcloud[bot]` | Quality | Quality gate status (Passed/Failed) |
+| `snyk-bot` | Security | Vulnerability count |
+
+**For each detected status bot**, extract a summary from the latest comment:
+
+- **Dependabot/Renovate**: Note the update: `dependabot: security update for lodash`.
+- **Deploy previews**: Extract the URL: `netlify: preview at https://...`.
+- **Other bots**: Just note presence: `sonarcloud: Quality Gate Passed`.
+
+#### Codecov Deep Parse
+
+For Codecov (`codecov-commenter` or `codecov[bot]`), extract detailed per-file coverage from the comment body instead of just the one-line delta. Codecov comments contain a markdown table with per-file patch coverage and missing line counts.
+
+**1. Extract the overall project coverage:**
+
+Parse the comment body for the project coverage line. Look for patterns like:
+- `| **Totals** |` or `| Totals |` row with percentage
+- `Coverage:` or `codecov` header lines with percentage and delta
+
+Extract: current percentage, previous percentage, delta.
+
+**2. Extract per-file patch coverage table:**
+
+Codecov comments include a `Files with Reduced Coverage` or `Impacted Files` table. Parse it to extract:
+
+| Column | What to extract |
+|--------|-----------------|
+| File path | Relative file path (may be truncated with `...`) |
+| Patch % | Patch coverage percentage for lines changed in this PR |
+| Missing lines | Count of uncovered lines in the patch |
+
+Build a list of files with their patch coverage and missing line counts.
+
+**3. Check patch threshold:**
+
+Read the configurable threshold from `collab-config.yml`:
+
+```bash
+COLLAB_CONFIG=".specify/extensions/spex-collab/collab-config.yml"
+PATCH_THRESHOLD=$(yq '.triage.codecov.patch_threshold // 80' "$COLLAB_CONFIG" 2>/dev/null || echo 80)
+```
+
+For each file in the per-file table, if its patch coverage is below `PATCH_THRESHOLD`, flag it as an **actionable finding** (not just informational). Store the flag alongside the coverage data for use in Step 12c.
+
+Store all parsed Codecov data as `CODECOV_DATA` for use in Steps 6, 12b, 12c, and 13. If no Codecov comment is found, `CODECOV_DATA` is empty.
 
 ## Step 4: Partition Threads
 
@@ -243,6 +317,7 @@ For each unresolved bot thread -- across ALL bot authors, not just one -- proces
 1. Read the comment body to understand the suggestion.
 2. Read the file referenced by `thread.path` at the relevant lines.
 3. If a spec exists (see Step 11 for spec-aware mode), include relevant spec requirements as context.
+4. If `CODECOV_DATA` (from Step 3d) contains an entry for `thread.path`, include the file's patch coverage percentage and missing line count as additional context. This surfaces whether the bot's suggestion overlaps with a coverage gap, which strengthens the case for accepting fixes that add error handling or branch coverage.
 
 ### 6b: Assess Validity
 
@@ -543,68 +618,17 @@ For each unresolved human thread:
    ```
    For skipped comments, record action as `skipped`.
 
-## Step 12b: Status Bot Detection
+## Step 12b: Status Bot Cross-Reference
 
-**Mandatory**: Steps 12b and 12c MUST execute after every triage pass, even when there are zero review threads. Codecov and other status bots post as issue comments (not review threads), so they are invisible to the review thread scan. Skipping these steps when "0 threads found" is the most common cause of missed coverage regressions.
+**Mandatory**: Steps 12b and 12c MUST execute after every triage pass, even when there are zero review threads.
 
-After processing review threads (bot + human), scan PR issue comments for status bots that post reports rather than inline code reviews. These bots cannot be triaged like review bots, but their status should be surfaced in the summary.
+Use the `STATUS_BOT_DATA` and `CODECOV_DATA` collected in Step 3d. If no status bots were detected, skip to Step 12c.
 
-**Fetch PR issue comments** (these are distinct from review threads):
+**Do NOT re-fetch issue comments here.** The data was already fetched and parsed in Step 3d.
 
-```bash
-BOT_COMMENTS=$(gh api "repos/$OWNER/$REPO/issues/$PR_NUM/comments" \
-  --jq '[.[] | select(.user.type == "Bot" or (.user.login | test("\\[bot\\]$|codecov|coveralls|dependabot|renovate|netlify|vercel|sonarcloud|snyk"; "i")))] | group_by(.user.login) | map({bot: .[0].user.login, count: length, latest: (sort_by(.created_at) | last)})' \
-  2>/dev/null || echo "[]")
-```
+**Cross-reference Codecov data with bot review findings:**
 
-**Known status bot profiles:**
-
-| Bot | Type | What to extract |
-|-----|------|-----------------|
-| `codecov-commenter` or `codecov[bot]` | Coverage | Coverage delta (look for "Coverage" and percentage change) |
-| `coveralls` | Coverage | Coverage percentage |
-| `dependabot[bot]` | Dependency | Update type (security/version) |
-| `renovate[bot]` | Dependency | Update type |
-| `netlify[bot]` | Deploy preview | Preview URL |
-| `vercel[bot]` | Deploy preview | Preview URL |
-| `sonarcloud[bot]` | Quality | Quality gate status (Passed/Failed) |
-| `snyk-bot` | Security | Vulnerability count |
-
-**For each detected status bot**, extract a summary from the latest comment:
-
-- **Dependabot/Renovate**: Note the update: `dependabot: security update for lodash`.
-- **Deploy previews**: Extract the URL: `netlify: preview at https://...`.
-- **Other bots**: Just note presence: `sonarcloud: Quality Gate Passed`.
-
-**Do NOT attempt to "fix" status bot findings** except for Codecov coverage regressions (see Step 12c). Other status bots (deploy previews, dependency updates, quality gates) are informational only.
-
-### Codecov Deep Parse
-
-For Codecov (`codecov-commenter` or `codecov[bot]`), extract detailed per-file coverage from the comment body instead of just the one-line delta. Codecov comments contain a markdown table with per-file patch coverage and missing line counts.
-
-**1. Extract the overall project coverage:**
-
-Parse the comment body for the project coverage line. Look for patterns like:
-- `| **Totals** |` or `| Totals |` row with percentage
-- `Coverage:` or `codecov` header lines with percentage and delta
-
-Extract: current percentage, previous percentage, delta.
-
-**2. Extract per-file patch coverage table:**
-
-Codecov comments include a `Files with Reduced Coverage` or `Impacted Files` table. Parse it to extract:
-
-| Column | What to extract |
-|--------|-----------------|
-| File path | Relative file path (may be truncated with `...`) |
-| Patch % | Patch coverage percentage for lines changed in this PR |
-| Missing lines | Count of uncovered lines in the patch |
-
-Build a list of files with their patch coverage and missing line counts.
-
-**3. Cross-reference with bot review findings:**
-
-For each file in the Codecov table, check if any bot review threads from this triage pass (Steps 6-11) reference the same file. This tells the developer whether coverage gaps overlap with issues bots already flagged.
+For each file in the `CODECOV_DATA` per-file table, check if any bot review threads processed in Steps 6-11 reference the same file. This tells the developer whether coverage gaps overlap with issues bots already flagged.
 
 ```
 For each codecov_file in codecov_files:
@@ -615,7 +639,7 @@ For each codecov_file in codecov_files:
   codecov_file.overlaps = overlaps
 ```
 
-**4. Format the coverage section for the Step 13 summary:**
+**Format the coverage section for the Step 13 summary:**
 
 ```
 **Coverage** (from Codecov):
@@ -627,15 +651,25 @@ For each codecov_file in codecov_files:
 Project: 89.74% (was 90.12%, delta -0.38%)
 ```
 
-If no Codecov comment is found, omit the coverage section entirely. If the Codecov comment doesn't contain a per-file table (e.g., it's a simple "patch coverage: 100%"), fall back to a one-line summary: `Codecov: 100% patch coverage (ok)`.
-
-Store the parsed coverage data for inclusion in the Step 13 summary output.
+If `CODECOV_DATA` is empty, omit the coverage section entirely. If the Codecov comment doesn't contain a per-file table (e.g., it's a simple "patch coverage: 100%"), fall back to a one-line summary: `Codecov: 100% patch coverage (ok)`.
 
 ## Step 12c: Coverage Remediation
 
-After parsing Codecov data (Step 12b), check whether a Codecov CI check is failing. Coverage regressions that cause CI failures are actionable, not merely informational.
+After cross-referencing Codecov data (Step 12b), check whether coverage remediation is needed. This step is triggered by two conditions: a failing Codecov CI check, or patch coverage below the configured threshold.
 
-**Skip this step if**: no Codecov data was parsed in Step 12b, or the CI check for Codecov is passing (check via `gh pr checks`), or `--no-coverage-fix` was passed as an argument.
+**Read the remediation config:**
+
+```bash
+COLLAB_CONFIG=".specify/extensions/spex-collab/collab-config.yml"
+PATCH_THRESHOLD=$(yq '.triage.codecov.patch_threshold // 80' "$COLLAB_CONFIG" 2>/dev/null || echo 80)
+AUTO_REMEDIATE=$(yq '.triage.codecov.auto_remediate // true' "$COLLAB_CONFIG" 2>/dev/null || echo true)
+```
+
+**Skip this step if**: `CODECOV_DATA` (from Step 3d) is empty, or `--no-coverage-fix` was passed as an argument, or `AUTO_REMEDIATE` is `false` (in which case, flag the gap in the Step 13 summary but do not attempt fixes).
+
+**Trigger conditions** (either is sufficient):
+1. A Codecov CI check is failing (check via `gh pr checks`), OR
+2. Any file in `CODECOV_DATA` has patch coverage below `PATCH_THRESHOLD`
 
 ### 1. Detect Coverage CI Failure
 
@@ -647,7 +681,7 @@ If `CODECOV_FAILING` is empty, coverage CI is not failing. Skip to Step 13.
 
 ### 2. Identify Files Needing Coverage
 
-From the Codecov data parsed in Step 12b, select files that need coverage improvement. Prioritize by:
+From the `CODECOV_DATA` parsed in Step 3d, select files that need coverage improvement. Prioritize by:
 
 1. Files with the lowest patch coverage percentage
 2. Files with the most missing lines
@@ -759,7 +793,7 @@ At the end of the triage pass, report a summary:
 
 Project: 89.74% (was 90.12%, delta -0.38%)
 
-**Other status bots** (from Step 12b, if any detected):
+**Other status bots** (from Step 3d, if any detected):
 | Bot | Status |
 |-----|--------|
 | dependabot[bot] | security update for lodash |
@@ -771,6 +805,8 @@ Project: 89.74% (was 90.12%, delta -0.38%)
 ```
 
 When `Open bot comments remaining` is 0, this signals that a `/loop` invocation can exit.
+
+**Hard rule**: If `CODECOV_DATA` was collected in Step 3d (non-empty), the **Coverage** section MUST appear in the summary. Omitting the coverage table when data exists is a triage error. If the Codecov comment doesn't contain a per-file table, include at minimum a one-line summary (e.g., `Codecov: 100% patch coverage (ok)`). If any file's patch coverage is below the configured `patch_threshold`, append a warning line: `WARNING: N files below ${PATCH_THRESHOLD}% patch coverage threshold`.
 
 ## Step 14: Extract Principles from Review Findings
 
