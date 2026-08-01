@@ -17,6 +17,7 @@ Last updated: 2026-07-24
 | 40 | 2026-07-15 | brainstorm-sync | active | 044 | - |
 | 41 | 2026-07-23 | smart-phase-splitting | active | - | - |
 | 42 | 2026-07-24 | first-class-codex-plugin | active | - | - |
+| 43 | 2026-07-31 | guided-demo (smoke test v4) | ready for spec | - | - |
 
 ## Open Threads
 
