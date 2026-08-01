@@ -19,3 +19,12 @@ Ideas captured from code reviews for future brainstorming.
 - **Summary**: Add a full GitHub-based flow where a GitHub issue triggers brainstorm document creation through interactive dialogues, connecting issue tracking to the SDD pipeline entry point.
 
 > Instead of starting brainstorming locally, allow the workflow to begin from a GitHub issue. The issue would serve as the seed, and an interactive dialogue (possibly via issue comments or a dedicated command) would refine the idea into a structured brainstorm document. This bridges the gap between project management (issues) and the spec-driven development pipeline (brainstorm -> specify -> plan -> implement).
+
+### deep-review-trigger-hardening
+
+- **Source**: PR #42-#44 review cycle (Codex plugin restructuring)
+- **Date**: 2026-07-26
+- **Reference**: 047-codex-plugin-support
+- **Summary**: Deep review did not trigger because the initial code review scored 94.3% (below the 95% threshold). After fixing the 4 findings, the review was not re-run, so deep review agents and CodeRabbit never fired.
+
+> The deep review trigger depends on the initial code review score meeting a threshold (95%). When findings are fixed but the review is not re-run, the deep review pipeline never activates. This creates a gap: PRs that improve during review never get the deep review pass. Options: (1) automatically re-trigger review after findings are resolved, (2) lower the threshold, (3) allow manual deep review invocation regardless of score, (4) track "findings resolved" as a separate trigger condition. The fix-then-forget pattern is likely common and should be handled gracefully.
