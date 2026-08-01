@@ -171,11 +171,13 @@ spex COMMANDS (helpers and configuration)
                                        --resume, --start-from <stage>
                                 Worktree: auto-creates if spex-worktrees enabled
                                 8 stages, then completion prompt (submit PR / merge / stop)
-  /speckit-spex-smoke-test    Focused interactive smoke test from spec's ## Smoke Test section
-                                Claude automates setup/execution, human provides judgment
-                                Auto-skips when no ## Smoke Test section exists
-                                Writes SMOKE-TEST.md report to spec directory
-                                Always interactive (even in ship pipeline)
+  /speckit-spex-smoke-test    Guided Demo: synthesize user-observable flows from spec FRs,
+                                triage infrastructure, present evidence humans can evaluate
+                                Reads FRs as primary input, ## Smoke Test as priority hints
+                                Four-tier triage: full, partial, setup offered, manual
+                                Auto-skips when all FRs are internal-only (unit-test verified)
+                                Writes SMOKE-TEST.md with FR coverage mapping
+                                Always interactive (even in ship pipeline, even --ask never)
   /speckit-spex-submit        Push and create PR for team review
                                 Flags: --watch
                                 --watch: monitor CI after PR, auto-fix failures,
