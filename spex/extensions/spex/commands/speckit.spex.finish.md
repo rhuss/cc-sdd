@@ -1,6 +1,6 @@
 ---
 description: "Smoke test + squash + merge/keep (land the code on main)"
-argument-hint: "[--no-smoke-test] [--skip-archive]"
+argument-hint: "[--auto] [--no-smoke-test] [--skip-archive]"
 ---
 
 # Finish - Smoke Test, Squash, and Land the Code
@@ -11,7 +11,9 @@ If `.specify/.spex-state` exists and its `status` is `running`, this command is 
 
 ```bash
 AUTONOMOUS_MODE=false
-if [ -f ".specify/.spex-state" ]; then
+if [ "$AUTO_MODE" = "true" ]; then
+  AUTONOMOUS_MODE=true
+elif [ -f ".specify/.spex-state" ]; then
   STATUS=$(jq -r '.status // empty' .specify/.spex-state 2>/dev/null)
   ASK=$(jq -r '.ask // "always"' .specify/.spex-state 2>/dev/null)
   if [ "$STATUS" = "running" ] && [ "$ASK" != "always" ]; then
@@ -26,14 +28,17 @@ In autonomous mode: suppress all interactive prompts, UNLESS running inside a wo
 
 Parse the following flags from arguments:
 
+- If `--auto` is passed, set `AUTO_MODE=true`. This suppresses all interactive prompts and uses defaults (same behavior as the ship pipeline's autonomous mode).
 - If `--no-smoke-test` is passed, set `SKIP_SMOKE_TEST=true`. This bypasses the smoke test gate unconditionally.
 - If `--skip-archive` is passed, set `SKIP_ARCHIVE=true`. This skips the archive step when spex-detach is enabled.
 
 ```bash
+AUTO_MODE=false
 SKIP_SMOKE_TEST=false
 SKIP_ARCHIVE=false
 for arg in "$@"; do
   case "$arg" in
+    --auto) AUTO_MODE=true ;;
     --no-smoke-test) SKIP_SMOKE_TEST=true ;;
     --skip-archive) SKIP_ARCHIVE=true ;;
   esac

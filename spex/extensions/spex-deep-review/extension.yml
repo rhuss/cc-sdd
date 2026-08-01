@@ -4,7 +4,7 @@ extension:
   id: spex-deep-review
   name: "Spex Deep Review"
   version: "1.0.0"
-  description: "Multi-perspective code review with 5 specialized agents and autonomous fix loop"
+  description: "Multi-perspective code review with 6 specialized agents and autonomous fix loop"
   author: cc-spex
   license: MIT
 
