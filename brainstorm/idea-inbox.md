@@ -28,3 +28,5 @@ Ideas captured from code reviews for future brainstorming.
 - **Summary**: Deep review did not trigger because the initial code review scored 94.3% (below the 95% threshold). After fixing the 4 findings, the review was not re-run, so deep review agents and CodeRabbit never fired.
 
 > The deep review trigger depends on the initial code review score meeting a threshold (95%). When findings are fixed but the review is not re-run, the deep review pipeline never activates. This creates a gap: PRs that improve during review never get the deep review pass. Options: (1) automatically re-trigger review after findings are resolved, (2) lower the threshold, (3) allow manual deep review invocation regardless of score, (4) track "findings resolved" as a separate trigger condition. The fix-then-forget pattern is likely common and should be handled gracefully.
+
+_Review-related ideas (goal-alignment-skip-behavior, spec-completeness, platform-abstraction) moved to [cc-review/brainstorm/idea-inbox.md](https://github.com/rhuss/cc-review/blob/main/brainstorm/idea-inbox.md) on 2026-08-03._

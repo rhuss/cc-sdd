@@ -113,8 +113,8 @@ release: validate sync-scripts-check test-install
 # Script inventory: which canonical scripts (in spex/scripts/) belong to which extensions
 SCRIPTS_spex := spex-flow-state.sh spex-ship-state.sh spex-ship-state.py spex-ship-statusline.sh spex-finish-context.sh spex-worktree-cwd.sh
 SCRIPTS_spex_gates := spex-flow-state.sh spex-closeout-gate.sh
-SCRIPTS_spex_collab := spex-flow-state.sh spex-triage-state.sh sanitize-gh-json.py
-SCRIPTS_spex_deep_review := spex-flow-state.sh
+SCRIPTS_spex_collab := spex-flow-state.sh
+SCRIPTS_spex_deep_review := spex-flow-state.sh detect-cc-review.sh
 EXTENSIONS := spex spex-gates spex-collab spex-deep-review
 
 sync-scripts:
