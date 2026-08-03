@@ -1,6 +1,6 @@
 # Brainstorm Overview
 
-Last updated: 2026-07-24
+Last updated: 2026-08-02
 
 ## Sessions
 
@@ -18,6 +18,7 @@ Last updated: 2026-07-24
 | 41 | 2026-07-23 | smart-phase-splitting | active | - | - |
 | 42 | 2026-07-24 | first-class-codex-plugin | active | - | - |
 | 43 | 2026-07-31 | guided-demo (smoke test v4) | ready for spec | - | - |
+| 44 | 2026-08-02 | extract-cc-review | active | - | [#50](https://github.com/rhuss/cc-spex/issues/50) |
 
 ## Open Threads
 
@@ -61,6 +62,13 @@ Last updated: 2026-07-24
 - Should recovery spikes remain in the feature worktree or use disposable experimental worktrees? (from #42)
 - Which harness adaptations should be generation-time transforms versus adapter-owned files? (from #42)
 - What evidence should be required before Codex Teams graduates from experimental to recommended? (from #42)
+- Exact adapter structure for each target harness (from #44)
+- Detection mechanism: how cc-spex discovers cc-review presence (from #44)
+- Concrete differences between "simplified" fallback and "full" cc-review agents (from #44)
+- Whether deep-review trigger hardening (95% threshold gap) belongs in cc-review or cc-spex (from #44)
+- Config file location and format for standalone cc-review without `.specify/` directory (from #44)
+- CI integration story: how would a bot trigger cc-review on every PR? (from #44)
+- Relationship to existing `/review` skill in superpowers (naming collision?) (from #44)
 
 ## Parked Ideas
 

@@ -90,20 +90,14 @@ spex EXTENSIONS (quality gates for spec-kit commands)
                          Agent Teams with spec guardian review
 
   spex-deep-review extension:
-    /speckit-spex-review-code → runs 5 specialized review agents
-                        (correctness, architecture, security,
-                        production-readiness, test-quality) after spec
-                        compliance passes, auto-fixes Critical/Important
-                        findings (up to 3 rounds), writes
-                        review-findings.md.
-                        Fix loop runs project test suite after each round
-                        (auto-detected or configured via test_command).
-                        Correctness agent detects swallowed errors.
-                        Test-quality agent cross-refs spec acceptance
-                        scenarios against test verification methods.
-                        Notable findings captured to brainstorm/idea-inbox.md.
-                        Agent leaderboard with MVP after every run.
-                        Layer comparison (checkpoint vs final) in ship mode.
+    /speckit-spex-review-code → When cc-review is installed, delegates to
+                        cc-review for enhanced review (6 agents + external
+                        tools like CodeRabbit, Copilot, Codex). When
+                        cc-review is absent, runs simplified built-in
+                        review (6 agents, fix loop, no external tools).
+                        Auto-fixes Critical/Important findings (up to 3
+                        rounds), writes review-findings.md.
+                        Fix loop runs project test suite after each round.
                         Project hints via .specify/review-hints.md.
                         Combines with spex-teams for parallel execution.
                         Optionally includes CodeRabbit, Copilot, + Codex CLIs.
@@ -129,10 +123,8 @@ spex EXTENSIONS (quality gates for spec-kit commands)
                                          After impl push: suggests triage (deep-review first if enabled)
     /speckit-spex-collab-revise   → revise spec from PR feedback, cascade plan/tasks
     /speckit-spex-collab-reconcile → scan code against revised tasks, produce delta
-    /speckit-spex-collab-triage   → triage PR review comments (bot autonomous + human interactive)
-                                    Captures deferred/rejected themes to brainstorm/idea-inbox.md
-                                    Flags: --pr <number>
-                                    Loop:  /loop 5m /speckit-spex-collab-triage
+    Triage moved to cc-review plugin. Install cc-review for PR comment
+                                    triage: github.com/rhuss/cc-review
 
   spex-detach extension (opt-in, disabled by default):
     Stealth mode: hides spec artifacts from git via .git/info/exclude.

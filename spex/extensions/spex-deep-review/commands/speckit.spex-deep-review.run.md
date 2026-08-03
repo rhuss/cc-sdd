@@ -231,6 +231,32 @@ Format as a structured block for the agent prompt:
 
 If `GOALS_AVAILABLE` is false (no PR found), log: `Goal alignment: skipped (no PR found)` and skip Agent 6 dispatch in Step 3.
 
+### Step 2b: cc-review Delegation Check
+
+Before dispatching review agents, check if cc-review is installed. If found, delegate to cc-review for the full enhanced review (including external tools).
+
+```bash
+DETECT_SCRIPT="spex/extensions/spex-deep-review/scripts/detect-cc-review.sh"
+CC_REVIEW_PATH=""
+if [ -x "$DETECT_SCRIPT" ]; then
+  CC_REVIEW_PATH=$("$DETECT_SCRIPT" 2>/dev/null || echo "")
+fi
+```
+
+**If cc-review is detected** (`CC_REVIEW_PATH` is non-empty):
+
+1. Log: `cc-review detected at $CC_REVIEW_PATH, delegating to enhanced review`
+2. Build delegation flags:
+   - `--spec <spec-path>` (if spec available)
+   - `--hints <review-hints-path>` (if `.specify/review-hints.md` exists)
+   - `--output <feature-dir>/review-findings.md`
+   - External tool flags from config
+3. Invoke cc-review's core review command: read `$CC_REVIEW_PATH/core/commands/review.md` and execute it with the delegation flags
+4. Read the gate outcome from the generated `review-findings.md`
+5. Return the gate outcome to the caller (skip Steps 3-8 below)
+
+**If cc-review is NOT detected**: Continue with the simplified built-in review below (Steps 3-8). The simplified review runs the same 6 agent perspectives and fix loop, but skips external tool integration (Steps 2 and 4).
+
 ### Step 3: Dispatch Review Agents
 
 **Check for teams extension:**
