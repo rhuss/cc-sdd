@@ -43,7 +43,7 @@ FLOW_STATE=".specify/extensions/spex-gates/scripts/spex-flow-state.sh" && [ -x "
 jq -r '.extensions["spex-deep-review"].enabled // false' .specify/extensions/.registry 2>/dev/null
 ```
 
-If deep review is enabled, this command MUST invoke `speckit.spex-deep-review.run` after spec compliance passes (>= 95%). Do NOT produce only a basic compliance review when deep-review is active. The deep review dispatches 5 specialized agents, runs a fix loop, and generates a Deep Review Report. See step 9a below for details.
+If deep review is enabled, this command MUST invoke `speckit.spex-deep-review.run` after spec compliance passes (>= 95%). Do NOT produce only a basic compliance review when deep-review is active. When cc-review is detected by spex-deep-review, the enhanced review (with external tools like CodeRabbit, Copilot, Codex) runs instead of the simplified fallback. See step 9a below for details.
 
 ## Overview
 
