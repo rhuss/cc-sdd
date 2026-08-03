@@ -1,0 +1,11 @@
+{
+  "schema_version": 1,
+  "harness": "auto",
+  "extensions": [
+    "spex",
+    "spex-gates",
+    "spex-worktrees",
+    "spex-deep-review"
+  ],
+  "security": "safe"
+}

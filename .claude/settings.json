@@ -10,7 +10,6 @@
     "NotebookEdit"
   ],
   "permissions": {
-    "defaultMode": "bypassPermissions",
     "allow": [
       "Bash(*)",
       "Read(*)",
@@ -21,6 +20,7 @@
       "Bash(*/spex/scripts/spex-ship-statusline.sh*)",
       "Bash(specify *)",
       "Bash(*/.local/bin/specify *)"
-    ]
+    ],
+    "defaultMode": "bypassPermissions"
   }
 }
