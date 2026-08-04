@@ -84,6 +84,17 @@ spex EXTENSIONS (quality gates for spec-kit commands)
                         commits spec artifacts, offers spec PR
     /speckit-implement → verifies spec package before starting,
                          runs code review + verification after
+    /speckit-spex-gates-data-checklist
+                      → generate data-pipeline hygiene checklist
+                        from a preset (lineage, row counts, fan-out,
+                        schema, output conventions, viz standards).
+                        Uses project preset if available at
+                        .specify/checklists/presets/data-pipeline.md,
+                        otherwise built-in preset.
+    review-code gate  → includes spec-declared constants drift check
+                        when spec has a ## Constants section.
+                        Detects value mismatches, missing constants,
+                        and multi-file consolidation issues.
 
   spex-teams extension (experimental):
     /speckit-implement → parallel task execution via Claude Code
@@ -190,6 +201,8 @@ spex COMMANDS (helpers and configuration)
   /speckit-spex-review-spec   Check spec quality and completeness
   /speckit-spex-review-plan   Validate plan coverage, task quality, red flags
   /speckit-spex-review-code   Check code compliance against spec
+                                (includes spec-declared constants drift check)
+  /speckit-spex-gates-data-checklist  Generate data-pipeline hygiene checklist
   /speckit-spex-stamp         Verification only (use /speckit-spex-finish for full flow)
   /speckit-spex-evolve        Reconcile spec/code drift
   /speckit-spex-clear         Clear stuck state, dismiss status line
