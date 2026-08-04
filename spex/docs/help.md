@@ -200,7 +200,7 @@ spex COMMANDS (helpers and configuration)
                                 to sibling repo automatically
   /speckit-spex-review-spec   Check spec quality and completeness
   /speckit-spex-review-plan   Validate plan coverage, task quality, red flags
-  /speckit-spex-review-code   Check code compliance against spec
+  /speckit-spex-gates-review-code  Check code compliance against spec
                                 (includes spec-declared constants drift check)
   /speckit-spex-gates-data-checklist  Generate data-pipeline hygiene checklist
   /speckit-spex-stamp         Verification only (use /speckit-spex-finish for full flow)

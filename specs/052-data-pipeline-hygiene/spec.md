@@ -106,7 +106,7 @@ An upstream issue is created on the spec-kit repository proposing a native prese
 - **FR-009**: The constants drift check MUST report findings with specific file paths, spec values, and code values when mismatches are detected.
 - **FR-010**: The constants drift check MUST skip silently when no `## Constants` section exists in the spec.
 - **FR-011**: The command MUST auto-detect the spec file path from the feature directory using `check-prerequisites.sh`, consistent with all other speckit commands.
-- **FR-012**: An upstream issue MUST be created on the spec-kit repository proposing a native preset system for `/speckit-checklist`.
+- **FR-012**: An upstream issue MUST be drafted proposing a native preset system for `/speckit-checklist`. The draft is saved locally for user review before submission. Actual submission does not block shipping this feature.
 
 ### Key Entities
 

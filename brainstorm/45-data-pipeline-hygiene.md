@@ -21,7 +21,7 @@ Modify the upstream speckit-checklist skill to load preset files by name.
 
 ### B: Standalone Extension Command (chosen, short-term)
 
-Create a new spex extension command (`speckit-spex-data-checklist`) that generates data-pipeline-specific checklist items directly. Separate from the upstream checklist skill, self-contained in a spex extension.
+Create a new spex extension command (`speckit-spex-gates-data-checklist`) that generates data-pipeline-specific checklist items directly. Separate from the upstream checklist skill, self-contained in a spex extension.
 
 - Pros: Self-contained, no upstream dependency. Full control over items. Works today.
 - Cons: Duplicates some checklist generation logic. Users need to know about a different command name.
@@ -46,7 +46,7 @@ For the shared-constants drift check, three approaches were considered:
 **Hybrid B+C:** Ship the extension command as a short-term solution, propose the preset system to spec-kit upstream in parallel. When upstream ships presets, the extension command gets retired.
 
 Specifically:
-1. **New spex extension command** (`speckit-spex-data-checklist`) in a spex extension, generating data-pipeline checklist items using the same "unit tests for English" philosophy as the upstream checklist
+1. **New spex extension command** (`speckit-spex-gates-data-checklist`) in a spex extension, generating data-pipeline checklist items using the same "unit tests for English" philosophy as the upstream checklist
 2. **review-code gate enhancement** for spec-declared constants drift detection (check one-module consolidation, value matching)
 3. **Upstream issue/PR** proposing preset system for speckit-checklist (two-level: built-in + project override)
 

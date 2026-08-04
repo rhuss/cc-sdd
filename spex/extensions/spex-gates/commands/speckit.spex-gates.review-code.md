@@ -326,9 +326,15 @@ Add a "Spec-Declared Constants" section to the compliance report (after "Extra F
 |----------|-----------|------------|------|--------|
 | NULL_THRESHOLD | 5% | 5% | src/config.py:12 | Match |
 | SKEW_LIMIT | 1.0 | 2.0 | src/config.py:13 | DRIFT |
+| CV_LIMIT | 30% | - | - | MISSING |
 ```
 
-Constants findings (drift, missing, consolidation) count as deviations in the compliance score. After including constants findings, recalculate the Overall Compliance Score from Step 6 to reflect these additional deviations before proceeding to Step 8.
+If a CONSOLIDATION finding exists, add a row below the table:
+```markdown
+**Consolidation**: Constants spread across 3 files (src/config.py, src/utils.py, src/defaults.py). Recommend a single module.
+```
+
+**Scoring formula**: Each spec-declared constant contributes one check to the compliance denominator. Match = pass (no deviation). DRIFT, MISSING = fail (one deviation each). CONSOLIDATION = one additional deviation regardless of how many constants are affected. After including constants findings, recalculate the Overall Compliance Score from Step 6 to reflect these additional deviations before proceeding to Step 8.
 
 ### 8. Deep Review Enhancement (if extension enabled)
 

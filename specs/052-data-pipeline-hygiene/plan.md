@@ -26,7 +26,7 @@ Add a `/speckit-spex-gates-data-checklist` command to the `spex-gates` extension
 
 **Constraints**: No modification to upstream speckit-checklist skill; POSIX-compatible shell
 
-**Scale/Scope**: Single extension enhancement (2 new files, 1 modified file)
+**Scale/Scope**: Single extension enhancement (2 new files, 2 modified files)
 
 ## Constitution Check
 
