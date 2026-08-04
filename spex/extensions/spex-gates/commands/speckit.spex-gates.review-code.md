@@ -268,15 +268,15 @@ Search the spec for a `## Constants` heading. If found, extract constant declara
 
 ```bash
 # Extract the ## Constants section content (skip heading, stop before next ## heading)
-awk '/^## Constants$/{found=1; next} /^## /{found=0} found{print}' "$FEATURE_SPEC" | grep -E '^\s*-\s+[A-Z_]+\s*[=:]\s*' | while read -r line; do
-  # Parse name and value
-  NAME=$(echo "$line" | sed -E 's/^\s*-\s+([A-Z_]+)\s*[=:]\s*.*/\1/')
-  VALUE=$(echo "$line" | sed -E 's/^\s*-\s+[A-Z_]+\s*[=:]\s*(.*)/\1/' | sed 's/\s*$//')
+awk '/^## Constants$/{found=1; next} /^## /{found=0} found{print}' "$FEATURE_SPEC" | grep -E '^[[:space:]]*-[[:space:]]+[A-Z_]+[[:space:]]*[=:][[:space:]]*' | while read -r line; do
+  # Parse name and value (use POSIX [[:space:]] for macOS BSD sed compatibility)
+  NAME=$(echo "$line" | sed -E 's/^[[:space:]]*-[[:space:]]+([A-Z_]+)[[:space:]]*[=:][[:space:]]*.*/\1/')
+  VALUE=$(echo "$line" | sed -E 's/^[[:space:]]*-[[:space:]]+[A-Z_]+[[:space:]]*[=:][[:space:]]*(.*)/\1/' | sed -E 's/[[:space:]]*$//')
   echo "$NAME=$VALUE"
 done
 
 # Warn about unparseable lines in the Constants section
-awk '/^## Constants$/{found=1; next} /^## /{found=0} found{print}' "$FEATURE_SPEC" | grep -v -E '^\s*$' | grep -v -E '^\s*-\s+[A-Z_]+\s*[=:]\s*' | while read -r line; do
+awk '/^## Constants$/{found=1; next} /^## /{found=0} found{print}' "$FEATURE_SPEC" | grep -v -E '^[[:space:]]*$' | grep -v -E '^[[:space:]]*-[[:space:]]+[A-Z_]+[[:space:]]*[=:][[:space:]]*' | while read -r line; do
   echo "WARNING: Unparseable constants line: $line"
 done
 ```
@@ -292,7 +292,7 @@ For each parsed constant:
 
 1. **Search the codebase** for definitions matching the constant name:
    ```bash
-   rg -n "\b${NAME}\b" --type-not md --type-not yaml -- . | grep -v 'specs/' | grep -v '.specify/'
+   rg -n "\b${NAME}\b" --type-not md --type-not yaml -- . | grep -v '^\./specs/' | grep -v '^\./\.specify/'
    ```
 
 2. **Check value match**: Compare the spec-declared value with the code-defined value. Values are compared as trimmed strings. Report a drift finding if they differ:
