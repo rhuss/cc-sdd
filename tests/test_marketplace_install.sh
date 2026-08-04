@@ -222,6 +222,8 @@ EXPECTED_EXT_COMMANDS=(
   "spex-gates/commands/speckit.spex-gates.review-spec.md"
   "spex-gates/commands/speckit.spex-gates.review-plan.md"
   "spex-gates/commands/speckit.spex-gates.stamp.md"
+  "spex-gates/commands/speckit.spex-gates.data-checklist.md"
+  "spex-gates/presets/data-pipeline.md"
   "spex-worktrees/commands/speckit.spex-worktrees.manage.md"
   "spex-deep-review/commands/speckit.spex-deep-review.run.md"
   "spex-collab/commands/speckit.spex-collab.reviewers.md"
