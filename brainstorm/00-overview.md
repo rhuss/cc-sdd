@@ -1,6 +1,6 @@
 # Brainstorm Overview
 
-Last updated: 2026-08-02
+Last updated: 2026-08-04
 
 ## Sessions
 
@@ -19,6 +19,7 @@ Last updated: 2026-08-02
 | 42 | 2026-07-24 | first-class-codex-plugin | active | - | - |
 | 43 | 2026-07-31 | guided-demo (smoke test v4) | ready for spec | - | - |
 | 44 | 2026-08-02 | extract-cc-review | active | - | [#50](https://github.com/rhuss/cc-spex/issues/50) |
+| 45 | 2026-08-02 | data-pipeline-hygiene | active | - | [#49](https://github.com/rhuss/cc-spex/issues/49) |
 
 ## Open Threads
 
@@ -69,6 +70,9 @@ Last updated: 2026-08-02
 - Config file location and format for standalone cc-review without `.specify/` directory (from #44)
 - CI integration story: how would a bot trigger cc-review on every PR? (from #44)
 - Relationship to existing `/review` skill in superpowers (naming collision?) (from #44)
+- What format should the spec use to declare constants? (from #45)
+- Should the extension command live in spex-gates or a new spex-data extension? (from #45)
+- Migration path when upstream presets land (deprecation notice, automatic fallback) (from #45)
 
 ## Parked Ideas
 
