@@ -8,6 +8,14 @@
 
 **Input**: Brainstorm #45: data-pipeline hygiene checklist preset and shared-constants drift rule
 
+## Clarifications
+
+### Session 2026-08-04
+
+- Q: What format should the `## Constants` section use for declaring constants? → A: Simple markdown bullet patterns: `- NAME = value` and `- NAME: value`. Both formats are supported. No complex expression parsing.
+- Q: Which extension should host the `/speckit-spex-data-checklist` command? → A: `spex-gates`. It already owns review-code (where the drift check goes), keeping related functionality together.
+- Q: How does the command resolve the spec file path? → A: Auto-detect from feature directory via `check-prerequisites.sh`, consistent with all other speckit commands.
+
 ## User Scenarios & Testing *(mandatory)*
 
 ### User Story 1 - Generate Data-Pipeline Checklist (Priority: P1)
@@ -93,13 +101,14 @@ An upstream issue is created on the spec-kit repository proposing a native prese
 - **FR-008**: The constants drift check MUST verify that constant values in code match the values declared in the spec.
 - **FR-009**: The constants drift check MUST report findings with specific file paths, spec values, and code values when mismatches are detected.
 - **FR-010**: The constants drift check MUST skip silently when no `## Constants` section exists in the spec.
-- **FR-011**: An upstream issue MUST be created on the spec-kit repository proposing a native preset system for `/speckit-checklist`.
+- **FR-011**: The command MUST auto-detect the spec file path from the feature directory using `check-prerequisites.sh`, consistent with all other speckit commands.
+- **FR-012**: An upstream issue MUST be created on the spec-kit repository proposing a native preset system for `/speckit-checklist`.
 
 ### Key Entities
 
 - **Preset**: A markdown file containing pre-written checklist items for a specific domain. Has a name (e.g., "data-pipeline"), a level (built-in or project), and a list of checklist items grouped by category.
 - **Checklist Item**: A requirement-quality question following the "unit tests for English" pattern, with a category tag (e.g., [Completeness], [Clarity]) and optional traceability reference.
-- **Spec-Declared Constant**: A named value declared in the spec's `## Constants` section, consisting of a name, a value, and optionally a description. Used as the source of truth for drift detection.
+- **Spec-Declared Constant**: A named value declared in the spec's `## Constants` section using simple markdown bullet patterns (`- NAME = value` or `- NAME: value`). Consists of a name, a value, and optionally a description. Used as the source of truth for drift detection.
 
 ## Success Criteria *(mandatory)*
 
@@ -113,7 +122,7 @@ An upstream issue is created on the spec-kit repository proposing a native prese
 
 ## Assumptions
 
-- The data-pipeline checklist command lives in an existing spex extension (likely `spex-gates` or a new lightweight extension), not as a standalone plugin.
+- The data-pipeline checklist command lives in the `spex-gates` extension, alongside the review-code gate it complements.
 - The `## Constants` section format in specs follows a simple key-value pattern that can be parsed with basic text processing (no complex expression evaluation needed).
 - The upstream preset proposal is documentation work only and does not block shipping the extension command.
 - The review-code gate enhancement is additive (new check section) and does not modify existing review-code behavior.
