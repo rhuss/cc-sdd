@@ -4,7 +4,7 @@ extension:
   id: spex-gates
   name: "Spex Quality Gates"
   version: "1.0.0"
-  description: "Quality gates and domain checklists for specification-driven development: spec review, plan review, code review, verification, and preset-based hygiene checklists"
+  description: "Quality gates for specification-driven development: spec review, plan review, code review, and verification"
   author: cc-spex
   license: MIT
 
@@ -25,9 +25,6 @@ provides:
     - name: speckit.spex-gates.verify
       file: commands/speckit.spex-gates.verify.md
       description: "Final verification gate: tests, code hygiene, spec compliance, drift check"
-    - name: speckit.spex-gates.data-checklist
-      file: commands/speckit.spex-gates.data-checklist.md
-      description: "Generate a data-pipeline-specific checklist from a preset file"
     - name: speckit.spex-gates.stamp
       file: commands/speckit.spex-gates.stamp.md
       description: "Stamp command - invokes verification before completion"
