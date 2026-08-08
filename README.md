@@ -275,6 +275,19 @@ cc-spex uses spec-kit's native extension system. Each extension lives in `spex/e
 - `after_tasks`: runs plan review
 - `after_implement`: runs code review (with spec-declared constants drift check) and verification
 
+#### Spec-Declared Constants Drift Check
+
+When a spec includes a `## Constants` section, the review-code gate automatically verifies that the implementing code matches. Add constants to your spec in either format:
+
+```markdown
+## Constants
+
+- NULL_THRESHOLD = 5%
+- SKEW_LIMIT: 1.0
+```
+
+The gate checks: value mismatches (spec says `5%`, code says `10%`), missing constants (declared in spec but absent in code), and consolidation (constants spread across multiple files instead of a single module). If the spec has no `## Constants` section, the check is silently skipped.
+
 **`spex-deep-review`** (requires `spex-gates`): Multi-perspective code review with six specialized agents (correctness, architecture, security, production readiness, test quality, goal alignment). Critical and Important findings trigger an autonomous fix loop (up to 3 rounds). Integrates with CodeRabbit and Codex CLIs when available.
 
 **`spex-teams`** (experimental, requires `spex-gates`): Parallel implementation via Claude Code Agent Teams. When combined with `spex-deep-review`, review agents run in parallel.
