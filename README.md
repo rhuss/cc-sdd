@@ -273,7 +273,20 @@ cc-spex uses spec-kit's native extension system. Each extension lives in `spex/e
 **`spex-gates`**: Quality gates that fire automatically via lifecycle hooks:
 - `after_specify`: runs spec review
 - `after_tasks`: runs plan review
-- `after_implement`: runs code review and verification
+- `after_implement`: runs code review (with spec-declared constants drift check) and verification
+
+#### Spec-Declared Constants Drift Check
+
+When a spec includes a `## Constants` section, the review-code gate automatically verifies that the implementing code matches. Add constants to your spec in either format:
+
+```markdown
+## Constants
+
+- NULL_THRESHOLD = 5%
+- SKEW_LIMIT: 1.0
+```
+
+The gate checks: value mismatches (spec says `5%`, code says `10%`), missing constants (declared in spec but absent in code), and consolidation (constants spread across multiple files instead of a single module). If the spec has no `## Constants` section, the check is silently skipped.
 
 **`spex-deep-review`** (requires `spex-gates`): Multi-perspective code review with six specialized agents (correctness, architecture, security, production readiness, test quality, goal alignment). Critical and Important findings trigger an autonomous fix loop (up to 3 rounds). Integrates with CodeRabbit and Codex CLIs when available.
 
@@ -335,7 +348,7 @@ These commands are provided by spex extensions and available after `/spex:init`.
 | `/speckit-spex-help` | spex | Show a quick reference for all commands |
 | `/speckit-spex-gates-review-spec` | spex-gates | Validate spec (fires automatically via hook) |
 | `/speckit-spex-gates-review-plan` | spex-gates | Review plan (fires automatically via hook) |
-| `/speckit-spex-gates-review-code` | spex-gates | Review code compliance (fires automatically via hook) |
+| `/speckit-spex-gates-review-code` | spex-gates | Review code compliance (fires automatically via hook), includes spec-declared constants drift check |
 | `/speckit-spex-smoke-test` | spex | Guided Demo: synthesizes user-observable flows from spec FRs, triages infrastructure (full/partial/setup offered/manual), presents evidence humans can evaluate. Uses `## Smoke Test` as priority hints. Auto-skips when all FRs are internal-only. Writes SMOKE-TEST.md with FR coverage mapping. Always interactive |
 | `/speckit-spex-submit` | spex | Push and create PR for team review. Runs verification, commits outstanding changes, creates PR with spec-linked body and REVIEWERS.md. `--watch`: monitor CI, auto-fix failures, triage review comments |
 | `/speckit-spex-finish` | spex | Smoke test + squash + merge/keep (land the code). Runs smoke test gate, squashes commits with conventional commit message, merges or keeps. When spex-detach enabled: archives specs to sibling repo. `--no-smoke-test`: skip smoke test gate |

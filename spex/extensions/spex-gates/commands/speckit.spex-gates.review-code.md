@@ -255,6 +255,87 @@ Compliance % = (Compliant Requirements / Total Requirements) x 100
 - If compliance = 100%: Proceed to verification
 ```
 
+### 7b. Spec-Declared Constants Check
+
+**This check activates ONLY when the spec contains a `## Constants` section.** If no such section exists, skip this entire step silently (zero false positives, per FR-010).
+
+#### Parsing Constants from the Spec
+
+Search the spec for a `## Constants` heading. If found, extract constant declarations from the lines between `## Constants` and the next `##` heading (or EOF). Two bullet formats are supported:
+
+- `- NAME = value` (equals separator)
+- `- NAME: value` (colon separator)
+
+```bash
+# Extract the ## Constants section content (skip heading, stop before next ## heading)
+awk '/^## Constants$/{found=1; next} /^## /{found=0} found{print}' "$FEATURE_SPEC" | grep -E '^[[:space:]]*-[[:space:]]+[A-Z_]+[[:space:]]*[=:][[:space:]]*' | while read -r line; do
+  # Parse name and value (use POSIX [[:space:]] for macOS BSD sed compatibility)
+  NAME=$(echo "$line" | sed -E 's/^[[:space:]]*-[[:space:]]+([A-Z_]+)[[:space:]]*[=:][[:space:]]*.*/\1/')
+  VALUE=$(echo "$line" | sed -E 's/^[[:space:]]*-[[:space:]]+[A-Z_]+[[:space:]]*[=:][[:space:]]*(.*)/\1/' | sed -E 's/[[:space:]]*$//')
+  echo "$NAME=$VALUE"
+done
+
+# Warn about unparseable lines in the Constants section
+awk '/^## Constants$/{found=1; next} /^## /{found=0} found{print}' "$FEATURE_SPEC" | grep -v -E '^[[:space:]]*$' | grep -v -E '^[[:space:]]*-[[:space:]]+[A-Z_]+[[:space:]]*[=:][[:space:]]*' | while read -r line; do
+  echo "WARNING: Unparseable constants line: $line"
+done
+```
+
+**Rules:**
+- Constant names consist of uppercase letters and underscores (e.g., `NULL_THRESHOLD`, `SKEW_LIMIT`)
+- Values are compared as strings, not parsed numerically. Threshold expressions like `>5%` or `+/-1` are valid values
+- Lines that do not match either supported format MUST be skipped with a warning listing the unparseable lines
+
+#### Checking Code for Constants
+
+For each parsed constant:
+
+1. **Search the codebase** for definitions matching the constant name:
+   ```bash
+   rg -n "\b${NAME}\b" --type-not md --type-not yaml -- . | grep -v '^\./specs/' | grep -v '^\./\.specify/'
+   ```
+
+2. **Check value match**: Compare the spec-declared value with the code-defined value. Values are compared as trimmed strings. Report a drift finding if they differ:
+   ```
+   DRIFT: ${NAME}
+     Spec value:  ${SPEC_VALUE}
+     Code value:  ${CODE_VALUE}
+     Code file:   ${FILE_PATH}:${LINE}
+   ```
+
+3. **Check consolidation** (cross-constant, after all individual checks): Collect the set of all files that define any spec-declared constant. If the union of defining files contains more than one distinct file, report a single consolidation finding:
+   ```
+   CONSOLIDATION: Spec-declared constants are spread across multiple files.
+     Recommend defining all spec-declared constants in a single module.
+     Files: ${FILE1}, ${FILE2}, ...
+   ```
+
+4. **Check for missing constants**: If a spec-declared constant is not found anywhere in the codebase, report it:
+   ```
+   MISSING: ${NAME} declared in spec but not found in code.
+   ```
+
+#### Including Constants Findings in the Report
+
+Add a "Spec-Declared Constants" section to the compliance report (after "Extra Features"):
+
+```markdown
+### Spec-Declared Constants
+
+| Constant | Spec Value | Code Value | File | Status |
+|----------|-----------|------------|------|--------|
+| NULL_THRESHOLD | 5% | 5% | src/config.py:12 | Match |
+| SKEW_LIMIT | 1.0 | 2.0 | src/config.py:13 | DRIFT |
+| CV_LIMIT | 30% | - | - | MISSING |
+```
+
+If a CONSOLIDATION finding exists, add a row below the table:
+```markdown
+**Consolidation**: Constants spread across 3 files (src/config.py, src/utils.py, src/defaults.py). Recommend a single module.
+```
+
+**Scoring formula**: Each spec-declared constant contributes one check to the compliance denominator. Match = pass (no deviation). DRIFT, MISSING = fail (one deviation each). CONSOLIDATION = one additional deviation regardless of how many constants are affected. After including constants findings, recalculate the Overall Compliance Score from Step 6 to reflect these additional deviations before proceeding to Step 8.
+
 ### 8. Deep Review Enhancement (if extension enabled)
 
 **First, parse flags from the invocation arguments:**
