@@ -12,6 +12,7 @@
 #
 # Environment variables checked:
 #   CLAUDE_PROJECT_DIR  -> claude
+#   CLAUDECODE          -> claude
 #   CODEX_SESSION_ID    -> codex
 #   (OpenCode sets no single reliable env var; detected via directory)
 
@@ -19,8 +20,8 @@ set -eu
 
 CWD="${1:-.}"
 
-# Priority 1: Environment variables
-if [ -n "${CLAUDE_PROJECT_DIR:-}" ]; then
+# Priority 1: Environment variables (most reliable)
+if [ -n "${CLAUDE_PROJECT_DIR:-}" ] || [ "${CLAUDECODE:-}" = "1" ]; then
   echo "claude"
   exit 0
 fi
@@ -31,7 +32,13 @@ if [ -n "${CODEX_SESSION_ID:-}" ]; then
 fi
 
 # Priority 2: Agent directory presence
-# Check in order of specificity (codex/opencode are more distinctive than .claude)
+# Check .claude first: projects often have leftover .opencode/ or .codex/ dirs
+# from trying other agents, but the env var check above is the real signal.
+if [ -d "$CWD/.claude" ]; then
+  echo "claude"
+  exit 0
+fi
+
 if [ -d "$CWD/.codex" ]; then
   echo "codex"
   exit 0
@@ -39,11 +46,6 @@ fi
 
 if [ -d "$CWD/.opencode" ]; then
   echo "opencode"
-  exit 0
-fi
-
-if [ -d "$CWD/.claude" ]; then
-  echo "claude"
   exit 0
 fi
 
