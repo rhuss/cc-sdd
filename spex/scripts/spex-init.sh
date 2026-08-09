@@ -120,6 +120,52 @@ check_ready() {
   return 0
 }
 
+# --- Ensure extension command skills exist ---
+# spec-kit generates core skills (specify, plan, etc.) but not extension
+# command skills (git, spex-gates, etc.). Generate missing ones from the
+# extension command files so hooks can invoke them.
+ensure_extension_skills() {
+  local ext_dir=".specify/extensions"
+  [ -d "$ext_dir" ] || return 0
+
+  for ext in "$ext_dir"/*/; do
+    [ -d "${ext}commands" ] || continue
+    local ext_id
+    ext_id=$(basename "$ext")
+
+    for cmd_file in "${ext}commands"/speckit.*.md; do
+      [ -f "$cmd_file" ] || continue
+      local cmd_name
+      cmd_name=$(basename "$cmd_file" .md | tr '.' '-')
+      local skill_dir=".claude/skills/${cmd_name}"
+
+      if [ ! -f "${skill_dir}/SKILL.md" ]; then
+        mkdir -p "$skill_dir"
+        # Extract description from frontmatter (POSIX-compatible)
+        local desc
+        desc=$(awk '/^---$/{n++; next} n==1 && /^description:/{sub(/^description: *"?/, ""); sub(/"? *$/, ""); print; exit}' "$cmd_file")
+        desc="${desc:-Extension command from $ext_id}"
+
+        {
+          printf '%s\n' '---'
+          printf 'name: "%s"\n' "$cmd_name"
+          printf 'description: "%s"\n' "$desc"
+          printf '%s\n' 'compatibility: "Requires spec-kit project structure with .specify/ directory"'
+          printf '%s\n' 'metadata:'
+          printf '  author: "spec-kit-%s"\n' "$ext_id"
+          printf '  source: "%s"\n' "$cmd_file"
+          printf '%s\n' 'user-invocable: true'
+          printf '%s\n' 'disable-model-invocation: false'
+          printf '%s\n' '---'
+          printf '\n'
+          # Strip YAML frontmatter (everything between first two --- lines)
+          awk '/^---$/{n++; next} n>=2{print}' "$cmd_file"
+        } > "${skill_dir}/SKILL.md"
+      fi
+    done
+  done
+}
+
 # --- Migrate .sdd-phase to .spex-phase ---
 migrate_phase_marker() {
   if [ -f ".specify/.sdd-phase" ] && [ ! -f ".specify/.spex-phase" ]; then
@@ -619,6 +665,7 @@ case "${1:-}" in
       fix_constitution
 
       install_extensions >/dev/null 2>&1 || true
+      ensure_extension_skills 2>/dev/null || true
       configure_statusline 2>/dev/null || true
       configure_gitignore 2>/dev/null || true
       check_update 2>/dev/null || true
