@@ -121,9 +121,11 @@ check_ready() {
 }
 
 # --- Ensure extension command skills exist ---
-# spec-kit generates core skills (specify, plan, etc.) but not extension
-# command skills (git, spex-gates, etc.). Generate missing ones from the
-# extension command files so hooks can invoke them.
+# Workaround: upstream extensions (e.g., git) don't ship .specify-dev/
+# agent-commands/ directories, so their commands aren't registered as
+# Claude Code skills. Spex extensions use symlinks for this, but upstream
+# extensions rely on specify init which no longer generates git skills.
+# This fills the gap until upstream adds agent-commands to the git extension.
 ensure_extension_skills() {
   local ext_dir=".specify/extensions"
   [ -d "$ext_dir" ] || return 0

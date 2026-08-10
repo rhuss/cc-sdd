@@ -54,10 +54,16 @@ provides:
       description: "Clear spex state: dismiss status line, remove stale flow/ship artifacts"
 
 hooks:
+  before_specify:
+    command: speckit.spex.flow-state
+    args: "running specify"
+    optional: false
+    priority: 1
+    description: "Initialize flow state and status line before specification"
   after_specify:
     command: speckit.spex.flow-state
     optional: false
-    description: "Initialize flow state tracking after specification"
+    description: "Mark specification complete in flow state"
   before_clarify:
     command: speckit.spex.flow-state
     args: "running clarify"
