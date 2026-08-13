@@ -158,7 +158,14 @@ Before switching away from the feature branch, commit all modified tracked files
 git add -u
 
 # Stage new spec and brainstorm artifacts (these are untracked but expected)
-[ -d "specs/$BRANCH_NAME" ] && git add "specs/$BRANCH_NAME"
+# Read the actual spec directory from feature.json (may differ from branch name
+# when feature numbering is sequential but branch uses issue numbers)
+SPEC_DIR=""
+if [ -f ".specify/feature.json" ]; then
+  SPEC_DIR=$(jq -r '.feature_directory // empty' ".specify/feature.json" 2>/dev/null)
+fi
+SPEC_DIR="${SPEC_DIR:-specs/$BRANCH_NAME}"
+[ -d "$SPEC_DIR" ] && git add "$SPEC_DIR"
 [ -d "brainstorm" ] && git add brainstorm/
 [ -d ".specify" ] && git add .specify/
 
@@ -252,7 +259,18 @@ if [ -d ".claude" ]; then
 fi
 ```
 
-This ensures the worktree has the same extensions, hooks, permissions, and skills as the main repo. No `/spex:init` needed in the worktree.
+If the spec directory exists in the main repo but not in the worktree (e.g., when specs are gitignored or were not committed), copy it:
+
+```bash
+# Copy spec directory if it exists locally but not in the worktree
+# (happens when specs are gitignored/excluded, or when git add missed them)
+if [ -n "$FEATURE_DIR" ] && [ -d "$FEATURE_DIR" ] && [ ! -d "$WORKTREE_PATH/$FEATURE_DIR" ]; then
+  mkdir -p "$WORKTREE_PATH/$(dirname "$FEATURE_DIR")"
+  rsync -a "$FEATURE_DIR/" "$WORKTREE_PATH/$FEATURE_DIR/"
+fi
+```
+
+This ensures the worktree has the same extensions, hooks, permissions, skills, and spec files as the main repo. No `/spex:init` needed in the worktree.
 
 ### Step 8b: Update feature.json and flow state for the Worktree Branch
 
